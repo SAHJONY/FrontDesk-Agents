@@ -145,18 +145,57 @@ const recentActivity: ActivityItem[] = [
 ]
 
 const envTemplate: Record<string, { value: string; description: string; category: string; secret?: boolean }> = {
-  TWILIO_ACCOUNT_SID: { value: 'ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', description: 'Twilio Account SID', category: 'Communication', secret: true },
-  TWILIO_AUTH_TOKEN: { value: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', description: 'Twilio Auth Token', category: 'Communication', secret: true },
-  TWILIO_PHONE_NUMBER: { value: '+1234567890', description: 'Twilio Phone Number', category: 'Communication' },
-  BLAND_API_KEY: { value: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', description: 'Bland.ai API Key', category: 'Communication', secret: true },
-  OPENAI_API_KEY: { value: 'sk-xxxxxxxxxxxxxxxxxxxxxxxx', description: 'OpenAI API Key', category: 'AI', secret: true },
-  DATABASE_URL: { value: 'postgresql://localhost:5432/frontdesk', description: 'Database Connection URL', category: 'Database', secret: true },
-  ENCRYPTION_KEY: { value: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', description: 'Data Encryption Key', category: 'Security', secret: true },
-  SESSION_SECRET: { value: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', description: 'Session Secret Key', category: 'Security', secret: true },
-  REDIS_URL: { value: 'redis://localhost:6379', description: 'Redis Cache URL', category: 'Cache' },
-  AWS_ACCESS_KEY: { value: 'AKIAXXXXXXXXXXXXXXXX', description: 'AWS Access Key', category: 'Infrastructure', secret: true },
-  AWS_SECRET_KEY: { value: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', description: 'AWS Secret Key', category: 'Infrastructure', secret: true },
-  SENTRY_DSN: { value: 'https://xxxxx@sentry.io/xxxxx', description: 'Sentry DSN for Error Tracking', category: 'Monitoring' },
+  // ==========================================
+  // SUPABASE - Database & Authentication
+  // ==========================================
+  NEXT_PUBLIC_SUPABASE_URL: { value: '', description: 'Supabase Project URL (https://your-project.supabase.co)', category: 'Supabase', secret: false },
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: { value: '', description: 'Supabase Anonymous/Public Key (safe for client)', category: 'Supabase', secret: false },
+  SUPABASE_SERVICE_ROLE_KEY: { value: '', description: 'Supabase Service Role Key (server-side only - KEEP SECRET)', category: 'Supabase', secret: true },
+  
+  // ==========================================
+  // TWILIO - Voice & SMS Communications
+  // ==========================================
+  TWILIO_ACCOUNT_SID: { value: '', description: 'Twilio Account SID (AC...)', category: 'Communication', secret: true },
+  TWILIO_AUTH_TOKEN: { value: '', description: 'Twilio Auth Token', category: 'Communication', secret: true },
+  TWILIO_PHONE_NUMBER: { value: '', description: 'Twilio Phone Number (+1...)', category: 'Communication' },
+  
+  // ==========================================
+  // BLAND.AI - AI-Powered Outbound Calls
+  // ==========================================
+  BLAND_API_KEY: { value: '', description: 'Bland.ai API Key', category: 'Communication', secret: true },
+  
+  // ==========================================
+  // OPENAI - GPT Language Processing
+  // ==========================================
+  OPENAI_API_KEY: { value: '', description: 'OpenAI API Key (sk-...)', category: 'AI', secret: true },
+  
+  // ==========================================
+  // DATABASE - PostgreSQL Connection
+  // ==========================================
+  DATABASE_URL: { value: '', description: 'PostgreSQL Database URL', category: 'Database', secret: true },
+  
+  // ==========================================
+  // SECURITY - Encryption & Sessions
+  // ==========================================
+  ENCRYPTION_KEY: { value: '', description: 'Data Encryption Key (32+ characters)', category: 'Security', secret: true },
+  SESSION_SECRET: { value: '', description: 'Session Secret Key (32+ characters)', category: 'Security', secret: true },
+  
+  // ==========================================
+  // CACHE - Redis
+  // ==========================================
+  REDIS_URL: { value: '', description: 'Redis Cache URL (redis://...)', category: 'Cache' },
+  
+  // ==========================================
+  // INFRASTRUCTURE - AWS
+  // ==========================================
+  AWS_ACCESS_KEY: { value: '', description: 'AWS Access Key ID (AKIA...)', category: 'Infrastructure', secret: true },
+  AWS_SECRET_KEY: { value: '', description: 'AWS Secret Access Key', category: 'Infrastructure', secret: true },
+  AWS_REGION: { value: 'us-east-1', description: 'AWS Region', category: 'Infrastructure' },
+  
+  // ==========================================
+  // MONITORING - Error Tracking
+  // ==========================================
+  SENTRY_DSN: { value: '', description: 'Sentry DSN for Error Tracking', category: 'Monitoring' },
 }
 
 // ==========================================

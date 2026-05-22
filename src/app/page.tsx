@@ -14,27 +14,28 @@ import {
   Building, Briefcase, Heart, Home, Stethoscope, Scale,
   Hotel, Store, GraduationCap,
   ChevronLeft, Menu, Quote, Award, Clock3, Globe2,
-  Languages, MessageCircle, Headphones as SupportIcon, CircleDot
+  Languages, MessageCircle, Headphones as SupportIcon, CircleDot,
+  PhoneCall, PhoneIncoming as Incoming, PhoneOutgoing as Outgoing,
+  Bot as BotIcon, Cpu, Sparkles as SparkleIcon, Shield as ShieldIcon,
+  Zap as ZapIcon, Users as UsersIcon, Building2 as BuildingIcon
 } from 'lucide-react'
 import { clsx } from 'clsx'
 
-// Import BUFFY & HERMES AI Brain System
+// BUFFY & HERMES AI Brain Import
 import { 
   buffyHermesEngine, 
   autonomousDecisionEngine,
   selfLearningEngine,
-  MonitoringDashboard,
   BuffyBrain,
   HermesBrain 
 } from '@/lib/ai-brain'
 import type { AutonomousDecision, AgentMessage } from '@/lib/ai-brain'
 
 // ==========================================
-// ULTIMATE HOLLYWOOD OFFICE ENVIRONMENT
-// The Most Advanced UI/UX Ever Built
+// 8K OFFICE ENVIRONMENT - IMMERSIVE BRANDING
+// FRONTDESK AGENTS Native System
 // ==========================================
 
-// Premium Color Palette
 const colors = {
   deepNavy: '#050810',
   midnightBlue: '#0a1220',
@@ -50,36 +51,74 @@ const colors = {
   cyanLight: '#66e5ff',
   cyanDark: '#0099cc',
   red: '#ff4757',
-  redDark: '#c0392b',
   green: '#26de81',
   purple: '#a55eea',
   orange: '#fd9644',
   rose: '#ff6b9d'
 }
 
-// High-Quality Office Environment Images
-const officeImages = {
-  lobby: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920&q=95',
-  reception: 'https://images.unsplash.com/photo-1604328698692-f76ea9498e76?w=1920&q=95',
-  office1: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=1920&q=95',
-  office2: 'https://images.unsplash.com/photo-1486718448742-163732cd1544?w=1920&q=95',
-  desk: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1920&q=95',
-  lobby2: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1920&q=95',
-  modernOffice: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=1920&q=95',
-  corporateLounge: 'https://images.unsplash.com/photo-1605369263802-1e1b44cb2f7c?w=1920&q=95',
+// ==========================================
+// 8K OFFICE ENVIRONMENT IMAGES
+// Premium Corporate Workspaces
+// ==========================================
+
+const officeBackgrounds = {
+  executiveLobby: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=3840&q=98',
+  modernReception: 'https://images.unsplash.com/photo-1604328698692-f76ea9498e76?w=3840&q=98',
+  corporateOffice: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=3840&q=98',
+  techWorkspace: 'https://images.unsplash.com/photo-1486718448742-163732cd1544?w=3840&q=98',
+  executiveSuite: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=3840&q=98',
+  glassOffice: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=3840&q=98',
+  contemporaryOffice: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=3840&q=98',
+  executiveLounge: 'https://images.unsplash.com/photo-1605369263802-1e1b44cb2f7c?w=3840&q=98',
+  cityOfficeView: 'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=3840&q=98',
+  modernInterior: 'https://images.unsplash.com/photo-1493501953787-2f0b99f931d6?w=3840&q=98'
 }
 
-// Professional Receptionist Avatars
-const avatars = [
-  'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&q=90',
-  'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=800&q=90',
-  'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=800&q=90',
-  'https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?w=800&q=90',
+// Real Professional Human Images for AI Agents
+const humanAvatars = {
+  aria: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=1200&q=95',
+  chronos: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=1200&q=95',
+  nova: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=1200&q=95',
+  atlas: 'https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?w=1200&q=95',
+  buffy: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=1200&q=95',
+  hermes: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&q=95'
+}
+
+// Office Zone Backgrounds
+const officeZones = [
+  { id: 'lobby', name: 'Executive Lobby', image: officeBackgrounds.executiveLobby, ambiance: 'Professional & Welcoming' },
+  { id: 'reception', name: 'Modern Reception', image: officeBackgrounds.modernReception, ambiance: 'Contemporary & Efficient' },
+  { id: 'office', name: 'Corporate Office', image: officeBackgrounds.corporateOffice, ambiance: 'Innovative & Dynamic' },
+  { id: 'lounge', name: 'Executive Lounge', image: officeBackgrounds.executiveLounge, ambiance: 'Luxurious & Comfortable' },
+]
+
+// Industries with Branding
+const industries = [
+  { id: 'healthcare', name: 'Healthcare', icon: Stethoscope, description: 'Patient-first virtual reception with HIPAA compliance', features: ['Appointment Scheduling', 'Patient Intake', 'Insurance Verification', 'Wait Time Updates'], color: '#26de81' },
+  { id: 'legal', name: 'Legal', icon: Scale, description: 'Professional client intake and case management', features: ['Client Intake', 'Consultation Booking', 'Document Handling', 'Confidentiality'], color: '#a55eea' },
+  { id: 'realestate', name: 'Real Estate', icon: Home, description: 'Property showcase reception and lead capture', features: ['Listing Information', 'Showing Scheduling', 'Lead Capture', 'Virtual Tours'], color: '#fd9644' },
+  { id: 'hospitality', name: 'Hospitality', icon: Hotel, description: 'Luxury guest services and concierge', features: ['Reservation Management', 'Concierge Services', 'Room Service', 'Local Recommendations'], color: '#00d4ff' },
+  { id: 'corporate', name: 'Corporate', icon: Building2, description: 'Enterprise visitor management and security', features: ['Security Check-in', 'Meeting Rooms', 'Employee Services', 'Visitor Notifications'], color: '#f0b429' },
+  { id: 'finance', name: 'Finance', icon: Briefcase, description: 'Secure financial services and appointments', features: ['Account Inquiries', 'Appointment Scheduling', 'Document Sharing', 'Compliance'], color: '#ff6b9d' },
+  { id: 'retail', name: 'Retail', icon: Store, description: 'Customer service and shopping assistance', features: ['Product Info', 'Inventory Check', 'Order Tracking', 'Returns'], color: '#ff4757' },
+  { id: 'government', name: 'Government', icon: Building, description: 'Citizen services and public information', features: ['Service Navigation', 'Appointment Booking', 'Form Assistance', 'Language Support'], color: '#8892a4' },
+]
+
+// AI Agents with Real Human Images
+const aiAgents = [
+  { id: 'buffy', name: 'BUFFY', title: 'Chief Strategic Intelligence', type: 'buffy', status: 'online', avatar: humanAvatars.buffy, specialties: ['Strategic Planning', 'Decision Making', 'Business Optimization', 'Pattern Recognition', 'Autonomous Learning'], languages: ['All Languages'], responseTime: '0.8ms', color: '#00f5ff', isAI: true },
+  { id: 'hermes', name: 'HERMES', title: 'Chief Operations Executor', type: 'hermes', status: 'online', avatar: humanAvatars.hermes, specialties: ['Lightning Delivery', 'Multi-channel Communication', 'Message Optimization', 'Real-time Execution'], languages: ['All Languages'], responseTime: '0.3ms', color: '#ffd700', isAI: true },
+  { id: 'aria', name: 'ARIA', title: 'Chief Reception Officer', type: 'reception', status: 'online', avatar: humanAvatars.aria, specialties: ['First Impressions', 'VIP Treatment', 'Multilingual Support'], languages: ['English', 'Spanish', 'French', 'Mandarin'], responseTime: '< 1 sec', color: '#f0b429', isAI: false },
+  { id: 'chronos', name: 'CHRONOS', title: 'Scheduling Specialist', type: 'scheduling', status: 'online', avatar: humanAvatars.chronos, specialties: ['Calendar Management', 'Appointment Optimization', 'Reminders'], languages: ['English', 'German', 'Portuguese'], responseTime: '< 2 sec', color: '#00d4ff', isAI: false },
+  { id: 'nova', name: 'NOVA', title: 'Information Analyst', type: 'information', status: 'online', avatar: humanAvatars.nova, specialties: ['Knowledge Base', 'FAQ Expert', 'Directions'], languages: ['English', 'Japanese', 'Korean'], responseTime: '< 1 sec', color: '#26de81', isAI: false },
+  { id: 'atlas', name: 'ATLAS', title: 'Escalation Manager', type: 'escalation', status: 'online', avatar: humanAvatars.atlas, specialties: ['Complex Cases', 'Crisis Management', 'Human Handoff'], languages: ['English', 'Arabic', 'Hindi'], responseTime: '< 3 sec', color: '#a55eea', isAI: false },
 ]
 
 // ==========================================
-// ADVANCED TYPES
+// TYPES
 // ==========================================
+
 interface Message {
   id: string
   role: 'user' | 'agent' | 'system'
@@ -88,277 +127,136 @@ interface Message {
   agentType?: string
 }
 
-// BUFFY & HERMES AI Brain Integration
-interface Agent {
-  id: string
-  name: string
-  title: string
-  type: string
-  status: 'online' | 'busy' | 'away'
-  avatar: string
-  specialties: string[]
-  languages: string[]
-  responseTime: string
-  color: string
-  isBuffyOrHermes?: boolean
-  aiRole?: 'buffy' | 'hermes'
-}
-
-interface OfficeZone {
-  id: string
-  name: string
-  description: string
-  image: string
-  ambiance: string
-  lighting: 'warm' | 'cool' | 'natural' | 'dramatic'
-}
-
 // ==========================================
-// AI AGENTS CONFIGURATION
+// AI RESPONSE ENGINE
 // ==========================================
-const aiAgents: Agent[] = [
-  {
-    id: 'buffy-core',
-    name: 'BUFFY',
-    title: 'Chief Strategic Intelligence',
-    type: 'buffy',
-    status: 'online',
-    avatar: '🧠',
-    specialties: ['Strategic Planning', 'Decision Making', 'Business Optimization', 'Pattern Recognition', 'Autonomous Learning'],
-    languages: ['All Languages'],
-    responseTime: '0.8ms',
-    color: '#00f5ff',
-    isBuffyOrHermes: true,
-    aiRole: 'buffy'
-  },
-  {
-    id: 'hermes-core',
-    name: 'HERMES',
-    title: 'Chief Operations Executor',
-    type: 'hermes',
-    status: 'online',
-    avatar: '⚡',
-    specialties: ['Lightning Delivery', 'Multi-channel Communication', 'Message Optimization', 'Real-time Execution'],
-    languages: ['All Languages'],
-    responseTime: '0.3ms',
-    color: '#ffd700',
-    isBuffyOrHermes: true,
-    aiRole: 'hermes'
-  },
-  {
-    id: 'agent-aria',
-    name: 'ARIA',
-    title: 'Chief Reception Officer',
-    type: 'greeting',
-    status: 'online',
-    avatar: avatars[0],
-    specialties: ['First Impressions', 'VIP Treatment', 'Multilingual'],
-    languages: ['English', 'Spanish', 'French', 'Mandarin'],
-    responseTime: '< 1 sec',
-    color: '#f0b429'
-  },
-  {
-    id: 'agent-chronos',
-    name: 'CHRONOS',
-    title: 'Scheduling Specialist',
-    type: 'scheduling',
-    status: 'online',
-    avatar: avatars[1],
-    specialties: ['Calendar Management', 'Appointment Optimization', 'Reminders'],
-    languages: ['English', 'German', 'Portuguese'],
-    responseTime: '< 2 sec',
-    color: '#00d4ff'
-  },
-  {
-    id: 'agent-nova',
-    name: 'NOVA',
-    title: 'Information Analyst',
-    type: 'information',
-    status: 'online',
-    avatar: avatars[2],
-    specialties: ['Knowledge Base', 'FAQ Expert', 'Directions'],
-    languages: ['English', 'Japanese', 'Korean'],
-    responseTime: '< 1 sec',
-    color: '#26de81'
-  },
-  {
-    id: 'agent-atlas',
-    name: 'ATLAS',
-    title: 'Escalation Manager',
-    type: 'escalation',
-    status: 'online',
-    avatar: avatars[3],
-    specialties: ['Complex Cases', 'Crisis Management', 'Human Handoff'],
-    languages: ['English', 'Arabic', 'Hindi'],
-    responseTime: '< 3 sec',
-    color: '#a55eea'
-  }
-]
 
-// Office Zones with Real Environments
-const officeZones: OfficeZone[] = [
-  { 
-    id: 'lobby', 
-    name: 'Grand Lobby', 
-    description: 'Elegant marble entrance with dramatic lighting',
-    image: officeImages.lobby,
-    ambiance: 'Professional & Welcoming', 
-    lighting: 'warm' 
-  },
-  { 
-    id: 'reception', 
-    name: 'Reception Area', 
-    description: 'Modern circular reception with ambient lighting',
-    image: officeImages.reception,
-    ambiance: 'Contemporary & Efficient', 
-    lighting: 'natural' 
-  },
-  { 
-    id: 'lounge', 
-    name: 'Executive Lounge', 
-    description: 'Premium visitor waiting area with city views',
-    image: officeImages.corporateLounge,
-    ambiance: 'Luxurious & Comfortable', 
-    lighting: 'dramatic' 
-  },
-  { 
-    id: 'office', 
-    name: 'Modern Office', 
-    description: 'State-of-the-art workspace environment',
-    image: officeImages.modernOffice,
-    ambiance: 'Innovative & Dynamic', 
-    lighting: 'cool' 
-  },
-]
-
-// Industries
-const industries = [
-  { 
-    id: 'healthcare', 
-    name: 'Healthcare', 
-    icon: Stethoscope, 
-    description: 'Patient-first virtual reception with HIPAA compliance',
-    features: ['Appointment Scheduling', 'Patient Intake', 'Insurance Verification', 'Wait Time Updates'],
-    color: '#26de81'
-  },
-  { 
-    id: 'legal', 
-    name: 'Legal', 
-    icon: Scale, 
-    description: 'Professional client intake and case management',
-    features: ['Client Intake', 'Consultation Booking', 'Document Handling', 'Confidentiality'],
-    color: '#a55eea'
-  },
-  { 
-    id: 'realestate', 
-    name: 'Real Estate', 
-    icon: Home, 
-    description: 'Property showcase reception and lead capture',
-    features: ['Listing Information', 'Showing Scheduling', 'Lead Capture', 'Virtual Tours'],
-    color: '#fd9644'
-  },
-  { 
-    id: 'hospitality', 
-    name: 'Hospitality', 
-    icon: Hotel, 
-    description: 'Luxury guest services and concierge',
-    features: ['Reservation Management', 'Concierge Services', 'Room Service', 'Local Recommendations'],
-    color: '#00d4ff'
-  },
-  { 
-    id: 'corporate', 
-    name: 'Corporate', 
-    icon: Building2, 
-    description: 'Enterprise visitor management and security',
-    features: ['Security Check-in', 'Meeting Rooms', 'Employee Services', 'Visitor Notifications'],
-    color: '#f0b429'
-  },
-  { 
-    id: 'finance', 
-    name: 'Finance', 
-    icon: Briefcase, 
-    description: 'Secure financial services and appointments',
-    features: ['Account Inquiries', 'Appointment Scheduling', 'Document Sharing', 'Compliance'],
-    color: '#ff6b9d'
-  },
-  { 
-    id: 'retail', 
-    name: 'Retail', 
-    icon: Store, 
-    description: 'Customer service and shopping assistance',
-    features: ['Product Info', 'Inventory Check', 'Order Tracking', 'Returns'],
-    color: '#ff4757'
-  },
-  { 
-    id: 'government', 
-    name: 'Government', 
-    icon: Building, 
-    description: 'Citizen services and public information',
-    features: ['Service Navigation', 'Appointment Booking', 'Form Assistance', 'Language Support'],
-    color: '#8892a4'
-  },
-]
-
-// ==========================================
-// ADVANCED AI RESPONSE ENGINE
-// ==========================================
 const generateAIResponse = (userMessage: string, agentType: string): string => {
   const msg = userMessage.toLowerCase()
   
-  if (msg.includes('appointment') || msg.includes('schedule') || msg.includes('book') || msg.includes('meeting')) {
-    return 'I would be delighted to help you schedule an appointment! Our system shows several optimal time slots available. Would you prefer morning or afternoon? I can also coordinate with your calendar to find the perfect time.'
+  if (msg.includes('appointment') || msg.includes('schedule') || msg.includes('book')) {
+    return 'I would be delighted to help you schedule an appointment! Our intelligent scheduling system shows optimal availability. Would you prefer morning or afternoon?'
   }
   
-  if (msg.includes('hello') || msg.includes('hi') || msg.includes('hey') || msg.includes('good morning') || msg.includes('good afternoon')) {
-    return 'Good day! Welcome to our office. I am ARIA, your dedicated AI receptionist, here to ensure your experience is exceptional. How may I assist you today?'
+  if (msg.includes('hello') || msg.includes('hi') || msg.includes('hey')) {
+    return 'Good day! Welcome to our office. I am your dedicated AI receptionist, here to ensure your experience is exceptional. How may I assist you today?'
   }
   
-  if (msg.includes('location') || msg.includes('address') || msg.includes('where') || msg.includes('directions') || msg.includes('find')) {
-    return 'Our office is located at 1250 Innovation Boulevard, Suite 400, in the prestigious West Tower building. We have secure underground parking and easy access via the Metro. Would you like me to send you turn-by-turn directions?'
+  if (msg.includes('location') || msg.includes('address') || msg.includes('where')) {
+    return 'Our office is located at 1250 Innovation Boulevard, Suite 400, in the prestigious West Tower building. We have secure underground parking and easy Metro access.'
   }
   
-  if (msg.includes('hour') || msg.includes('open') || msg.includes('close') || msg.includes('available') || msg.includes('time')) {
-    return 'Our business hours are Monday through Friday, 8:00 AM to 7:00 PM EST. For urgent matters outside these hours, our 24/7 virtual concierge is available. You can also schedule a callback at your convenience.'
+  if (msg.includes('hour') || msg.includes('open') || msg.includes('close')) {
+    return 'Our business hours are Monday through Friday, 8:00 AM to 7:00 PM EST. For urgent matters outside these hours, our 24/7 virtual concierge is available.'
   }
   
-  if (msg.includes('price') || msg.includes('cost') || msg.includes('fee') || msg.includes('quote') || msg.includes('pricing')) {
-    return 'Thank you for your inquiry about our services. We offer customized solutions tailored to your specific needs. May I schedule a complimentary consultation with our team to discuss the perfect package for you?'
+  if (msg.includes('price') || msg.includes('cost') || msg.includes('quote')) {
+    return 'Thank you for your inquiry. We offer customized solutions tailored to your specific needs. May I schedule a complimentary consultation with our team?'
   }
   
-  if (msg.includes('services') || msg.includes('what do you') || msg.includes('offer') || msg.includes('help')) {
-    return 'We offer a comprehensive suite of services: appointment scheduling, visitor registration, information retrieval, multilingual support, and seamless human handoff when needed. How may I direct your inquiry?'
+  if (msg.includes('services') || msg.includes('offer') || msg.includes('help')) {
+    return 'We offer: appointment scheduling, visitor registration, information retrieval, multilingual support, and seamless human handoff. How may I direct your inquiry?'
   }
   
   if (msg.includes('thank') || msg.includes('thanks')) {
-    return 'You are most welcome! It is my pleasure to assist you. Is there anything else I can help you with today? Your satisfaction is my priority.'
+    return 'You are most welcome! It is my pleasure to assist you. Is there anything else I can help you with today?'
   }
   
-  if (msg.includes('bye') || msg.includes('goodbye') || msg.includes('take care') || msg.includes('later')) {
-    return 'Thank you for visiting! Have a wonderful day ahead. Please do not hesitate to reach out if you need anything further. We look forward to welcoming you again soon!'
+  if (msg.includes('bye') || msg.includes('goodbye')) {
+    return 'Thank you for visiting! Have a wonderful day ahead. Please do not hesitate to reach out if you need anything further.'
   }
   
-  if (msg.includes('speak to') || msg.includes('human') || msg.includes('real person') || msg.includes('agent')) {
-    return 'I understand you would like to speak with a team member. I am connecting you with our guest services team who will be with you shortly. Please hold for just a moment.'
+  if (msg.includes('speak to') || msg.includes('human') || msg.includes('real person')) {
+    return 'I understand you would like to speak with a team member. I am connecting you with our guest services team who will be with you shortly.'
   }
   
-  return 'I understand your inquiry. Let me process that information and provide you with the most relevant assistance. Could you share more details so I can ensure I address your needs perfectly?'
+  return 'I understand your inquiry. Let me process that information and provide you with the most relevant assistance. Could you share more details?'
 }
 
 // ==========================================
-// ADVANCED COMPONENTS
+// COMPONENTS
 // ==========================================
 
-// Ambient Particles System
+// Immersive Office Background with Parallax
+const OfficeBackground = ({ zone }: { zone: string }) => {
+  const [loaded, setLoaded] = useState(false)
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+  
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePos({
+        x: (e.clientX / window.innerWidth - 0.5) * 15,
+        y: (e.clientY / window.innerHeight - 0.5) * 15
+      })
+    }
+    window.addEventListener('mousemove', handleMouseMove)
+    return () => window.removeEventListener('mousemove', handleMouseMove)
+  }, [])
+  
+  const zoneData = officeZones.find(z => z.id === zone) || officeZones[0]
+  
+  return (
+    <div className='absolute inset-0 z-0 overflow-hidden'>
+      {/* Base Gradient */}
+      <div className='absolute inset-0 bg-gradient-to-br from-deepNavy via-midnightBlue to-slate' />
+      
+      {/* 8K Office Image with Parallax */}
+      <motion.div 
+        className='absolute inset-0 opacity-30'
+        animate={{ x: mousePos.x, y: mousePos.y }}
+        transition={{ type: 'spring', stiffness: 30, damping: 20 }}
+      >
+        <img 
+          src={zoneData.image}
+          alt='Premium Office Environment'
+          className={clsx(
+            'w-full h-full object-cover transition-opacity duration-1500',
+            loaded ? 'opacity-30' : 'opacity-0'
+          )}
+          onLoad={() => setLoaded(true)}
+        />
+      </motion.div>
+      
+      {/* Multiple Light Overlays for Depth */}
+      <div className='absolute inset-0 bg-gradient-to-br from-amber-500/8 via-transparent to-cyan-500/8' />
+      <div className='absolute inset-0 bg-gradient-to-bl from-purple-500/5 via-transparent to-transparent' />
+      <div className='absolute inset-0 bg-gradient-to-t from-deepNavy via-transparent to-transparent' />
+      
+      {/* Atmospheric Depth */}
+      <motion.div 
+        className='absolute inset-0'
+        animate={{ opacity: [0.4, 0.6, 0.4] }}
+        style={{ background: 'radial-gradient(ellipse at 50% 100%, rgba(30,40,60,0.9) 0%, transparent 70%)' }}
+        transition={{ duration: 10, repeat: Infinity }}
+      />
+      
+      {/* Vignette for Focus */}
+      <div className='absolute inset-0' style={{ 
+        background: 'radial-gradient(ellipse at center, transparent 0%, rgba(5,8,16,0.4) 40%, rgba(5,8,16,0.9) 100%)' 
+      }} />
+      
+      {/* Subtle Grid for Tech Feel */}
+      <div className='absolute inset-0 opacity-[0.02]' 
+           style={{ 
+             backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
+             backgroundSize: '80px 80px'
+           }} 
+      />
+    </div>
+  )
+}
+
+// Ambient Golden Particles
 const AmbientParticles = () => {
   const particles = useMemo(() => 
-    Array.from({ length: 80 }, (_, i) => ({
+    Array.from({ length: 60 }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,
-      size: Math.random() * 3 + 0.5,
-      duration: Math.random() * 30 + 20,
-      delay: Math.random() * 15,
-      color: Math.random() > 0.6 ? colors.gold : Math.random() > 0.3 ? colors.cyan : colors.silver
+      size: Math.random() * 2.5 + 0.5,
+      duration: Math.random() * 25 + 15,
+      delay: Math.random() * 10,
+      color: Math.random() > 0.5 ? colors.gold : Math.random() > 0.3 ? colors.cyan : colors.silver
     })), [])
   
   return (
@@ -373,12 +271,12 @@ const AmbientParticles = () => {
             width: particle.size,
             height: particle.size,
             background: particle.color,
-            boxShadow: `0 0 ${particle.size * 3}px ${particle.color}`
+            boxShadow: `0 0 ${particle.size * 4}px ${particle.color}`
           }}
           animate={{
-            y: [-30, -300, -600],
-            opacity: [0, 0.6, 0],
-            scale: [1, 1.2, 0.8]
+            y: [-20, -250, -500],
+            opacity: [0, 0.5, 0],
+            scale: [1, 1.3, 0.7]
           }}
           transition={{
             duration: particle.duration,
@@ -392,118 +290,39 @@ const AmbientParticles = () => {
   )
 }
 
-// Dynamic Light Beams
+// Light Beams Effect
 const LightBeams = () => (
   <div className='fixed inset-0 pointer-events-none z-[1] overflow-hidden'>
     <motion.div 
-      className='absolute top-0 left-[20%] w-[600px] h-full bg-gradient-to-b from-amber-500/15 via-orange-500/8 to-transparent'
-      style={{ transform: 'rotate(-12deg)', transformOrigin: 'top center' }}
-      animate={{ 
-        opacity: [0.4, 0.7, 0.4],
-        x: [0, 80, 0]
-      }}
+      className='absolute top-0 left-[15%] w-[700px] h-full bg-gradient-to-b from-amber-500/12 via-orange-500/6 to-transparent'
+      style={{ transform: 'rotate(-10deg)', transformOrigin: 'top center' }}
+      animate={{ opacity: [0.4, 0.7, 0.4], x: [0, 60, 0] }}
       transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
     />
     <motion.div 
-      className='absolute top-0 right-[15%] w-[500px] h-full bg-gradient-to-b from-cyan-500/12 via-blue-500/6 to-transparent'
-      style={{ transform: 'rotate(10deg)', transformOrigin: 'top center' }}
-      animate={{ 
-        opacity: [0.3, 0.6, 0.3],
-        x: [0, -60, 0]
-      }}
-      transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut', delay: 3 }}
+      className='absolute top-0 right-[10%] w-[500px] h-full bg-gradient-to-b from-cyan-500/10 via-blue-500/5 to-transparent'
+      style={{ transform: 'rotate(8deg)', transformOrigin: 'top center' }}
+      animate={{ opacity: [0.3, 0.6, 0.3], x: [0, -50, 0] }}
+      transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
     />
     <motion.div 
-      className='absolute top-0 left-1/2 w-[400px] h-full bg-gradient-to-b from-purple-500/10 via-pink-500/5 to-transparent'
+      className='absolute top-0 left-1/2 w-[400px] h-full bg-gradient-to-b from-purple-500/8 via-pink-500/4 to-transparent'
       style={{ transform: 'translateX(-50%)', transformOrigin: 'top center' }}
-      animate={{ 
-        opacity: [0.2, 0.5, 0.2],
-        scale: [1, 1.1, 1]
-      }}
-      transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 6 }}
+      animate={{ opacity: [0.2, 0.5, 0.2], scale: [1, 1.1, 1] }}
+      transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 5 }}
     />
   </div>
 )
 
-// Office Environment Background with Parallax
-const OfficeBackground = ({ zone }: { zone: string }) => {
-  const [loaded, setLoaded] = useState(false)
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
-  
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePos({
-        x: (e.clientX / window.innerWidth - 0.5) * 20,
-        y: (e.clientY / window.innerHeight - 0.5) * 20
-      })
-    }
-    window.addEventListener('mousemove', handleMouseMove)
-    return () => window.removeEventListener('mousemove', handleMouseMove)
-  }, [])
-  
-  const zoneData = officeZones.find(z => z.id === zone) || officeZones[0]
-  
-  return (
-    <div className='absolute inset-0 z-0 overflow-hidden'>
-      {/* Base Gradient */}
-      <div className='absolute inset-0 bg-gradient-to-br from-deepNavy via-midnightBlue to-slate' />
-      
-      {/* Parallax Image Layer */}
-      <motion.div 
-        className='absolute inset-0 opacity-25'
-        animate={{
-          x: mousePos.x,
-          y: mousePos.y
-        }}
-        transition={{ type: 'spring', stiffness: 50, damping: 20 }}
-      >
-        <img 
-          src={zoneData.image}
-          alt='Office Environment'
-          className={clsx(
-            'w-full h-full object-cover transition-opacity duration-1000',
-            loaded ? 'opacity-25' : 'opacity-0'
-          )}
-          onLoad={() => setLoaded(true)}
-        />
-      </motion.div>
-      
-      {/* Multiple Gradient Overlays for Depth */}
-      <div className='absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-cyan-500/5' />
-      <div className='absolute inset-0 bg-gradient-to-bl from-purple-500/5 via-transparent to-transparent' />
-      <div className='absolute inset-0 bg-gradient-to-t from-deepNavy via-transparent to-transparent' />
-      
-      {/* Atmospheric Fog */}
-      <motion.div 
-        className='absolute inset-0'
-        animate={{ opacity: [0.3, 0.5, 0.3] }}
-        style={{ background: 'radial-gradient(ellipse at 50% 100%, rgba(30,40,60,0.8) 0%, transparent 70%)' }}
-        transition={{ duration: 8, repeat: Infinity }}
-      />
-      
-      {/* Vignette Effect */}
-      <div className='absolute inset-0' style={{ 
-        background: 'radial-gradient(ellipse at center, transparent 0%, rgba(5,8,16,0.3) 40%, rgba(5,8,16,0.8) 100%)' 
-      }} />
-      
-      {/* Subtle Grid Pattern */}
-      <div className='absolute inset-0 opacity-[0.03]' 
-           style={{ 
-             backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
-             backgroundSize: '100px 100px'
-           }} 
-      />
-    </div>
-  )
-}
-
-// Photorealistic AI Receptionist Avatar
-const AIAvatar = ({ agent, isSpeaking, isListening, size = 'large' }: { agent: Agent, isSpeaking: boolean, isListening: boolean, size?: 'small' | 'large' }) => {
+// Real Human Avatar with Professional Presence
+const HumanAvatar = ({ agent, isSpeaking, isListening, size = 'large' }: { agent: any, isSpeaking: boolean, isListening: boolean, size?: 'small' | 'large' }) => {
   const [hovered, setHovered] = useState(false)
   const [loaded, setLoaded] = useState(false)
   const [imgError, setImgError] = useState(false)
   
-  const dimensions = size === 'large' ? { container: 'w-72 h-72 md:w-80 md:h-80', outer: '-inset-4' } : { container: 'w-24 h-24 md:w-28 md:h-28', outer: '-inset-2' }
+  const dimensions = size === 'large' 
+    ? { container: 'w-72 h-72 md:w-80 md:h-80', outer: '-inset-4' } 
+    : { container: 'w-24 h-24 md:w-28 md:h-28', outer: '-inset-2' }
   
   return (
     <motion.div 
@@ -518,10 +337,10 @@ const AIAvatar = ({ agent, isSpeaking, isListening, size = 'large' }: { agent: A
         className={clsx('absolute rounded-full', dimensions.outer)}
         animate={{ 
           boxShadow: isSpeaking 
-            ? `0 0 50px ${agent.color}, 0 0 100px ${agent.color}60, inset 0 0 50px ${agent.color}40`
+            ? `0 0 60px ${agent.color}, 0 0 120px ${agent.color}50, inset 0 0 60px ${agent.color}40`
             : hovered 
-              ? `0 0 40px ${agent.color}80, 0 0 80px ${agent.color}40`
-              : `0 0 30px ${agent.color}30, 0 0 60px ${agent.color}10`
+              ? `0 0 50px ${agent.color}60, 0 0 100px ${agent.color}30`
+              : `0 0 40px ${agent.color}20, 0 0 80px ${agent.color}10`
         }}
         transition={{ duration: 0.5 }}
       />
@@ -542,18 +361,16 @@ const AIAvatar = ({ agent, isSpeaking, isListening, size = 'large' }: { agent: A
         
         {/* Avatar Image Container */}
         <div className='absolute inset-1 rounded-full overflow-hidden bg-gradient-to-br from-slate to-midnightBlue shadow-2xl'>
-          {/* Loading Skeleton */}
           {!loaded && (
             <div className='absolute inset-0 bg-gradient-to-br from-slate to-midnightBlue animate-pulse' />
           )}
           
-          {/* Avatar Image or Fallback */}
           {!imgError ? (
             <motion.img 
               src={agent.avatar}
               alt={agent.name}
               className={clsx(
-                'w-full h-full object-cover object-top transition-all duration-700',
+                'w-full h-full object-cover object-center transition-all duration-700',
                 hovered && 'scale-105',
                 loaded ? 'opacity-100' : 'opacity-0'
               )}
@@ -567,12 +384,9 @@ const AIAvatar = ({ agent, isSpeaking, isListening, size = 'large' }: { agent: A
             </div>
           )}
           
-          {/* Professional Lighting Overlay */}
+          {/* Professional Lighting */}
           <div className='absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-cyan-500/10 pointer-events-none' />
           <div className='absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-white/10 pointer-events-none' />
-          
-          {/* Reflection Effect */}
-          <div className='absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-slate/60 to-transparent pointer-events-none' />
         </div>
         
         {/* Status Badge */}
@@ -603,50 +417,40 @@ const AIAvatar = ({ agent, isSpeaking, isListening, size = 'large' }: { agent: A
         </motion.div>
       </div>
       
-      {/* Voice Wave Visualization */}
+      {/* Voice Visualization */}
       {isSpeaking && (
         <div className='absolute -right-10 md:-right-14 top-1/2 -translate-y-1/2 flex items-center gap-0.5 h-12 md:h-16'>
-          {[...Array(14)].map((_, i) => (
+          {[...Array(12)].map((_, i) => (
             <motion.div
               key={i}
               className='w-1 rounded-full'
-              style={{ 
-                background: `linear-gradient(to top, ${agent.color}, ${colors.white})`
-              }}
-              initial={{ height: 4 }}
-              animate={{ 
-                height: [4, Math.random() * 48 + 24, 4],
-              }}
-              transition={{
-                duration: 0.6,
-                repeat: Infinity,
-                delay: i * 0.04,
-                ease: 'easeInOut'
-              }}
+              style={{ background: `linear-gradient(to top, ${agent.color}, ${colors.white})` }}
+              animate={{ height: [4, Math.random() * 44 + 20, 4] }}
+              transition={{ duration: 0.5, repeat: Infinity, delay: i * 0.04, ease: 'easeInOut' }}
             />
           ))}
         </div>
       )}
       
-      {/* Listening Pulse Rings */}
+      {/* Listening Pulse */}
       {isListening && (
         <>
           <motion.div 
             className='absolute inset-0 rounded-full border-2'
-            style={{ borderColor: `${agent.color}80` }}
+            style={{ borderColor: `${agent.color}60` }}
             animate={{ scale: [1, 1.15, 1], opacity: [1, 0, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
           />
           <motion.div 
             className='absolute inset-0 rounded-full border'
-            style={{ borderColor: `${agent.color}40` }}
+            style={{ borderColor: `${agent.color}30` }}
             animate={{ scale: [1, 1.3, 1], opacity: [1, 0, 1] }}
             transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
           />
         </>
       )}
       
-      {/* Agent Name Label */}
+      {/* Agent Label */}
       <motion.div 
         className='absolute -bottom-14 left-1/2 -translate-x-1/2 text-center whitespace-nowrap'
         initial={{ opacity: 0, y: 10 }}
@@ -667,14 +471,12 @@ const PremiumBubble = ({ message, isAgent, agentColor = colors.gold }: { message
     transition={{ duration: 0.4, type: 'spring', stiffness: 100 }}
     className={clsx('flex gap-3 mb-4', isAgent ? 'flex-row' : 'flex-row-reverse')}
   >
-    {/* Avatar */}
     {isAgent && (
       <div className='w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border-2 shadow-lg' style={{ borderColor: `${agentColor}60` }}>
         <img src={aiAgents[0].avatar} alt='AI' className='w-full h-full object-cover' />
       </div>
     )}
     
-    {/* Message Bubble */}
     <div className={clsx(
       'max-w-[85%] px-5 py-3.5 rounded-2xl backdrop-blur-xl',
       isAgent 
@@ -694,7 +496,6 @@ const PremiumBubble = ({ message, isAgent, agentColor = colors.gold }: { message
       </div>
     </div>
     
-    {/* User Icon */}
     {!isAgent && (
       <div className='w-10 h-10 rounded-full bg-gradient-to-br from-gold to-goldDark flex-shrink-0 flex items-center justify-center shadow-lg border-2 border-gold/50'>
         <User className='w-5 h-5 text-deepNavy' />
@@ -712,29 +513,23 @@ const GlassCard = ({ children, className, delay = 0, glowColor = colors.gold }: 
     transition={{ duration: 0.7, delay }}
     className={clsx('relative group', className)}
   >
-    {/* Glow Effect */}
     <div 
       className='absolute -inset-0.5 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-700'
       style={{ background: `linear-gradient(135deg, ${glowColor}30, ${colors.cyan}30, ${colors.purple}30)` }}
     />
     
-    {/* Card */}
     <div className='relative bg-gradient-to-br from-white/8 to-white/4 backdrop-blur-xl rounded-2xl border border-white/10 p-6 md:p-8 overflow-hidden'>
-      {/* Glass Reflection Line */}
       <div className='absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent' />
-      
-      {/* Corner Accent */}
       <div 
         className='absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-20'
         style={{ background: `radial-gradient(circle, ${glowColor}40, transparent)` }}
       />
-      
       {children}
     </div>
   </motion.div>
 )
 
-// Cinematic Loading Screen
+// Cinematic Loading
 const CinematicLoader = () => (
   <motion.div 
     className='fixed inset-0 z-[100] flex items-center justify-center bg-deepNavy overflow-hidden'
@@ -742,7 +537,6 @@ const CinematicLoader = () => (
     exit={{ opacity: 0 }}
     transition={{ duration: 1.5, ease: 'easeInOut' }}
   >
-    {/* Animated Background */}
     <div className='absolute inset-0'>
       <div className='absolute inset-0 bg-gradient-to-br from-midnightBlue via-slate to-deepNavy' />
       <motion.div 
@@ -751,18 +545,10 @@ const CinematicLoader = () => (
         animate={{ scale: [0.7, 1.3, 0.7], opacity: [0.4, 0.7, 0.4] }}
         transition={{ duration: 5, repeat: Infinity }}
       />
-      <motion.div 
-        className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px]'
-        style={{ background: 'radial-gradient(circle, rgba(0,212,255,0.1) 0%, transparent 60%)' }}
-        animate={{ scale: [1, 0.8, 1], opacity: [0.3, 0.6, 0.3] }}
-        transition={{ duration: 4, repeat: Infinity, delay: 1 }}
-      />
     </div>
     
-    {/* Logo Animation */}
     <div className='text-center z-10'>
       <motion.div className='relative w-40 h-40 mx-auto mb-10'>
-        {/* Spinning Orbit Rings */}
         <motion.div 
           className='absolute inset-0 rounded-full border border-gold/40'
           animate={{ rotate: 360 }}
@@ -778,24 +564,13 @@ const CinematicLoader = () => (
           animate={{ rotate: 360 }}
           transition={{ duration: 5, repeat: Infinity, ease: 'linear' }}
         />
-        <motion.div 
-          className='absolute inset-9 rounded-full border border-pink-500/20'
-          animate={{ rotate: -360 }}
-          transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
-        />
-        
-        {/* Center Icon */}
         <div className='absolute inset-0 flex items-center justify-center'>
-          <motion.div
-            animate={{ scale: [1, 1.1, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
+          <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity }}>
             <Bot className='w-16 h-16 text-gold drop-shadow-lg' />
           </motion.div>
         </div>
       </motion.div>
       
-      {/* Loading Text */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
         <motion.h2 
           className='text-3xl font-bold text-white mb-3 tracking-[0.3em]'
@@ -807,7 +582,6 @@ const CinematicLoader = () => (
         <p className='text-gold text-xl font-bold tracking-[0.4em]'>FRONTDESK AGENTS</p>
       </motion.div>
       
-      {/* Progress Bar */}
       <motion.div 
         className='w-80 h-1 bg-white/10 rounded-full mt-10 mx-auto overflow-hidden'
         initial={{ opacity: 0 }}
@@ -816,24 +590,10 @@ const CinematicLoader = () => (
       >
         <motion.div 
           className='h-full bg-gradient-to-r from-gold via-cyan to-gold'
-          animate={{ 
-            width: ['0%', '100%'],
-          }}
+          animate={{ width: ['0%', '100%'] }}
           transition={{ duration: 2.5, delay: 0.5, ease: 'easeInOut' }}
         />
       </motion.div>
-      
-      {/* Loading Dots */}
-      <div className='flex justify-center gap-2 mt-6'>
-        {[0, 1, 2].map((i) => (
-          <motion.div
-            key={i}
-            className='w-2 h-2 rounded-full bg-gold'
-            animate={{ y: [0, -10, 0], opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.15 }}
-          />
-        ))}
-      </div>
     </div>
   </motion.div>
 )
@@ -841,22 +601,20 @@ const CinematicLoader = () => (
 // ==========================================
 // MAIN PAGE COMPONENT
 // ==========================================
+
 export default function FrontdeskAgentsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [messages, setMessages] = useState<Message[]>([])
   const [inputValue, setInputValue] = useState('')
   const [isListening, setIsListening] = useState(false)
   const [isSpeaking, setIsSpeaking] = useState(false)
-  const [selectedAgent, setSelectedAgent] = useState<Agent>(aiAgents[0])
+  const [selectedAgent, setSelectedAgent] = useState(aiAgents[0])
   const [isDemoOpen, setIsDemoOpen] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [selectedZone, setSelectedZone] = useState('lobby')
   const [showWelcome, setShowWelcome] = useState(true)
   const [currentView, setCurrentView] = useState<'hero' | 'features' | 'industries' | 'pricing'>('hero')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [showMonitoring, setShowMonitoring] = useState(false)
-  const [buffyHermesStatus, setBuffyHermesStatus] = useState<any>(null)
-  const [lastDecision, setLastDecision] = useState<AutonomousDecision | null>(null)
   
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -868,21 +626,17 @@ export default function FrontdeskAgentsPage() {
   })
   
   const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0])
-  const heroScale = useTransform(scrollYProgress, [0, 0.8], [1, 0.95])
   const heroY = useTransform(scrollYProgress, [0, 0.8], [0, -100])
   
-  // Loading Sequence
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 4500)
+    const timer = setTimeout(() => setIsLoading(false), 4000)
     return () => clearTimeout(timer)
   }, [])
   
-  // Auto-scroll messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
   }, [messages])
   
-  // Welcome Message
   useEffect(() => {
     if (!isLoading && showWelcome) {
       setTimeout(() => {
@@ -898,7 +652,6 @@ export default function FrontdeskAgentsPage() {
     }
   }, [isLoading, showWelcome])
   
-  // Send Message Handler with BUFFY & HERMES AI Brain Integration
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return
     
@@ -914,24 +667,7 @@ export default function FrontdeskAgentsPage() {
     setInputValue('')
     setIsSpeaking(true)
     
-    // Process through BUFFY & HERMES AI Brain
     try {
-      // Use the DecisionContext format expected by profitEngine.ts
-      const context = {
-        customerTier: 'pro' as const,
-        conversationCount: messages.length,
-        isNegativeSentiment: false,
-        isCritical: false,
-        businessValue: 0.5,
-        timeOfDay: new Date(),
-        previousInteractions: 0
-      }
-      
-      // BUFFY makes autonomous decision
-      const decision = await autonomousDecisionEngine.decide('customer_engagement', context)
-      setLastDecision(decision)
-      
-      // HERMES prepares optimized response
       const agentMessage: AgentMessage = {
         id: 'msg-' + Date.now(),
         agent: 'BUFFY-HERMES',
@@ -941,7 +677,6 @@ export default function FrontdeskAgentsPage() {
         sentiment: 'neutral'
       }
       
-      // Process through BuffyHermes collaboration
       const result = await buffyHermesEngine.process(agentMessage, {
         industry: 'corporate',
         customerTier: 'pro',
@@ -954,34 +689,19 @@ export default function FrontdeskAgentsPage() {
         officeZone: selectedZone
       })
       
-      // Update status display
-      setBuffyHermesStatus(buffyHermesEngine.getSystemStatus())
-      
-      // Get AI response
       const aiResponse = generateAIResponse(currentInput, selectedAgent.type)
-      const enhancedResponse = `[BUFFY Decision: ${decision.selectedOption}] ${aiResponse}`
       
       const agentMsg: Message = {
         id: 'agent-' + Date.now(),
         role: 'agent',
-        content: enhancedResponse,
+        content: aiResponse,
         timestamp: new Date(),
-        agentType: selectedAgent.aiRole === 'buffy' ? 'BUFFY' : selectedAgent.aiRole === 'hermes' ? 'HERMES' : selectedAgent.name
+        agentType: selectedAgent.name
       }
       setMessages(prev => [...prev, agentMsg])
       
-      // Learn from interaction
-      await selfLearningEngine.learn({
-        id: 'learning-' + Date.now(),
-        initialSentiment: 'neutral' as const,
-        finalSentiment: 'positive' as const,
-        responseTime: result.totalProcessingTime,
-        outcome: 'resolved'
-      } as any)
-      
     } catch (error) {
-      console.error('BUFFY & HERMES processing error:', error)
-      // Fallback to standard response
+      console.error('Processing error:', error)
       const agentMsg: Message = {
         id: 'agent-' + Date.now(),
         role: 'agent',
@@ -995,25 +715,22 @@ export default function FrontdeskAgentsPage() {
     setIsSpeaking(false)
   }
   
-  // Voice Toggle Handler
   const handleVoiceToggle = () => {
     setIsListening(!isListening)
     if (!isListening) {
-      // Simulate voice input
       setTimeout(() => {
         setIsListening(false)
         const voiceMsg: Message = {
           id: 'voice-' + Date.now(),
           role: 'user',
-          content: 'I need to schedule an appointment for tomorrow at 2 PM with Dr. Johnson.',
+          content: 'I need to schedule an appointment for tomorrow at 2 PM.',
           timestamp: new Date()
         }
         setMessages(prev => [...prev, voiceMsg])
-      }, 3500)
+      }, 3000)
     }
   }
   
-  // Quick Action Handler
   const handleQuickAction = (action: string) => {
     setInputValue(action)
     inputRef.current?.focus()
@@ -1025,12 +742,11 @@ export default function FrontdeskAgentsPage() {
   
   return (
     <div className='min-h-screen bg-deepNavy text-white overflow-x-hidden relative'>
-      {/* Background Effects */}
       <OfficeBackground zone={selectedZone} />
       <AmbientParticles />
       <LightBeams />
       
-      {/* Navigation */}
+      {/* Navigation - Native FRONTDESK AGENTS Branding */}
       <motion.nav 
         className='fixed top-0 left-0 right-0 z-50 px-4 md:px-8 py-4'
         initial={{ y: -100, opacity: 0 }}
@@ -1038,7 +754,7 @@ export default function FrontdeskAgentsPage() {
         transition={{ delay: 0.3, duration: 0.8 }}
       >
         <div className='max-w-7xl mx-auto flex items-center justify-between'>
-          {/* Logo */}
+          {/* FRONTDESK AGENTS Logo */}
           <motion.div 
             className='flex items-center gap-3 cursor-pointer'
             whileHover={{ scale: 1.02 }}
@@ -1100,7 +816,6 @@ export default function FrontdeskAgentsPage() {
             Try Demo
           </motion.button>
           
-          {/* Mobile Menu Button */}
           <motion.button
             className='md:hidden p-2 rounded-xl bg-white/5'
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -1110,7 +825,6 @@ export default function FrontdeskAgentsPage() {
           </motion.button>
         </div>
         
-        {/* Mobile Menu */}
         <AnimatePresence>
           {mobileMenuOpen && (
             <motion.div
@@ -1162,7 +876,7 @@ export default function FrontdeskAgentsPage() {
             <span className='text-gold text-sm font-semibold tracking-wide'>World's Most Advanced AI Receptionist</span>
           </motion.div>
           
-          {/* Main Headline */}
+          {/* Main Headline - FRONTDESK AGENTS Branding */}
           <motion.h1
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
@@ -1186,7 +900,7 @@ export default function FrontdeskAgentsPage() {
             className='text-lg md:text-xl text-silver max-w-3xl mx-auto mb-12 leading-relaxed'
           >
             Experience the world's most sophisticated AI-powered virtual receptionist. 
-            Photorealistic avatars, hyper-realistic office environments, and human-like 
+            Photorealistic avatars, hyper-realistic 8K office environments, and human-like 
             conversations that transform how businesses greet their visitors.
           </motion.p>
           
@@ -1219,7 +933,7 @@ export default function FrontdeskAgentsPage() {
             </motion.button>
           </motion.div>
           
-          {/* Stats Grid */}
+          {/* Stats Grid - Native Branding */}
           <motion.div
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
@@ -1266,7 +980,6 @@ export default function FrontdeskAgentsPage() {
           animate={{ opacity: 1 }}
         >
           <div className='max-w-7xl mx-auto'>
-            {/* Section Header */}
             <div className='text-center mb-20'>
               <motion.span 
                 className='text-gold text-sm font-bold tracking-[0.3em] uppercase'
@@ -1281,7 +994,7 @@ export default function FrontdeskAgentsPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
               >
-                Hollywood-Grade Experience
+                8K Office Experience
               </motion.h2>
               <motion.p 
                 className='text-silver text-lg md:text-xl max-w-2xl mx-auto'
@@ -1293,15 +1006,14 @@ export default function FrontdeskAgentsPage() {
               </motion.p>
             </div>
             
-            {/* Feature Cards */}
             <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-6'>
               {[
-                { icon: Bot, title: 'AI Agents', desc: 'Multi-agent AI system with specialized roles working in coordination', color: colors.gold, delay: 0 },
+                { icon: BotIcon, title: 'AI Agents', desc: 'Multi-agent AI system with specialized roles working in coordination', color: colors.gold, delay: 0 },
                 { icon: Languages, title: '50+ Languages', desc: 'Fluent multilingual support breaking language barriers worldwide', color: colors.cyan, delay: 0.1 },
                 { icon: Calendar, title: 'Smart Scheduling', desc: 'AI-powered appointment optimization and calendar management', color: colors.green, delay: 0.2 },
-                { icon: Shield, title: 'Enterprise Security', desc: 'Bank-grade encryption and compliance with global standards', color: colors.purple, delay: 0.3 },
-                { icon: Zap, title: 'Instant Response', desc: 'Sub-second intelligent responses with human-like accuracy', color: colors.orange, delay: 0.4 },
-                { icon: Users, title: 'Seamless Handoff', desc: 'Smooth escalation to human agents when complexity requires it', color: colors.rose, delay: 0.5 },
+                { icon: ShieldIcon, title: 'Enterprise Security', desc: 'Bank-grade encryption and compliance with global standards', color: colors.purple, delay: 0.3 },
+                { icon: ZapIcon, title: 'Instant Response', desc: 'Sub-second intelligent responses with human-like accuracy', color: colors.orange, delay: 0.4 },
+                { icon: UsersIcon, title: 'Seamless Handoff', desc: 'Smooth escalation to human agents when complexity requires it', color: colors.rose, delay: 0.5 },
                 { icon: Globe2, title: 'Universal Industry', desc: 'Adaptable to any business type from healthcare to government', color: colors.gold, delay: 0.6 },
                 { icon: MessageCircle, title: 'Voice & Text', desc: 'Natural voice conversations and text chat in one interface', color: colors.cyan, delay: 0.7 },
                 { icon: SupportIcon, title: '24/7 Support', desc: 'Round-the-clock availability for global operations', color: colors.green, delay: 0.8 },
@@ -1330,14 +1042,13 @@ export default function FrontdeskAgentsPage() {
           animate={{ opacity: 1 }}
         >
           <div className='max-w-7xl mx-auto'>
-            {/* Section Header */}
             <div className='text-center mb-20'>
               <motion.span 
                 className='text-cyan text-sm font-bold tracking-[0.3em] uppercase'
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
               >
-                Universal Solutions
+                Universal Solutions - FRONTDESK AGENTS Native
               </motion.span>
               <motion.h2 
                 className='text-4xl md:text-6xl font-bold text-white mt-6 mb-6'
@@ -1357,7 +1068,6 @@ export default function FrontdeskAgentsPage() {
               </motion.p>
             </div>
             
-            {/* Industry Grid */}
             <div className='grid md:grid-cols-2 lg:grid-cols-4 gap-6'>
               {industries.map((industry, i) => (
                 <GlassCard key={industry.id} delay={i * 0.1} glowColor={industry.color}>
@@ -1392,14 +1102,13 @@ export default function FrontdeskAgentsPage() {
           animate={{ opacity: 1 }}
         >
           <div className='max-w-5xl mx-auto'>
-            {/* Section Header */}
             <div className='text-center mb-20'>
               <motion.span 
                 className='text-purple text-sm font-bold tracking-[0.3em] uppercase'
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
               >
-                Simple Pricing
+                Simple Pricing - FRONTDESK AGENTS
               </motion.span>
               <motion.h2 
                 className='text-4xl md:text-6xl font-bold text-white mt-6 mb-6'
@@ -1419,7 +1128,6 @@ export default function FrontdeskAgentsPage() {
               </motion.p>
             </div>
             
-            {/* Pricing Cards */}
             <div className='grid md:grid-cols-3 gap-6'>
               {[
                 { 
@@ -1502,7 +1210,7 @@ export default function FrontdeskAgentsPage() {
               'h-full glass-card overflow-hidden flex flex-col',
               !isFullscreen && 'max-w-7xl mx-auto'
             )}>
-              {/* Demo Header */}
+              {/* Demo Header - Native Branding */}
               <div className='flex items-center justify-between px-6 py-4 border-b border-white/10 bg-gradient-to-r from-slate/50 to-transparent'>
                 <div className='flex items-center gap-4'>
                   <div 
@@ -1513,11 +1221,10 @@ export default function FrontdeskAgentsPage() {
                   </div>
                   <div>
                     <h2 className='text-lg font-bold text-white'>AI Receptionist Demo</h2>
-                    <p className='text-sm' style={{ color: colors.cyan }}>Powered by Advanced Agentic AI</p>
+                    <p className='text-sm' style={{ color: colors.cyan }}>Powered by FRONTDESK AGENTS</p>
                   </div>
                 </div>
                 
-                {/* Zone Selector */}
                 <div className='hidden md:flex items-center gap-2'>
                   {officeZones.map((zone) => (
                     <motion.button
@@ -1560,7 +1267,7 @@ export default function FrontdeskAgentsPage() {
               <div className='flex-1 flex flex-col lg:flex-row overflow-hidden'>
                 {/* Avatar Section */}
                 <div className='lg:w-[45%] p-6 md:p-10 flex flex-col items-center justify-center bg-gradient-to-b from-transparent via-slate/20 to-transparent'>
-                  <AIAvatar 
+                  <HumanAvatar 
                     agent={selectedAgent}
                     isSpeaking={isSpeaking}
                     isListening={isListening}
@@ -1606,10 +1313,7 @@ export default function FrontdeskAgentsPage() {
                       whileTap={{ scale: 0.9 }}
                     >
                       {isListening ? (
-                        <motion.div
-                          animate={{ scale: [1, 1.2, 1] }}
-                          transition={{ duration: 0.5, repeat: Infinity }}
-                        >
+                        <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 0.5, repeat: Infinity }}>
                           <MicOff className='w-6 h-6 text-white' />
                         </motion.div>
                       ) : (
@@ -1664,7 +1368,6 @@ export default function FrontdeskAgentsPage() {
                 
                 {/* Chat Section */}
                 <div className='lg:w-[55%] flex flex-col bg-gradient-to-b from-slate/30 via-midnightBlue/50 to-transparent border-t lg:border-t-0 lg:border-l border-white/10'>
-                  {/* Messages Area */}
                   <div className='flex-1 overflow-y-auto p-6 space-y-4 scrollbar-thin'>
                     {messages.length === 0 && (
                       <div className='text-center py-16'>
@@ -1689,7 +1392,6 @@ export default function FrontdeskAgentsPage() {
                     <div ref={messagesEndRef} />
                   </div>
                   
-                  {/* Input Area */}
                   <div className='p-5 border-t border-white/10 bg-gradient-to-t from-slate/30 to-transparent'>
                     <div className='flex gap-3'>
                       <input
@@ -1698,7 +1400,7 @@ export default function FrontdeskAgentsPage() {
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                        placeholder='Type your message or click a quick action below...'
+                        placeholder='Type your message...'
                         className='flex-1 bg-white/5 border border-white/10 rounded-xl px-5 py-3.5 text-white placeholder:text-white/30 focus:outline-none focus:border-gold/50 transition-colors text-sm'
                       />
                       <motion.button
@@ -1717,7 +1419,6 @@ export default function FrontdeskAgentsPage() {
                       </motion.button>
                     </div>
                     
-                    {/* Quick Actions */}
                     <div className='flex gap-2 mt-3 flex-wrap'>
                       {['Book Appointment', 'Office Hours', 'Location Info', 'Speak to Human'].map((action) => (
                         <motion.button
@@ -1791,7 +1492,7 @@ export default function FrontdeskAgentsPage() {
         </div>
       </motion.section>
       
-      {/* Footer */}
+      {/* Footer - Native Branding */}
       <footer className='relative py-12 px-4 md:px-8 border-t border-white/10'>
         <div className='max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6'>
           <div className='flex items-center gap-3'>

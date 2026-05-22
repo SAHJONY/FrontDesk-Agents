@@ -1,130 +1,348 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect, useRef, useMemo } from 'react'
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 import { 
   Mic, MicOff, MessageSquare, Phone, Globe, Calendar, 
   Users, Building2, Shield, Zap, ChevronRight, Play, 
   Pause, Volume2, Bot, Sparkles, Star, ArrowRight,
   CheckCircle2, AlertCircle, Loader2, Send, PhoneOff,
-  Maximize2, Minimize2
+  Maximize2, Minimize2, Video, Coffee, Clock, MapPin,
+  FileText, Headphones, Monitor, Wifi, Lock, Fingerprint,
+  VolumeX, PhoneIncoming, PhoneOutgoing, User, Settings,
+  ChevronDown, X, Plus, Minus, PlayCircle, PauseCircle,
+  Building, Briefcase, Heart, Home, Stethoscope, Scale,
+  Hotel, Store, GraduationCap,
+  ChevronLeft, Menu, Quote, Award, Clock3, Globe2,
+  Languages, MessageCircle, Headphones as SupportIcon, CircleDot
 } from 'lucide-react'
 import { clsx } from 'clsx'
 
-// Types
+// ==========================================
+// ULTIMATE HOLLYWOOD OFFICE ENVIRONMENT
+// The Most Advanced UI/UX Ever Built
+// ==========================================
+
+// Premium Color Palette
+const colors = {
+  deepNavy: '#050810',
+  midnightBlue: '#0a1220',
+  slate: '#141d2f',
+  steel: '#1c2942',
+  silver: '#8892a4',
+  gold: '#f0b429',
+  goldLight: '#ffd666',
+  goldDark: '#c4920a',
+  white: '#ffffff',
+  offWhite: '#f5f7fa',
+  cyan: '#00d4ff',
+  cyanLight: '#66e5ff',
+  cyanDark: '#0099cc',
+  red: '#ff4757',
+  redDark: '#c0392b',
+  green: '#26de81',
+  purple: '#a55eea',
+  orange: '#fd9644',
+  rose: '#ff6b9d'
+}
+
+// High-Quality Office Environment Images
+const officeImages = {
+  lobby: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920&q=95',
+  reception: 'https://images.unsplash.com/photo-1604328698692-f76ea9498e76?w=1920&q=95',
+  office1: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=1920&q=95',
+  office2: 'https://images.unsplash.com/photo-1486718448742-163732cd1544?w=1920&q=95',
+  desk: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1920&q=95',
+  lobby2: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1920&q=95',
+  modernOffice: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=1920&q=95',
+  corporateLounge: 'https://images.unsplash.com/photo-1605369263802-1e1b44cb2f7c?w=1920&q=95',
+}
+
+// Professional Receptionist Avatars
+const avatars = [
+  'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&q=90',
+  'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=800&q=90',
+  'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=800&q=90',
+  'https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?w=800&q=90',
+]
+
+// ==========================================
+// ADVANCED TYPES
+// ==========================================
 interface Message {
   id: string
   role: 'user' | 'agent' | 'system'
   content: string
   timestamp: Date
-  agentType?: 'greeting' | 'scheduling' | 'information' | 'escalation' | 'multilingual'
+  agentType?: string
 }
 
 interface Agent {
   id: string
   name: string
-  type: 'greeting' | 'scheduling' | 'information' | 'escalation' | 'multilingual'
-  status: 'online' | 'busy' | 'offline'
+  title: string
+  type: string
+  status: 'online' | 'busy' | 'away'
   avatar: string
-  capabilities: string[]
+  specialties: string[]
   languages: string[]
+  responseTime: string
+  color: string
 }
 
-interface Appointment {
+interface OfficeZone {
   id: string
-  clientName: string
-  service: string
-  dateTime: Date
-  status: 'confirmed' | 'pending' | 'completed'
+  name: string
+  description: string
+  image: string
+  ambiance: string
+  lighting: 'warm' | 'cool' | 'natural' | 'dramatic'
 }
 
-// AI Agents Configuration
-const agents: Agent[] = [
+// ==========================================
+// AI AGENTS CONFIGURATION
+// ==========================================
+const aiAgents: Agent[] = [
   {
-    id: 'agent-1',
-    name: 'ARIA - Primary Receptionist',
+    id: 'agent-aria',
+    name: 'ARIA',
+    title: 'Chief Reception Officer',
     type: 'greeting',
     status: 'online',
-    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&q=80',
-    capabilities: ['Warm Welcome', 'Company Overview', 'Visitor Management'],
-    languages: ['English', 'Spanish', 'French', 'Mandarin']
+    avatar: avatars[0],
+    specialties: ['First Impressions', 'VIP Treatment', 'Multilingual'],
+    languages: ['English', 'Spanish', 'French', 'Mandarin'],
+    responseTime: '< 1 sec',
+    color: '#f0b429'
   },
   {
-    id: 'agent-2',
-    name: 'CHRONOS - Scheduling Agent',
+    id: 'agent-chronos',
+    name: 'CHRONOS',
+    title: 'Scheduling Specialist',
     type: 'scheduling',
     status: 'online',
-    avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=800&q=80',
-    capabilities: ['Appointment Booking', 'Calendar Management', 'Reminders'],
-    languages: ['English', 'Spanish', 'German']
+    avatar: avatars[1],
+    specialties: ['Calendar Management', 'Appointment Optimization', 'Reminders'],
+    languages: ['English', 'German', 'Portuguese'],
+    responseTime: '< 2 sec',
+    color: '#00d4ff'
   },
   {
-    id: 'agent-3',
-    name: 'KNOWLEDGE - Info Agent',
+    id: 'agent-nova',
+    name: 'NOVA',
+    title: 'Information Analyst',
     type: 'information',
     status: 'online',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=800&q=80',
-    capabilities: ['FAQ Answers', 'Product Info', 'Directions', 'Policies'],
-    languages: ['English', 'Japanese', 'Korean']
+    avatar: avatars[2],
+    specialties: ['Knowledge Base', 'FAQ Expert', 'Directions'],
+    languages: ['English', 'Japanese', 'Korean'],
+    responseTime: '< 1 sec',
+    color: '#26de81'
   },
   {
-    id: 'agent-4',
-    name: 'ESCALATE - Human Handoff',
+    id: 'agent-atlas',
+    name: 'ATLAS',
+    title: 'Escalation Manager',
     type: 'escalation',
     status: 'online',
-    avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=800&q=80',
-    capabilities: ['Complex Issues', 'Complaints', 'Special Requests'],
-    languages: ['English', 'Arabic', 'Portuguese']
+    avatar: avatars[3],
+    specialties: ['Complex Cases', 'Crisis Management', 'Human Handoff'],
+    languages: ['English', 'Arabic', 'Hindi'],
+    responseTime: '< 3 sec',
+    color: '#a55eea'
   }
 ]
 
-// Industry Templates
+// Office Zones with Real Environments
+const officeZones: OfficeZone[] = [
+  { 
+    id: 'lobby', 
+    name: 'Grand Lobby', 
+    description: 'Elegant marble entrance with dramatic lighting',
+    image: officeImages.lobby,
+    ambiance: 'Professional & Welcoming', 
+    lighting: 'warm' 
+  },
+  { 
+    id: 'reception', 
+    name: 'Reception Area', 
+    description: 'Modern circular reception with ambient lighting',
+    image: officeImages.reception,
+    ambiance: 'Contemporary & Efficient', 
+    lighting: 'natural' 
+  },
+  { 
+    id: 'lounge', 
+    name: 'Executive Lounge', 
+    description: 'Premium visitor waiting area with city views',
+    image: officeImages.corporateLounge,
+    ambiance: 'Luxurious & Comfortable', 
+    lighting: 'dramatic' 
+  },
+  { 
+    id: 'office', 
+    name: 'Modern Office', 
+    description: 'State-of-the-art workspace environment',
+    image: officeImages.modernOffice,
+    ambiance: 'Innovative & Dynamic', 
+    lighting: 'cool' 
+  },
+]
+
+// Industries
 const industries = [
-  { id: 'healthcare', name: 'Healthcare & Medical', icon: '🏥', description: 'Patient intake, appointment scheduling, medical FAQs' },
-  { id: 'legal', name: 'Legal & Law Firms', icon: '⚖️', description: 'Client intake, case inquiries, consultation booking' },
-  { id: 'realestate', name: 'Real Estate', icon: '🏠', description: 'Property inquiries, showing scheduling, lead qualification' },
-  { id: 'hospitality', name: 'Hospitality & Hotels', icon: '🏨', description: 'Guest services, reservations, concierge support' },
-  { id: 'corporate', name: 'Corporate & Enterprise', icon: '🏢', description: 'Visitor management, employee services, meeting rooms' },
-  { id: 'retail', name: 'Retail & E-commerce', icon: '🛍️', description: 'Product info, order status, returns processing' },
-  { id: 'education', name: 'Education & Universities', icon: '🎓', description: 'Admissions, course info, student services' },
-  { id: 'government', name: 'Government & Public', icon: '🏛️', description: 'Service inquiries, appointment booking, information desk' }
+  { 
+    id: 'healthcare', 
+    name: 'Healthcare', 
+    icon: Stethoscope, 
+    description: 'Patient-first virtual reception with HIPAA compliance',
+    features: ['Appointment Scheduling', 'Patient Intake', 'Insurance Verification', 'Wait Time Updates'],
+    color: '#26de81'
+  },
+  { 
+    id: 'legal', 
+    name: 'Legal', 
+    icon: Scale, 
+    description: 'Professional client intake and case management',
+    features: ['Client Intake', 'Consultation Booking', 'Document Handling', 'Confidentiality'],
+    color: '#a55eea'
+  },
+  { 
+    id: 'realestate', 
+    name: 'Real Estate', 
+    icon: Home, 
+    description: 'Property showcase reception and lead capture',
+    features: ['Listing Information', 'Showing Scheduling', 'Lead Capture', 'Virtual Tours'],
+    color: '#fd9644'
+  },
+  { 
+    id: 'hospitality', 
+    name: 'Hospitality', 
+    icon: Hotel, 
+    description: 'Luxury guest services and concierge',
+    features: ['Reservation Management', 'Concierge Services', 'Room Service', 'Local Recommendations'],
+    color: '#00d4ff'
+  },
+  { 
+    id: 'corporate', 
+    name: 'Corporate', 
+    icon: Building2, 
+    description: 'Enterprise visitor management and security',
+    features: ['Security Check-in', 'Meeting Rooms', 'Employee Services', 'Visitor Notifications'],
+    color: '#f0b429'
+  },
+  { 
+    id: 'finance', 
+    name: 'Finance', 
+    icon: Briefcase, 
+    description: 'Secure financial services and appointments',
+    features: ['Account Inquiries', 'Appointment Scheduling', 'Document Sharing', 'Compliance'],
+    color: '#ff6b9d'
+  },
+  { 
+    id: 'retail', 
+    name: 'Retail', 
+    icon: Store, 
+    description: 'Customer service and shopping assistance',
+    features: ['Product Info', 'Inventory Check', 'Order Tracking', 'Returns'],
+    color: '#ff4757'
+  },
+  { 
+    id: 'government', 
+    name: 'Government', 
+    icon: Building, 
+    description: 'Citizen services and public information',
+    features: ['Service Navigation', 'Appointment Booking', 'Form Assistance', 'Language Support'],
+    color: '#8892a4'
+  },
 ]
 
-// AI Response Generator
+// ==========================================
+// ADVANCED AI RESPONSE ENGINE
+// ==========================================
 const generateAIResponse = (userMessage: string, agentType: string): string => {
-  const lowerMsg = userMessage.toLowerCase()
+  const msg = userMessage.toLowerCase()
   
-  if (lowerMsg.includes('appointment') || lowerMsg.includes('schedule') || lowerMsg.includes('book')) {
-    return 'I would be happy to help you schedule an appointment! Please let me know your preferred date and time, and I will check availability for you. What service are you looking to book today?'
-  }
-  if (lowerMsg.includes('hello') || lowerMsg.includes('hi') || lowerMsg.includes('hey')) {
-    return 'Welcome! I am ARIA, your AI receptionist. How may I assist you today? I can help with appointments, information about our services, or connect you with the right department.'
-  }
-  if (lowerMsg.includes('location') || lowerMsg.includes('address') || lowerMsg.includes('where')) {
-    return 'Our office is located at 1250 Innovation Drive, Suite 400. You can find us on the 4th floor of the West Tower. Would you like me to provide driving directions or public transit options?'
-  }
-  if (lowerMsg.includes('hour') || lowerMsg.includes('open') || lowerMsg.includes('close')) {
-    return 'Our business hours are Monday through Friday, 8:00 AM to 6:00 PM. For urgent matters outside these hours, our emergency line is available 24/7. How may I help you?'
-  }
-  if (lowerMsg.includes('price') || lowerMsg.includes('cost') || lowerMsg.includes('fee')) {
-    return 'Thank you for your inquiry about our pricing. Our services are customized based on your specific needs. Would you like me to schedule a consultation with our team to discuss a tailored package for you?'
+  if (msg.includes('appointment') || msg.includes('schedule') || msg.includes('book') || msg.includes('meeting')) {
+    return 'I would be delighted to help you schedule an appointment! Our system shows several optimal time slots available. Would you prefer morning or afternoon? I can also coordinate with your calendar to find the perfect time.'
   }
   
-  return `Thank you for your message. I am processing your request and will provide you with the most relevant information. Is there anything specific you would like to know more about regarding our services?`
+  if (msg.includes('hello') || msg.includes('hi') || msg.includes('hey') || msg.includes('good morning') || msg.includes('good afternoon')) {
+    return 'Good day! Welcome to our office. I am ARIA, your dedicated AI receptionist, here to ensure your experience is exceptional. How may I assist you today?'
+  }
+  
+  if (msg.includes('location') || msg.includes('address') || msg.includes('where') || msg.includes('directions') || msg.includes('find')) {
+    return 'Our office is located at 1250 Innovation Boulevard, Suite 400, in the prestigious West Tower building. We have secure underground parking and easy access via the Metro. Would you like me to send you turn-by-turn directions?'
+  }
+  
+  if (msg.includes('hour') || msg.includes('open') || msg.includes('close') || msg.includes('available') || msg.includes('time')) {
+    return 'Our business hours are Monday through Friday, 8:00 AM to 7:00 PM EST. For urgent matters outside these hours, our 24/7 virtual concierge is available. You can also schedule a callback at your convenience.'
+  }
+  
+  if (msg.includes('price') || msg.includes('cost') || msg.includes('fee') || msg.includes('quote') || msg.includes('pricing')) {
+    return 'Thank you for your inquiry about our services. We offer customized solutions tailored to your specific needs. May I schedule a complimentary consultation with our team to discuss the perfect package for you?'
+  }
+  
+  if (msg.includes('services') || msg.includes('what do you') || msg.includes('offer') || msg.includes('help')) {
+    return 'We offer a comprehensive suite of services: appointment scheduling, visitor registration, information retrieval, multilingual support, and seamless human handoff when needed. How may I direct your inquiry?'
+  }
+  
+  if (msg.includes('thank') || msg.includes('thanks')) {
+    return 'You are most welcome! It is my pleasure to assist you. Is there anything else I can help you with today? Your satisfaction is my priority.'
+  }
+  
+  if (msg.includes('bye') || msg.includes('goodbye') || msg.includes('take care') || msg.includes('later')) {
+    return 'Thank you for visiting! Have a wonderful day ahead. Please do not hesitate to reach out if you need anything further. We look forward to welcoming you again soon!'
+  }
+  
+  if (msg.includes('speak to') || msg.includes('human') || msg.includes('real person') || msg.includes('agent')) {
+    return 'I understand you would like to speak with a team member. I am connecting you with our guest services team who will be with you shortly. Please hold for just a moment.'
+  }
+  
+  return 'I understand your inquiry. Let me process that information and provide you with the most relevant assistance. Could you share more details so I can ensure I address your needs perfectly?'
 }
 
-// Particle Background Component
-const ParticleBackground = () => {
+// ==========================================
+// ADVANCED COMPONENTS
+// ==========================================
+
+// Ambient Particles System
+const AmbientParticles = () => {
+  const particles = useMemo(() => 
+    Array.from({ length: 80 }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 3 + 0.5,
+      duration: Math.random() * 30 + 20,
+      delay: Math.random() * 15,
+      color: Math.random() > 0.6 ? colors.gold : Math.random() > 0.3 ? colors.cyan : colors.silver
+    })), [])
+  
   return (
-    <div className='particles'>
-      {[...Array(50)].map((_, i) => (
-        <div
-          key={i}
-          className='particle'
+    <div className='fixed inset-0 pointer-events-none overflow-hidden z-[1]'>
+      {particles.map((particle) => (
+        <motion.div
+          key={particle.id}
+          className='absolute rounded-full'
           style={{
-            left: `${Math.random() * 100}%`,
-            animationDelay: `${Math.random() * 10}s`,
-            animationDuration: `${8 + Math.random() * 4}s`
+            left: `${particle.x}%`,
+            top: `${particle.y}%`,
+            width: particle.size,
+            height: particle.size,
+            background: particle.color,
+            boxShadow: `0 0 ${particle.size * 3}px ${particle.color}`
+          }}
+          animate={{
+            y: [-30, -300, -600],
+            opacity: [0, 0.6, 0],
+            scale: [1, 1.2, 0.8]
+          }}
+          transition={{
+            duration: particle.duration,
+            delay: particle.delay,
+            repeat: Infinity,
+            ease: 'linear'
           }}
         />
       ))}
@@ -132,532 +350,1235 @@ const ParticleBackground = () => {
   )
 }
 
-// Cinematic Loading Component
-const CinematicLoader = () => (
-  <motion.div 
-    className='fixed inset-0 z-50 flex items-center justify-center bg-deep-space'
-    initial={{ opacity: 1 }}
-    exit={{ opacity: 0 }}
-    transition={{ duration: 1 }}
-  >
-    <div className='text-center'>
-      <motion.div
-        className='relative w-32 h-32 mx-auto mb-8'
-        animate={{ rotate: 360 }}
-        transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-      >
-        <div className='absolute inset-0 rounded-full border-4 border-hollywood-gold/20' />
-        <div className='absolute inset-0 rounded-full border-4 border-transparent border-t-hollywood-gold' />
-        <div className='absolute inset-4 rounded-full border-4 border-transparent border-t-cinematic-red' />
-        <div className='absolute inset-8 rounded-full border-4 border-transparent border-t-aurora-cyan' />
-      </motion.div>
-      <motion.h2 
-        className='text-2xl font-display font-bold gold-gradient-text mb-2'
-        animate={{ opacity: [0.5, 1, 0.5] }}
-        transition={{ duration: 2, repeat: Infinity }}
-      >
-        INITIALIZING FRONTDESK AGENTS
-      </motion.h2>
-      <p className='text-soft-white/60 text-sm'>Loading Hollywood-grade AI Receptionist...</p>
-    </div>
-  </motion.div>
-)
-
-// Avatar Component
-const ReceptionistAvatar = ({ agent, isSpeaking, isListening }: { agent: Agent, isSpeaking: boolean, isListening: boolean }) => (
-  <motion.div 
-    className='relative avatar-container'
-    animate={{ 
-      scale: isSpeaking ? [1, 1.02, 1] : 1,
-      rotateY: isListening ? [0, 5, 0] : 0
-    }}
-    transition={{ duration: isSpeaking ? 0.5 : 2, repeat: isSpeaking ? Infinity : 0 }}
-  >
-    <div className={clsx(
-      'relative w-64 h-64 rounded-full overflow-hidden border-4',
-      'bg-gradient-to-br from-premium-navy to-midnight-blue',
-      isSpeaking ? 'border-hollywood-gold gold-glow' : 'border-aurora-cyan/50'
-    )}>
-      {/* Office Background */}
-      <div className='absolute inset-0 bg-gradient-to-b from-deep-space/80 to-midnight-blue/90' />
-      
-      {/* Avatar Image */}
-      <div className='absolute inset-0 flex items-center justify-center'>
-        <div className='relative w-full h-full'>
-          <img 
-            src={agent.avatar} 
-            alt={agent.name}
-            className='w-full h-full object-cover object-top'
-          />
-          {/* Overlay Effects */}
-          <div className='absolute inset-0 bg-gradient-to-t from-deep-space via-transparent to-transparent' />
-          <div className='absolute inset-0 bg-gradient-to-r from-cinematic-red/20 to-transparent' />
-        </div>
-      </div>
-
-      {/* Status Ring */}
-      <div className={clsx(
-        'absolute -bottom-2 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full',
-        'flex items-center gap-2 text-xs font-semibold',
-        agent.status === 'online' ? 'bg-aurora-cyan/20 text-aurora-cyan' : 'bg-gray-500/20 text-gray-400'
-      )}>
-        <span className={clsx('w-2 h-2 rounded-full', agent.status === 'online' ? 'bg-aurora-cyan status-online' : 'bg-gray-400')} />
-        {agent.status.toUpperCase()}
-      </div>
-    </div>
-
-    {/* Speaking Indicators */}
-    {isSpeaking && (
-      <div className='absolute -right-4 top-1/2 -translate-y-1/2 voice-wave'>
-        {[...Array(5)].map((_, i) => (
-          <motion.span 
-            key={i}
-            initial={{ scaleY: 0.5 }}
-            animate={{ scaleY: [0.5, 1, 0.5] }}
-            transition={{ duration: 0.5, repeat: Infinity, delay: i * 0.1 }}
-          />
-        ))}
-      </div>
-    )}
-
-    {/* Agent Name Badge */}
+// Dynamic Light Beams
+const LightBeams = () => (
+  <div className='fixed inset-0 pointer-events-none z-[1] overflow-hidden'>
     <motion.div 
-      className='absolute -bottom-12 left-1/2 -translate-x-1/2 text-center'
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-    >
-      <h3 className='font-display font-bold text-hollywood-gold'>{agent.name}</h3>
-      <p className='text-xs text-soft-white/60 capitalize'>{agent.type} Agent</p>
-    </motion.div>
-  </motion.div>
+      className='absolute top-0 left-[20%] w-[600px] h-full bg-gradient-to-b from-amber-500/15 via-orange-500/8 to-transparent'
+      style={{ transform: 'rotate(-12deg)', transformOrigin: 'top center' }}
+      animate={{ 
+        opacity: [0.4, 0.7, 0.4],
+        x: [0, 80, 0]
+      }}
+      transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+    />
+    <motion.div 
+      className='absolute top-0 right-[15%] w-[500px] h-full bg-gradient-to-b from-cyan-500/12 via-blue-500/6 to-transparent'
+      style={{ transform: 'rotate(10deg)', transformOrigin: 'top center' }}
+      animate={{ 
+        opacity: [0.3, 0.6, 0.3],
+        x: [0, -60, 0]
+      }}
+      transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut', delay: 3 }}
+    />
+    <motion.div 
+      className='absolute top-0 left-1/2 w-[400px] h-full bg-gradient-to-b from-purple-500/10 via-pink-500/5 to-transparent'
+      style={{ transform: 'translateX(-50%)', transformOrigin: 'top center' }}
+      animate={{ 
+        opacity: [0.2, 0.5, 0.2],
+        scale: [1, 1.1, 1]
+      }}
+      transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 6 }}
+    />
+  </div>
 )
 
-// Message Bubble Component
-const MessageBubble = ({ message }: { message: Message }) => {
-  const isAgent = message.role === 'agent'
-  const isSystem = message.role === 'system'
+// Office Environment Background with Parallax
+const OfficeBackground = ({ zone }: { zone: string }) => {
+  const [loaded, setLoaded] = useState(false)
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+  
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePos({
+        x: (e.clientX / window.innerWidth - 0.5) * 20,
+        y: (e.clientY / window.innerHeight - 0.5) * 20
+      })
+    }
+    window.addEventListener('mousemove', handleMouseMove)
+    return () => window.removeEventListener('mousemove', handleMouseMove)
+  }, [])
+  
+  const zoneData = officeZones.find(z => z.id === zone) || officeZones[0]
   
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.3 }}
-      className={clsx(
-        'flex gap-3 mb-4',
-        isAgent ? 'flex-row' : 'flex-row-reverse'
-      )}
-    >
-      {isAgent && (
-        <div className='w-10 h-10 rounded-full bg-gradient-to-br from-premium-navy to-midnight-blue flex-shrink-0 overflow-hidden border border-hollywood-gold/30'>
-          <img src={agents[0].avatar} alt='AI' className='w-full h-full object-cover' />
-        </div>
-      )}
+    <div className='absolute inset-0 z-0 overflow-hidden'>
+      {/* Base Gradient */}
+      <div className='absolute inset-0 bg-gradient-to-br from-deepNavy via-midnightBlue to-slate' />
       
-      <div className={clsx(
-        'max-w-[75%] px-4 py-3 rounded-2xl',
-        isSystem 
-          ? 'bg-gradient-to-r from-hollywood-gold/20 to-transparent border border-hollywood-gold/30 text-hollywood-gold text-sm'
-          : isAgent 
-            ? 'bg-premium-navy/80 backdrop-blur-sm border border-aurora-cyan/20 text-soft-white'
-            : 'bg-cinematic-red/90 backdrop-blur-sm text-white'
-      )}>
-        {isSystem && <Sparkles className='w-4 h-4 inline-block mr-2' />}
-        <p className='text-sm leading-relaxed'>{message.content}</p>
-        <p className='text-xs text-soft-white/40 mt-1'>{message.timestamp.toLocaleTimeString()}</p>
+      {/* Parallax Image Layer */}
+      <motion.div 
+        className='absolute inset-0 opacity-25'
+        animate={{
+          x: mousePos.x,
+          y: mousePos.y
+        }}
+        transition={{ type: 'spring', stiffness: 50, damping: 20 }}
+      >
+        <img 
+          src={zoneData.image}
+          alt='Office Environment'
+          className={clsx(
+            'w-full h-full object-cover transition-opacity duration-1000',
+            loaded ? 'opacity-25' : 'opacity-0'
+          )}
+          onLoad={() => setLoaded(true)}
+        />
+      </motion.div>
+      
+      {/* Multiple Gradient Overlays for Depth */}
+      <div className='absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-cyan-500/5' />
+      <div className='absolute inset-0 bg-gradient-to-bl from-purple-500/5 via-transparent to-transparent' />
+      <div className='absolute inset-0 bg-gradient-to-t from-deepNavy via-transparent to-transparent' />
+      
+      {/* Atmospheric Fog */}
+      <motion.div 
+        className='absolute inset-0'
+        animate={{ opacity: [0.3, 0.5, 0.3] }}
+        style={{ background: 'radial-gradient(ellipse at 50% 100%, rgba(30,40,60,0.8) 0%, transparent 70%)' }}
+        transition={{ duration: 8, repeat: Infinity }}
+      />
+      
+      {/* Vignette Effect */}
+      <div className='absolute inset-0' style={{ 
+        background: 'radial-gradient(ellipse at center, transparent 0%, rgba(5,8,16,0.3) 40%, rgba(5,8,16,0.8) 100%)' 
+      }} />
+      
+      {/* Subtle Grid Pattern */}
+      <div className='absolute inset-0 opacity-[0.03]' 
+           style={{ 
+             backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
+             backgroundSize: '100px 100px'
+           }} 
+      />
+    </div>
+  )
+}
+
+// Photorealistic AI Receptionist Avatar
+const AIAvatar = ({ agent, isSpeaking, isListening, size = 'large' }: { agent: Agent, isSpeaking: boolean, isListening: boolean, size?: 'small' | 'large' }) => {
+  const [hovered, setHovered] = useState(false)
+  const [loaded, setLoaded] = useState(false)
+  const [imgError, setImgError] = useState(false)
+  
+  const dimensions = size === 'large' ? { container: 'w-72 h-72 md:w-80 md:h-80', outer: '-inset-4' } : { container: 'w-24 h-24 md:w-28 md:h-28', outer: '-inset-2' }
+  
+  return (
+    <motion.div 
+      className='relative cursor-pointer'
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      animate={{ scale: isSpeaking ? [1, 1.02, 1] : 1 }}
+      transition={{ duration: 0.5, repeat: isSpeaking ? Infinity : 0 }}
+    >
+      {/* Outer Glow Ring */}
+      <motion.div 
+        className={clsx('absolute rounded-full', dimensions.outer)}
+        animate={{ 
+          boxShadow: isSpeaking 
+            ? `0 0 50px ${agent.color}, 0 0 100px ${agent.color}60, inset 0 0 50px ${agent.color}40`
+            : hovered 
+              ? `0 0 40px ${agent.color}80, 0 0 80px ${agent.color}40`
+              : `0 0 30px ${agent.color}30, 0 0 60px ${agent.color}10`
+        }}
+        transition={{ duration: 0.5 }}
+      />
+      
+      {/* Main Avatar Container */}
+      <div className={clsx('relative', dimensions.container)}>
+        {/* Rotating Outer Ring */}
+        <motion.div 
+          className='absolute inset-0 rounded-full'
+          style={{ border: `2px solid ${isSpeaking ? agent.color : colors.cyan}40` }}
+          animate={{ rotate: isSpeaking ? 360 : 0 }}
+          transition={{ duration: 20, repeat: isSpeaking ? Infinity : 0, ease: 'linear' }}
+        />
+        
+        {/* Inner Rings */}
+        <div className='absolute -inset-1 rounded-full border border-white/5 backdrop-blur-sm' />
+        <div className='absolute -inset-2 rounded-full border border-white/10 backdrop-blur-sm' />
+        
+        {/* Avatar Image Container */}
+        <div className='absolute inset-1 rounded-full overflow-hidden bg-gradient-to-br from-slate to-midnightBlue shadow-2xl'>
+          {/* Loading Skeleton */}
+          {!loaded && (
+            <div className='absolute inset-0 bg-gradient-to-br from-slate to-midnightBlue animate-pulse' />
+          )}
+          
+          {/* Avatar Image or Fallback */}
+          {!imgError ? (
+            <motion.img 
+              src={agent.avatar}
+              alt={agent.name}
+              className={clsx(
+                'w-full h-full object-cover object-top transition-all duration-700',
+                hovered && 'scale-105',
+                loaded ? 'opacity-100' : 'opacity-0'
+              )}
+              onLoad={() => setLoaded(true)}
+              onError={() => setImgError(true)}
+              style={{ filter: 'contrast(1.05) saturate(1.1) brightness(1.02)' }}
+            />
+          ) : (
+            <div className='w-full h-full flex items-center justify-center bg-gradient-to-br from-slate to-midnightBlue'>
+              <Bot className='w-1/3 h-1/3 text-gold' />
+            </div>
+          )}
+          
+          {/* Professional Lighting Overlay */}
+          <div className='absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-cyan-500/10 pointer-events-none' />
+          <div className='absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-white/10 pointer-events-none' />
+          
+          {/* Reflection Effect */}
+          <div className='absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-slate/60 to-transparent pointer-events-none' />
+        </div>
+        
+        {/* Status Badge */}
+        <motion.div 
+          className={clsx(
+            'absolute -bottom-1 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full backdrop-blur-md border',
+            agent.status === 'online' ? 'bg-green-500/25 border-green-500/60' :
+            agent.status === 'busy' ? 'bg-amber-500/25 border-amber-500/60' :
+            'bg-slate/25 border-slate/60'
+          )}
+          animate={{ scale: [1, 1.05, 1] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          <div className='flex items-center gap-1.5'>
+            <motion.span 
+              className={clsx(
+                'w-1.5 h-1.5 rounded-full',
+                agent.status === 'online' ? 'bg-green-400' :
+                agent.status === 'busy' ? 'bg-amber-400' : 'bg-slate-400'
+              )}
+              animate={{ opacity: [1, 0.4, 1] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+            />
+            <span className='text-[10px] font-semibold text-white/90 uppercase tracking-wider'>
+              {agent.status}
+            </span>
+          </div>
+        </motion.div>
       </div>
       
-      {!isAgent && !isSystem && (
-        <div className='w-10 h-10 rounded-full bg-gradient-to-br from-cinematic-red to-neon-purple flex-shrink-0 flex items-center justify-center'>
-          <User className='w-5 h-5 text-white' />
+      {/* Voice Wave Visualization */}
+      {isSpeaking && (
+        <div className='absolute -right-10 md:-right-14 top-1/2 -translate-y-1/2 flex items-center gap-0.5 h-12 md:h-16'>
+          {[...Array(14)].map((_, i) => (
+            <motion.div
+              key={i}
+              className='w-1 rounded-full'
+              style={{ 
+                background: `linear-gradient(to top, ${agent.color}, ${colors.white})`
+              }}
+              initial={{ height: 4 }}
+              animate={{ 
+                height: [4, Math.random() * 48 + 24, 4],
+              }}
+              transition={{
+                duration: 0.6,
+                repeat: Infinity,
+                delay: i * 0.04,
+                ease: 'easeInOut'
+              }}
+            />
+          ))}
         </div>
       )}
+      
+      {/* Listening Pulse Rings */}
+      {isListening && (
+        <>
+          <motion.div 
+            className='absolute inset-0 rounded-full border-2'
+            style={{ borderColor: `${agent.color}80` }}
+            animate={{ scale: [1, 1.15, 1], opacity: [1, 0, 1] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          />
+          <motion.div 
+            className='absolute inset-0 rounded-full border'
+            style={{ borderColor: `${agent.color}40` }}
+            animate={{ scale: [1, 1.3, 1], opacity: [1, 0, 1] }}
+            transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+          />
+        </>
+      )}
+      
+      {/* Agent Name Label */}
+      <motion.div 
+        className='absolute -bottom-14 left-1/2 -translate-x-1/2 text-center whitespace-nowrap'
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <h3 className='text-lg font-bold text-white tracking-wide' style={{ textShadow: `0 0 20px ${agent.color}60` }}>{agent.name}</h3>
+        <p className='text-xs font-medium' style={{ color: agent.color }}>{agent.title}</p>
+      </motion.div>
     </motion.div>
   )
 }
 
-// User Icon for message
-const User = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
-    <path d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2' />
-    <circle cx='12' cy='7' r='4' />
-  </svg>
+// Premium Chat Bubble
+const PremiumBubble = ({ message, isAgent, agentColor = colors.gold }: { message: Message, isAgent: boolean, agentColor?: string }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20, scale: 0.95 }}
+    animate={{ opacity: 1, y: 0, scale: 1 }}
+    transition={{ duration: 0.4, type: 'spring', stiffness: 100 }}
+    className={clsx('flex gap-3 mb-4', isAgent ? 'flex-row' : 'flex-row-reverse')}
+  >
+    {/* Avatar */}
+    {isAgent && (
+      <div className='w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border-2 shadow-lg' style={{ borderColor: `${agentColor}60` }}>
+        <img src={aiAgents[0].avatar} alt='AI' className='w-full h-full object-cover' />
+      </div>
+    )}
+    
+    {/* Message Bubble */}
+    <div className={clsx(
+      'max-w-[85%] px-5 py-3.5 rounded-2xl backdrop-blur-xl',
+      isAgent 
+        ? 'bg-gradient-to-br from-slate/90 to-midnightBlue/90 border border-white/10 rounded-tl-md' 
+        : 'bg-gradient-to-br from-gold/95 to-goldDark/95 border border-gold/30 rounded-tr-md shadow-lg'
+    )}>
+      <p className='text-sm leading-relaxed text-white'>{message.content}</p>
+      <div className='flex items-center gap-2 mt-2'>
+        <span className='text-xs text-white/50'>
+          {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        </span>
+        {isAgent && message.agentType && (
+          <span className='px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 text-xs font-medium'>
+            {message.agentType}
+          </span>
+        )}
+      </div>
+    </div>
+    
+    {/* User Icon */}
+    {!isAgent && (
+      <div className='w-10 h-10 rounded-full bg-gradient-to-br from-gold to-goldDark flex-shrink-0 flex items-center justify-center shadow-lg border-2 border-gold/50'>
+        <User className='w-5 h-5 text-deepNavy' />
+      </div>
+    )}
+  </motion.div>
 )
 
-// Main Page Component
+// Glass Morphism Card
+const GlassCard = ({ children, className, delay = 0, glowColor = colors.gold }: { children: React.ReactNode, className?: string, delay?: number, glowColor?: string }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 40 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.7, delay }}
+    className={clsx('relative group', className)}
+  >
+    {/* Glow Effect */}
+    <div 
+      className='absolute -inset-0.5 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-700'
+      style={{ background: `linear-gradient(135deg, ${glowColor}30, ${colors.cyan}30, ${colors.purple}30)` }}
+    />
+    
+    {/* Card */}
+    <div className='relative bg-gradient-to-br from-white/8 to-white/4 backdrop-blur-xl rounded-2xl border border-white/10 p-6 md:p-8 overflow-hidden'>
+      {/* Glass Reflection Line */}
+      <div className='absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent' />
+      
+      {/* Corner Accent */}
+      <div 
+        className='absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-20'
+        style={{ background: `radial-gradient(circle, ${glowColor}40, transparent)` }}
+      />
+      
+      {children}
+    </div>
+  </motion.div>
+)
+
+// Cinematic Loading Screen
+const CinematicLoader = () => (
+  <motion.div 
+    className='fixed inset-0 z-[100] flex items-center justify-center bg-deepNavy overflow-hidden'
+    initial={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    transition={{ duration: 1.5, ease: 'easeInOut' }}
+  >
+    {/* Animated Background */}
+    <div className='absolute inset-0'>
+      <div className='absolute inset-0 bg-gradient-to-br from-midnightBlue via-slate to-deepNavy' />
+      <motion.div 
+        className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px]'
+        style={{ background: 'radial-gradient(circle, rgba(240,180,41,0.15) 0%, transparent 60%)' }}
+        animate={{ scale: [0.7, 1.3, 0.7], opacity: [0.4, 0.7, 0.4] }}
+        transition={{ duration: 5, repeat: Infinity }}
+      />
+      <motion.div 
+        className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px]'
+        style={{ background: 'radial-gradient(circle, rgba(0,212,255,0.1) 0%, transparent 60%)' }}
+        animate={{ scale: [1, 0.8, 1], opacity: [0.3, 0.6, 0.3] }}
+        transition={{ duration: 4, repeat: Infinity, delay: 1 }}
+      />
+    </div>
+    
+    {/* Logo Animation */}
+    <div className='text-center z-10'>
+      <motion.div className='relative w-40 h-40 mx-auto mb-10'>
+        {/* Spinning Orbit Rings */}
+        <motion.div 
+          className='absolute inset-0 rounded-full border border-gold/40'
+          animate={{ rotate: 360 }}
+          transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
+        />
+        <motion.div 
+          className='absolute inset-3 rounded-full border border-cyan-500/30'
+          animate={{ rotate: -360 }}
+          transition={{ duration: 7, repeat: Infinity, ease: 'linear' }}
+        />
+        <motion.div 
+          className='absolute inset-6 rounded-full border border-purple-500/30'
+          animate={{ rotate: 360 }}
+          transition={{ duration: 5, repeat: Infinity, ease: 'linear' }}
+        />
+        <motion.div 
+          className='absolute inset-9 rounded-full border border-pink-500/20'
+          animate={{ rotate: -360 }}
+          transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+        />
+        
+        {/* Center Icon */}
+        <div className='absolute inset-0 flex items-center justify-center'>
+          <motion.div
+            animate={{ scale: [1, 1.1, 1] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <Bot className='w-16 h-16 text-gold drop-shadow-lg' />
+          </motion.div>
+        </div>
+      </motion.div>
+      
+      {/* Loading Text */}
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
+        <motion.h2 
+          className='text-3xl font-bold text-white mb-3 tracking-[0.3em]'
+          animate={{ opacity: [0.4, 1, 0.4] }}
+          transition={{ duration: 2.5, repeat: Infinity }}
+        >
+          INITIALIZING
+        </motion.h2>
+        <p className='text-gold text-xl font-bold tracking-[0.4em]'>FRONTDESK AGENTS</p>
+      </motion.div>
+      
+      {/* Progress Bar */}
+      <motion.div 
+        className='w-80 h-1 bg-white/10 rounded-full mt-10 mx-auto overflow-hidden'
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1 }}
+      >
+        <motion.div 
+          className='h-full bg-gradient-to-r from-gold via-cyan to-gold'
+          animate={{ 
+            width: ['0%', '100%'],
+          }}
+          transition={{ duration: 2.5, delay: 0.5, ease: 'easeInOut' }}
+        />
+      </motion.div>
+      
+      {/* Loading Dots */}
+      <div className='flex justify-center gap-2 mt-6'>
+        {[0, 1, 2].map((i) => (
+          <motion.div
+            key={i}
+            className='w-2 h-2 rounded-full bg-gold'
+            animate={{ y: [0, -10, 0], opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.15 }}
+          />
+        ))}
+      </div>
+    </div>
+  </motion.div>
+)
+
+// ==========================================
+// MAIN PAGE COMPONENT
+// ==========================================
 export default function FrontdeskAgentsPage() {
   const [isLoading, setIsLoading] = useState(true)
-  const [currentView, setCurrentView] = useState<'hero' | 'demo' | 'features' | 'industries'>('hero')
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 'welcome',
-      role: 'agent',
-      content: 'Welcome to FRONTDESK AGENTS! I am ARIA, your AI receptionist. I am here to assist you with appointments, information, and connecting you to the right services. How may I help you today?',
-      timestamp: new Date(),
-      agentType: 'greeting'
-    }
-  ])
+  const [messages, setMessages] = useState<Message[]>([])
   const [inputValue, setInputValue] = useState('')
   const [isListening, setIsListening] = useState(false)
   const [isSpeaking, setIsSpeaking] = useState(false)
-  const [selectedAgent, setSelectedAgent] = useState<Agent>(agents[0])
-  const [isDemoMode, setIsDemoMode] = useState(false)
-  const [activeIndustry, setActiveIndustry] = useState<string | null>(null)
+  const [selectedAgent, setSelectedAgent] = useState<Agent>(aiAgents[0])
+  const [isDemoOpen, setIsDemoOpen] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [selectedZone, setSelectedZone] = useState('lobby')
+  const [showWelcome, setShowWelcome] = useState(true)
+  const [currentView, setCurrentView] = useState<'hero' | 'features' | 'industries' | 'pricing'>('hero')
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-
+  const heroRef = useRef<HTMLDivElement>(null)
+  
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ['start start', 'end start']
+  })
+  
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0])
+  const heroScale = useTransform(scrollYProgress, [0, 0.8], [1, 0.95])
+  const heroY = useTransform(scrollYProgress, [0, 0.8], [0, -100])
+  
+  // Loading Sequence
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 3000)
+    const timer = setTimeout(() => setIsLoading(false), 4500)
     return () => clearTimeout(timer)
   }, [])
-
+  
+  // Auto-scroll messages
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
   }, [messages])
-
+  
+  // Welcome Message
+  useEffect(() => {
+    if (!isLoading && showWelcome) {
+      setTimeout(() => {
+        setMessages([{
+          id: 'welcome-' + Date.now(),
+          role: 'agent',
+          content: 'Welcome to the future of office reception. I am ARIA, your AI-powered virtual concierge. How may I assist you today?',
+          timestamp: new Date(),
+          agentType: 'ARIA'
+        }])
+        setShowWelcome(false)
+      }, 800)
+    }
+  }, [isLoading, showWelcome])
+  
+  // Send Message Handler
   const handleSendMessage = () => {
     if (!inputValue.trim()) return
     
-    const userMessage: Message = {
-      id: `user-${Date.now()}`,
+    const userMsg: Message = {
+      id: 'user-' + Date.now(),
       role: 'user',
       content: inputValue,
       timestamp: new Date()
     }
     
-    setMessages(prev => [...prev, userMessage])
+    setMessages(prev => [...prev, userMsg])
+    const currentInput = inputValue
     setInputValue('')
-    
-    // Simulate AI thinking
     setIsSpeaking(true)
+    
+    // AI Response with typing delay
     setTimeout(() => {
-      const agentMessage: Message = {
-        id: `agent-${Date.now()}`,
+      const agentMsg: Message = {
+        id: 'agent-' + Date.now(),
         role: 'agent',
-        content: generateAIResponse(inputValue, selectedAgent.type),
+        content: generateAIResponse(currentInput, selectedAgent.type),
         timestamp: new Date(),
-        agentType: selectedAgent.type
+        agentType: selectedAgent.name
       }
-      setMessages(prev => [...prev, agentMessage])
+      setMessages(prev => [...prev, agentMsg])
       setIsSpeaking(false)
-    }, 1500)
+    }, 1000 + Math.random() * 1000)
   }
-
+  
+  // Voice Toggle Handler
   const handleVoiceToggle = () => {
     setIsListening(!isListening)
     if (!isListening) {
       // Simulate voice input
       setTimeout(() => {
         setIsListening(false)
-        const voiceMessage: Message = {
-          id: `user-${Date.now()}`,
+        const voiceMsg: Message = {
+          id: 'voice-' + Date.now(),
           role: 'user',
-          content: 'I would like to schedule an appointment for tomorrow at 2 PM.',
+          content: 'I need to schedule an appointment for tomorrow at 2 PM with Dr. Johnson.',
           timestamp: new Date()
         }
-        setMessages(prev => [...prev, voiceMessage])
-      }, 3000)
+        setMessages(prev => [...prev, voiceMsg])
+      }, 3500)
     }
   }
-
+  
+  // Quick Action Handler
+  const handleQuickAction = (action: string) => {
+    setInputValue(action)
+    inputRef.current?.focus()
+  }
+  
   if (isLoading) {
     return <CinematicLoader />
   }
-
+  
   return (
-    <main className='min-h-screen bg-deep-space relative overflow-hidden'>
-      {/* Particle Background */}
-      <ParticleBackground />
+    <div className='min-h-screen bg-deepNavy text-white overflow-x-hidden relative'>
+      {/* Background Effects */}
+      <OfficeBackground zone={selectedZone} />
+      <AmbientParticles />
+      <LightBeams />
       
-      {/* Cinematic Background Elements */}
-      <div className='absolute inset-0 overflow-hidden pointer-events-none'>
-        {/* Gradient Orbs */}
-        <motion.div 
-          className='absolute top-0 left-1/4 w-96 h-96 bg-cinematic-red/10 rounded-full blur-3xl'
-          animate={{ 
-            x: [0, 50, 0],
-            y: [0, 30, 0],
-            scale: [1, 1.1, 1]
-          }}
-          transition={{ duration: 10, repeat: Infinity }}
-        />
-        <motion.div 
-          className='absolute bottom-0 right-1/4 w-96 h-96 bg-aurora-cyan/10 rounded-full blur-3xl'
-          animate={{ 
-            x: [0, -50, 0],
-            y: [0, -30, 0],
-            scale: [1, 1.2, 1]
-          }}
-          transition={{ duration: 12, repeat: Infinity }}
-        />
-        <motion.div 
-          className='absolute top-1/2 right-0 w-64 h-64 bg-hollywood-gold/10 rounded-full blur-3xl'
-          animate={{ 
-            x: [0, -30, 0],
-            scale: [1, 1.15, 1]
-          }}
-          transition={{ duration: 8, repeat: Infinity }}
-        />
-        
-        {/* Grid Lines */}
-        <div className='absolute inset-0' style={{
-          backgroundImage: `linear-gradient(rgba(255,215,0,0.03) 1px, transparent 1px),
-                           linear-gradient(90deg, rgba(255,215,0,0.03) 1px, transparent 1px)`,
-          backgroundSize: '100px 100px'
-        }} />
-      </div>
-
       {/* Navigation */}
-      <nav className='relative z-50 flex items-center justify-between px-8 py-4'>
-        <motion.div 
-          className='flex items-center gap-3'
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-        >
-          <div className='w-12 h-12 rounded-xl bg-gradient-to-br from-cinematic-red to-neon-purple flex items-center justify-center hollywood-glow'>
-            <Bot className='w-7 h-7 text-white' />
-          </div>
-          <div>
-            <h1 className='font-display font-bold text-xl text-white'>FRONTDESK</h1>
-            <p className='text-xs text-hollywood-gold font-semibold tracking-wider'>AGENTS</p>
-          </div>
-        </motion.div>
-
-        <motion.div 
-          className='flex items-center gap-6'
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-        >
-          <button 
-            onClick={() => setCurrentView('features')}
-            className='text-soft-white/80 hover:text-hollywood-gold transition-colors text-sm font-medium'
-          >
-            Features
-          </button>
-          <button 
-            onClick={() => setCurrentView('industries')}
-            className='text-soft-white/80 hover:text-hollywood-gold transition-colors text-sm font-medium'
-          >
-            Industries
-          </button>
-          <button 
-            onClick={() => setIsDemoMode(!isDemoMode)}
-            className={clsx(
-              'px-6 py-2 rounded-lg font-semibold text-sm transition-all',
-              isDemoMode 
-                ? 'bg-hollywood-gold text-deep-space' 
-                : 'bg-cinematic-red text-white hover:bg-cinematic-red/80'
-            )}
-          >
-            {isDemoMode ? 'Exit Demo' : 'Try Demo'}
-          </button>
-        </motion.div>
-      </nav>
-
-      {/* Main Content */}
-      <div className='relative z-10 container mx-auto px-4 py-8'>
-        
-        {/* Hero Section */}
-        {currentView === 'hero' && (
+      <motion.nav 
+        className='fixed top-0 left-0 right-0 z-50 px-4 md:px-8 py-4'
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.3, duration: 0.8 }}
+      >
+        <div className='max-w-7xl mx-auto flex items-center justify-between'>
+          {/* Logo */}
           <motion.div 
-            className='text-center py-20'
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1 }}
+            className='flex items-center gap-3 cursor-pointer'
+            whileHover={{ scale: 1.02 }}
+            onClick={() => setCurrentView('hero')}
           >
+            <div className='relative'>
+              <div 
+                className='w-12 h-12 rounded-xl bg-gradient-to-br from-gold to-goldDark flex items-center justify-center shadow-lg'
+                style={{ boxShadow: `0 8px 32px ${colors.gold}40` }}
+              >
+                <Bot className='w-6 h-6 text-deepNavy' />
+              </div>
+              <motion.div 
+                className='absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-green-400 rounded-full border-[2px] border-deepNavy'
+                animate={{ opacity: [1, 0.5, 1], scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+            </div>
+            <div>
+              <h1 className='text-xl font-bold tracking-wide text-white'>FRONTDESK</h1>
+              <p className='text-xs font-bold tracking-[0.3em] text-gold'>AGENTS</p>
+            </div>
+          </motion.div>
+          
+          {/* Desktop Navigation */}
+          <div className='hidden md:flex items-center gap-2'>
+            {[
+              { id: 'features', label: 'Features', icon: Zap },
+              { id: 'industries', label: 'Industries', icon: Building2 },
+              { id: 'pricing', label: 'Pricing', icon: Calendar },
+            ].map((item) => (
+              <motion.button
+                key={item.id}
+                onClick={() => setCurrentView(item.id as any)}
+                className={clsx(
+                  'px-5 py-2.5 rounded-xl font-medium text-sm transition-all flex items-center gap-2 backdrop-blur-sm',
+                  currentView === item.id 
+                    ? 'bg-gold/20 text-gold border border-gold/30 shadow-lg' 
+                    : 'text-white/70 hover:text-white hover:bg-white/5 border border-transparent'
+                )}
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <item.icon className='w-4 h-4' />
+                {item.label}
+              </motion.button>
+            ))}
+          </div>
+          
+          {/* CTA Button */}
+          <motion.button
+            onClick={() => setIsDemoOpen(true)}
+            className='px-6 py-2.5 rounded-xl bg-gradient-to-r from-gold to-goldDark text-deepNavy font-bold text-sm flex items-center gap-2 shadow-lg'
+            style={{ boxShadow: `0 8px 32px ${colors.gold}40` }}
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Play className='w-4 h-4' />
+            Try Demo
+          </motion.button>
+          
+          {/* Mobile Menu Button */}
+          <motion.button
+            className='md:hidden p-2 rounded-xl bg-white/5'
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            whileTap={{ scale: 0.9 }}
+          >
+            <Menu className='w-6 h-6 text-white' />
+          </motion.button>
+        </div>
+        
+        {/* Mobile Menu */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-            >
-              <span className='inline-block px-4 py-2 rounded-full bg-hollywood-gold/10 text-hollywood-gold text-sm font-semibold mb-6 border border-hollywood-gold/20'>
-                ✨ WORLD'S MOST ADVANCED AI RECEPTIONIST
-              </span>
-            </motion.div>
-            
-            <motion.h1 
-              className='font-display text-6xl md:text-8xl font-bold mb-6 leading-tight'
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-            >
-              <span className='gold-gradient-text'>FRONTDESK</span>
-              <br />
-              <span className='text-white'>AGENTS</span>
-            </motion.h1>
-            
-            <motion.p 
-              className='text-xl md:text-2xl text-soft-white/70 mb-8 max-w-3xl mx-auto'
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
-            >
-              Hollywood-grade AI receptionist with 8K cinematic visuals, 
-              multi-language support, and universal industry compatibility.
-            </motion.p>
-            
-            <motion.div 
-              className='flex flex-wrap justify-center gap-4 mb-12'
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.8 }}
-            >
-              <button 
-                onClick={() => setIsDemoMode(true)}
-                className='cinematic-btn flex items-center gap-2'
-              >
-                <Play className='w-5 h-5' />
-                Experience Demo
-              </button>
-              <button 
-                onClick={() => setCurrentView('features')}
-                className='px-6 py-3 rounded-lg border-2 border-hollywood-gold/30 text-hollywood-gold font-semibold hover:bg-hollywood-gold/10 transition-all flex items-center gap-2'
-              >
-                <Star className='w-5 h-5' />
-                Explore Features
-              </button>
-            </motion.div>
-
-            {/* Stats */}
-            <motion.div 
-              className='grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto'
-              initial={{ opacity: 0, y: 60 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 1 }}
+              exit={{ opacity: 0, y: -20 }}
+              className='md:hidden mt-4 p-4 rounded-2xl bg-slate/90 backdrop-blur-xl border border-white/10'
             >
               {[
-                { value: '50+', label: 'Languages' },
-                { value: '8K', label: 'Video Quality' },
-                { value: '99.9%', label: 'Uptime' },
-                { value: '100+', label: 'Industries' }
-              ].map((stat, i) => (
-                <div key={i} className='text-center'>
-                  <p className='text-4xl font-bold text-hollywood-gold mb-2'>{stat.value}</p>
-                  <p className='text-soft-white/60 text-sm'>{stat.label}</p>
-                </div>
+                { id: 'features', label: 'Features', icon: Zap },
+                { id: 'industries', label: 'Industries', icon: Building2 },
+                { id: 'pricing', label: 'Pricing', icon: Calendar },
+              ].map((item) => (
+                <motion.button
+                  key={item.id}
+                  onClick={() => { setCurrentView(item.id as any); setMobileMenuOpen(false) }}
+                  className='w-full px-4 py-3 rounded-xl font-medium text-sm flex items-center gap-3 text-white/70 hover:text-white hover:bg-white/5 transition-colors'
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <item.icon className='w-5 h-5' />
+                  {item.label}
+                </motion.button>
               ))}
             </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.nav>
+      
+      {/* Hero Section */}
+      <motion.section 
+        ref={heroRef}
+        className='relative min-h-screen flex flex-col items-center justify-center px-4 md:px-8 pt-24 pb-16'
+        style={{ opacity: heroOpacity, y: heroY }}
+      >
+        <div className='text-center max-w-6xl mx-auto relative z-10'>
+          {/* Premium Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className='inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gold/10 border border-gold/30 mb-8 shadow-lg'
+          >
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+            >
+              <Star className='w-5 h-5 text-gold' />
+            </motion.div>
+            <span className='text-gold text-sm font-semibold tracking-wide'>World's Most Advanced AI Receptionist</span>
           </motion.div>
-        )}
-
-        {/* Demo Section */}
-        {isDemoMode && (
-          <motion.div 
-            className={clsx(
-              'fixed inset-0 z-50 bg-deep-space p-4 md:p-8',
-              isFullscreen && 'inset-0'
-            )}
+          
+          {/* Main Headline */}
+          <motion.h1
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className='text-5xl md:text-7xl lg:text-[5rem] font-bold mb-8 leading-[1.1] tracking-tight'
+          >
+            <span className='bg-gradient-to-r from-white via-offWhite to-silver bg-clip-text text-transparent'>
+              THE FUTURE OF
+            </span>
+            <br />
+            <span className='bg-gradient-to-r from-gold via-goldLight to-gold bg-clip-text text-transparent' style={{ textShadow: `0 0 60px ${colors.gold}40` }}>
+              OFFICE RECEPTION
+            </span>
+          </motion.h1>
+          
+          {/* Subtitle */}
+          <motion.p
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+            className='text-lg md:text-xl text-silver max-w-3xl mx-auto mb-12 leading-relaxed'
+          >
+            Experience the world's most sophisticated AI-powered virtual receptionist. 
+            Photorealistic avatars, hyper-realistic office environments, and human-like 
+            conversations that transform how businesses greet their visitors.
+          </motion.p>
+          
+          {/* CTA Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.9 }}
+            className='flex flex-wrap justify-center gap-4 mb-20'
+          >
+            <motion.button
+              onClick={() => setIsDemoOpen(true)}
+              className='px-10 py-5 rounded-2xl bg-gradient-to-r from-gold to-goldDark text-deepNavy font-bold text-lg flex items-center gap-3 shadow-2xl'
+              style={{ boxShadow: `0 20px 60px ${colors.gold}40` }}
+              whileHover={{ scale: 1.05, y: -3 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <PlayCircle className='w-7 h-7' />
+              Experience the Demo
+            </motion.button>
+            
+            <motion.button
+              onClick={() => setCurrentView('features')}
+              className='px-10 py-5 rounded-2xl bg-white/5 border border-white/20 text-white font-semibold text-lg flex items-center gap-3 backdrop-blur-sm'
+              whileHover={{ scale: 1.05, y: -3, backgroundColor: 'rgba(255,255,255,0.1)' }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Sparkles className='w-7 h-7' />
+              Explore Features
+            </motion.button>
+          </motion.div>
+          
+          {/* Stats Grid */}
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.1 }}
+            className='grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-w-5xl mx-auto'
+          >
+            {[
+              { value: '50+', label: 'Languages', icon: Languages, color: colors.cyan },
+              { value: '8K', label: 'Video Quality', icon: Video, color: colors.gold },
+              { value: '99.9%', label: 'Accuracy', icon: Zap, color: colors.green },
+              { value: '24/7', label: 'Availability', icon: Clock3, color: colors.purple },
+            ].map((stat, i) => (
+              <motion.div
+                key={i}
+                className='text-center p-5 md:p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm'
+                whileHover={{ scale: 1.05, y: -5, borderColor: `${stat.color}40` }}
+              >
+                <stat.icon className='w-7 h-7 mx-auto mb-3' style={{ color: stat.color }} />
+                <p className='text-3xl md:text-4xl font-bold text-white mb-1'>{stat.value}</p>
+                <p className='text-sm text-silver'>{stat.label}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+        
+        {/* Scroll Indicator */}
+        <motion.div
+          className='absolute bottom-10 left-1/2 -translate-x-1/2'
+          animate={{ y: [0, 15, 0] }}
+          transition={{ duration: 2.5, repeat: Infinity }}
+        >
+          <div className='flex flex-col items-center gap-2'>
+            <span className='text-xs text-white/40 tracking-widest'>SCROLL</span>
+            <ChevronDown className='w-6 h-6 text-white/50' />
+          </div>
+        </motion.div>
+      </motion.section>
+      
+      {/* Features Section */}
+      {currentView === 'features' && (
+        <motion.section 
+          className='relative py-32 px-4 md:px-8'
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <div className='max-w-7xl mx-auto'>
+            {/* Section Header */}
+            <div className='text-center mb-20'>
+              <motion.span 
+                className='text-gold text-sm font-bold tracking-[0.3em] uppercase'
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+              >
+                Revolutionary Technology
+              </motion.span>
+              <motion.h2 
+                className='text-4xl md:text-6xl font-bold text-white mt-6 mb-6'
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+              >
+                Hollywood-Grade Experience
+              </motion.h2>
+              <motion.p 
+                className='text-silver text-lg md:text-xl max-w-2xl mx-auto'
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                Every pixel, every animation, every interaction designed to perfection
+              </motion.p>
+            </div>
+            
+            {/* Feature Cards */}
+            <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-6'>
+              {[
+                { icon: Bot, title: 'AI Agents', desc: 'Multi-agent AI system with specialized roles working in coordination', color: colors.gold, delay: 0 },
+                { icon: Languages, title: '50+ Languages', desc: 'Fluent multilingual support breaking language barriers worldwide', color: colors.cyan, delay: 0.1 },
+                { icon: Calendar, title: 'Smart Scheduling', desc: 'AI-powered appointment optimization and calendar management', color: colors.green, delay: 0.2 },
+                { icon: Shield, title: 'Enterprise Security', desc: 'Bank-grade encryption and compliance with global standards', color: colors.purple, delay: 0.3 },
+                { icon: Zap, title: 'Instant Response', desc: 'Sub-second intelligent responses with human-like accuracy', color: colors.orange, delay: 0.4 },
+                { icon: Users, title: 'Seamless Handoff', desc: 'Smooth escalation to human agents when complexity requires it', color: colors.rose, delay: 0.5 },
+                { icon: Globe2, title: 'Universal Industry', desc: 'Adaptable to any business type from healthcare to government', color: colors.gold, delay: 0.6 },
+                { icon: MessageCircle, title: 'Voice & Text', desc: 'Natural voice conversations and text chat in one interface', color: colors.cyan, delay: 0.7 },
+                { icon: SupportIcon, title: '24/7 Support', desc: 'Round-the-clock availability for global operations', color: colors.green, delay: 0.8 },
+              ].map((feature, i) => (
+                <GlassCard key={i} delay={feature.delay} glowColor={feature.color}>
+                  <div 
+                    className='w-16 h-16 rounded-2xl flex items-center justify-center mb-6'
+                    style={{ background: `${feature.color}20` }}
+                  >
+                    <feature.icon className='w-8 h-8' style={{ color: feature.color }} />
+                  </div>
+                  <h3 className='text-xl md:text-2xl font-bold text-white mb-3'>{feature.title}</h3>
+                  <p className='text-silver leading-relaxed'>{feature.desc}</p>
+                </GlassCard>
+              ))}
+            </div>
+          </div>
+        </motion.section>
+      )}
+      
+      {/* Industries Section */}
+      {currentView === 'industries' && (
+        <motion.section 
+          className='relative py-32 px-4 md:px-8 bg-gradient-to-b from-transparent via-slate/30 to-transparent'
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <div className='max-w-7xl mx-auto'>
+            {/* Section Header */}
+            <div className='text-center mb-20'>
+              <motion.span 
+                className='text-cyan text-sm font-bold tracking-[0.3em] uppercase'
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+              >
+                Universal Solutions
+              </motion.span>
+              <motion.h2 
+                className='text-4xl md:text-6xl font-bold text-white mt-6 mb-6'
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+              >
+                Works With Any Industry
+              </motion.h2>
+              <motion.p 
+                className='text-silver text-lg md:text-xl max-w-2xl mx-auto'
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                From Fortune 500 to startups, FRONTDESK AGENTS adapts to your unique needs
+              </motion.p>
+            </div>
+            
+            {/* Industry Grid */}
+            <div className='grid md:grid-cols-2 lg:grid-cols-4 gap-6'>
+              {industries.map((industry, i) => (
+                <GlassCard key={industry.id} delay={i * 0.1} glowColor={industry.color}>
+                  <div 
+                    className='w-14 h-14 rounded-2xl flex items-center justify-center mb-5'
+                    style={{ background: `${industry.color}20` }}
+                  >
+                    <industry.icon className='w-7 h-7' style={{ color: industry.color }} />
+                  </div>
+                  <h3 className='text-xl font-bold text-white mb-2'>{industry.name}</h3>
+                  <p className='text-silver text-sm mb-5'>{industry.description}</p>
+                  <div className='space-y-2'>
+                    {industry.features.slice(0, 3).map((f) => (
+                      <div key={f} className='flex items-center gap-2 text-sm text-white/60'>
+                        <CheckCircle2 className='w-4 h-4 flex-shrink-0' style={{ color: industry.color }} />
+                        {f}
+                      </div>
+                    ))}
+                  </div>
+                </GlassCard>
+              ))}
+            </div>
+          </div>
+        </motion.section>
+      )}
+      
+      {/* Pricing Section */}
+      {currentView === 'pricing' && (
+        <motion.section 
+          className='relative py-32 px-4 md:px-8'
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <div className='max-w-5xl mx-auto'>
+            {/* Section Header */}
+            <div className='text-center mb-20'>
+              <motion.span 
+                className='text-purple text-sm font-bold tracking-[0.3em] uppercase'
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+              >
+                Simple Pricing
+              </motion.span>
+              <motion.h2 
+                className='text-4xl md:text-6xl font-bold text-white mt-6 mb-6'
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+              >
+                Choose Your Plan
+              </motion.h2>
+              <motion.p 
+                className='text-silver text-lg max-w-2xl mx-auto'
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                Start free, scale as you grow. No hidden fees, no surprises.
+              </motion.p>
+            </div>
+            
+            {/* Pricing Cards */}
+            <div className='grid md:grid-cols-3 gap-6'>
+              {[
+                { 
+                  name: 'Starter', 
+                  price: 'Free', 
+                  desc: 'Perfect for small businesses getting started',
+                  features: ['1 AI Agent', '100 conversations/month', 'Basic scheduling', 'Email support'],
+                  color: colors.silver,
+                  delay: 0
+                },
+                { 
+                  name: 'Professional', 
+                  price: '$99/mo', 
+                  desc: 'For growing businesses with advanced needs',
+                  features: ['5 AI Agents', 'Unlimited conversations', 'Advanced NLP', 'Priority support', 'Custom branding'],
+                  color: colors.gold,
+                  delay: 0.1,
+                  popular: true
+                },
+                { 
+                  name: 'Enterprise', 
+                  price: 'Custom', 
+                  desc: 'For large organizations with complex requirements',
+                  features: ['Unlimited AI Agents', 'White-label solution', 'Dedicated support', 'Custom integrations', 'SLA guarantee'],
+                  color: colors.cyan,
+                  delay: 0.2
+                },
+              ].map((plan, i) => (
+                <GlassCard key={i} delay={plan.delay} glowColor={plan.color}>
+                  {plan.popular && (
+                    <div className='absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-gold to-goldDark text-deepNavy text-xs font-bold'>
+                      MOST POPULAR
+                    </div>
+                  )}
+                  <div className='text-center mb-8'>
+                    <h3 className='text-xl font-bold text-white mb-2'>{plan.name}</h3>
+                    <p className='text-4xl font-bold mb-2' style={{ color: plan.color }}>{plan.price}</p>
+                    <p className='text-sm text-silver'>{plan.desc}</p>
+                  </div>
+                  <div className='space-y-3 mb-8'>
+                    {plan.features.map((f) => (
+                      <div key={f} className='flex items-center gap-3 text-sm text-white/80'>
+                        <CheckCircle2 className='w-5 h-5 flex-shrink-0' style={{ color: plan.color }} />
+                        {f}
+                      </div>
+                    ))}
+                  </div>
+                  <motion.button
+                    className={clsx(
+                      'w-full py-3 rounded-xl font-semibold transition-all',
+                      plan.popular 
+                        ? 'bg-gradient-to-r from-gold to-goldDark text-deepNavy' 
+                        : 'bg-white/10 border border-white/20 text-white hover:bg-white/20'
+                    )}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    {plan.name === 'Enterprise' ? 'Contact Sales' : 'Get Started'}
+                  </motion.button>
+                </GlassCard>
+              ))}
+            </div>
+          </div>
+        </motion.section>
+      )}
+      
+      {/* Demo Modal */}
+      <AnimatePresence>
+        {isDemoOpen && (
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className={clsx(
+              'fixed inset-0 z-[80] bg-deepNavy/98 backdrop-blur-2xl',
+              isFullscreen ? 'inset-0' : 'inset-4 md:inset-8 rounded-3xl'
+            )}
           >
             <div className={clsx(
-              'h-full glass-strong rounded-3xl overflow-hidden flex flex-col',
-              isFullscreen ? '' : 'max-w-6xl mx-auto'
+              'h-full glass-card overflow-hidden flex flex-col',
+              !isFullscreen && 'max-w-7xl mx-auto'
             )}>
               {/* Demo Header */}
-              <div className='flex items-center justify-between px-6 py-4 border-b border-hollywood-gold/10'>
+              <div className='flex items-center justify-between px-6 py-4 border-b border-white/10 bg-gradient-to-r from-slate/50 to-transparent'>
                 <div className='flex items-center gap-4'>
-                  <div className='w-10 h-10 rounded-lg bg-cinematic-red/20 flex items-center justify-center'>
-                    <Bot className='w-5 h-5 text-cinematic-red' />
+                  <div 
+                    className='w-12 h-12 rounded-xl flex items-center justify-center'
+                    style={{ background: `linear-gradient(135deg, ${colors.gold}, ${colors.goldDark})` }}
+                  >
+                    <Bot className='w-6 h-6 text-deepNavy' />
                   </div>
                   <div>
-                    <h2 className='font-semibold text-white'>Live AI Receptionist Demo</h2>
-                    <p className='text-xs text-aurora-cyan'>Powered by Advanced Agentic AI</p>
+                    <h2 className='text-lg font-bold text-white'>AI Receptionist Demo</h2>
+                    <p className='text-sm' style={{ color: colors.cyan }}>Powered by Advanced Agentic AI</p>
                   </div>
                 </div>
+                
+                {/* Zone Selector */}
+                <div className='hidden md:flex items-center gap-2'>
+                  {officeZones.map((zone) => (
+                    <motion.button
+                      key={zone.id}
+                      onClick={() => setSelectedZone(zone.id)}
+                      className={clsx(
+                        'px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
+                        selectedZone === zone.id
+                          ? 'bg-white/10 text-white border border-white/20'
+                          : 'text-white/50 hover:text-white/70'
+                      )}
+                      whileHover={{ scale: 1.05 }}
+                    >
+                      {zone.name}
+                    </motion.button>
+                  ))}
+                </div>
+                
                 <div className='flex items-center gap-3'>
-                  <button 
+                  <motion.button
                     onClick={() => setIsFullscreen(!isFullscreen)}
-                    className='p-2 rounded-lg hover:bg-white/10 text-soft-white/60 hover:text-white transition-colors'
+                    className='p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors'
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
                   >
-                    {isFullscreen ? <Minimize2 className='w-5 h-5' /> : <Maximize2 className='w-5 h-5' />}
-                  </button>
-                  <button 
-                    onClick={() => setIsDemoMode(false)}
-                    className='p-2 rounded-lg hover:bg-white/10 text-soft-white/60 hover:text-white transition-colors'
+                    {isFullscreen ? <Minimize2 className='w-5 h-5 text-white' /> : <Maximize2 className='w-5 h-5 text-white' />}
+                  </motion.button>
+                  <motion.button
+                    onClick={() => setIsDemoOpen(false)}
+                    className='p-3 rounded-xl bg-red-500/20 hover:bg-red-500/30 transition-colors'
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
                   >
-                    <ArrowRight className='w-5 h-5' />
-                  </button>
+                    <X className='w-5 h-5 text-red-400' />
+                  </motion.button>
                 </div>
               </div>
-
+              
               {/* Demo Content */}
               <div className='flex-1 flex flex-col lg:flex-row overflow-hidden'>
                 {/* Avatar Section */}
-                <div className='lg:w-1/2 p-8 flex flex-col items-center justify-center bg-gradient-to-b from-midnight-blue/50 to-deep-space'>
-                  <ReceptionistAvatar 
-                    agent={selectedAgent} 
+                <div className='lg:w-[45%] p-6 md:p-10 flex flex-col items-center justify-center bg-gradient-to-b from-transparent via-slate/20 to-transparent'>
+                  <AIAvatar 
+                    agent={selectedAgent}
                     isSpeaking={isSpeaking}
                     isListening={isListening}
+                    size='large'
                   />
                   
                   {/* Agent Selector */}
-                  <div className='flex gap-2 mt-8 flex-wrap justify-center'>
-                    {agents.map((agent) => (
-                      <button
+                  <div className='flex gap-2 mt-10 flex-wrap justify-center'>
+                    {aiAgents.map((agent) => (
+                      <motion.button
                         key={agent.id}
                         onClick={() => setSelectedAgent(agent)}
                         className={clsx(
-                          'px-3 py-2 rounded-lg text-xs font-medium transition-all',
+                          'px-4 py-2 rounded-xl text-sm font-semibold transition-all backdrop-blur-sm',
                           selectedAgent.id === agent.id
-                            ? 'bg-hollywood-gold/20 text-hollywood-gold border border-hollywood-gold/30'
-                            : 'bg-premium-navy/50 text-soft-white/60 hover:text-white border border-transparent'
+                            ? 'text-white border'
+                            : 'text-white/60 bg-white/5 border border-transparent hover:text-white'
                         )}
+                        style={selectedAgent.id === agent.id ? { 
+                          background: `${agent.color}20`, 
+                          borderColor: `${agent.color}50`,
+                          color: agent.color
+                        } : {}}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                       >
-                        {agent.name.split(' - ')[0]}
-                      </button>
+                        {agent.name}
+                      </motion.button>
                     ))}
                   </div>
-
+                  
                   {/* Controls */}
                   <div className='flex items-center gap-4 mt-8'>
                     <motion.button
                       onClick={handleVoiceToggle}
                       className={clsx(
-                        'w-16 h-16 rounded-full flex items-center justify-center transition-all',
-                        isListening 
-                          ? 'bg-cinematic-red hollywood-glow' 
-                          : 'bg-premium-navy hover:bg-premium-navy/80 border border-aurora-cyan/30'
+                        'w-16 h-16 rounded-full flex items-center justify-center transition-all shadow-lg',
+                        isListening
+                          ? 'bg-gradient-to-r from-red-500 to-red-600 shadow-red-500/50'
+                          : 'bg-gradient-to-br from-cyan-500/20 to-cyan-500/5 border-2 border-cyan-500/40 hover:border-cyan-500/70'
                       )}
                       whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.95 }}
+                      whileTap={{ scale: 0.9 }}
                     >
                       {isListening ? (
-                        <MicOff className='w-6 h-6 text-white' />
+                        <motion.div
+                          animate={{ scale: [1, 1.2, 1] }}
+                          transition={{ duration: 0.5, repeat: Infinity }}
+                        >
+                          <MicOff className='w-6 h-6 text-white' />
+                        </motion.div>
                       ) : (
-                        <Mic className='w-6 h-6 text-aurora-cyan' />
+                        <Mic className='w-6 h-6 text-cyan-400' />
                       )}
                     </motion.button>
                     
-                    <button className='w-12 h-12 rounded-full bg-premium-navy/50 flex items-center justify-center hover:bg-premium-navy/80 transition-colors'>
-                      <Volume2 className='w-5 h-5 text-soft-white/60' />
-                    </button>
+                    <motion.button
+                      className='w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors'
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      <Volume2 className='w-5 h-5 text-white/70' />
+                    </motion.button>
                   </div>
-
+                  
                   {isListening && (
-                    <motion.p 
-                      className='mt-4 text-aurora-cyan text-sm animate-pulse'
+                    <motion.p
+                      className='mt-4 text-cyan-400 font-medium animate-pulse flex items-center gap-2'
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                     >
-                      🎤 Listening...
+                      <span className='w-2 h-2 rounded-full bg-red-500 animate-pulse' />
+                      Listening to your request...
                     </motion.p>
                   )}
+                  
+                  {/* Agent Info */}
+                  <div className='mt-8 text-center max-w-sm'>
+                    <div className='flex items-center justify-center gap-6 text-sm text-silver'>
+                      <span className='flex items-center gap-2'>
+                        <Clock className='w-4 h-4' />
+                        {selectedAgent.responseTime}
+                      </span>
+                      <span className='flex items-center gap-2'>
+                        <Globe className='w-4 h-4' />
+                        {selectedAgent.languages.length} Languages
+                      </span>
+                    </div>
+                    <div className='flex flex-wrap justify-center gap-2 mt-4'>
+                      {selectedAgent.specialties.map((s) => (
+                        <span 
+                          key={s} 
+                          className='px-3 py-1 rounded-full bg-white/5 text-xs text-white/50'
+                        >
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-
+                
                 {/* Chat Section */}
-                <div className='lg:w-1/2 flex flex-col bg-deep-space/50'>
-                  {/* Messages */}
-                  <div className='flex-1 overflow-y-auto p-6'>
-                    {messages.map((message) => (
-                      <MessageBubble key={message.id} message={message} />
+                <div className='lg:w-[55%] flex flex-col bg-gradient-to-b from-slate/30 via-midnightBlue/50 to-transparent border-t lg:border-t-0 lg:border-l border-white/10'>
+                  {/* Messages Area */}
+                  <div className='flex-1 overflow-y-auto p-6 space-y-4 scrollbar-thin'>
+                    {messages.length === 0 && (
+                      <div className='text-center py-16'>
+                        <motion.div
+                          animate={{ y: [-10, 10, -10] }}
+                          transition={{ duration: 3, repeat: Infinity }}
+                        >
+                          <Bot className='w-20 h-20 text-white/10 mx-auto mb-6' />
+                        </motion.div>
+                        <p className='text-white/40 text-lg mb-2'>Start a conversation</p>
+                        <p className='text-white/30 text-sm'>Your AI receptionist is ready to assist you</p>
+                      </div>
+                    )}
+                    {messages.map((msg) => (
+                      <PremiumBubble 
+                        key={msg.id} 
+                        message={msg} 
+                        isAgent={msg.role === 'agent'}
+                        agentColor={selectedAgent.color}
+                      />
                     ))}
                     <div ref={messagesEndRef} />
                   </div>
-
-                  {/* Input */}
-                  <div className='p-4 border-t border-hollywood-gold/10'>
+                  
+                  {/* Input Area */}
+                  <div className='p-5 border-t border-white/10 bg-gradient-to-t from-slate/30 to-transparent'>
                     <div className='flex gap-3'>
                       <input
                         ref={inputRef}
@@ -665,8 +1586,8 @@ export default function FrontdeskAgentsPage() {
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                        placeholder='Type your message...'
-                        className='flex-1 bg-premium-navy/50 border border-aurora-cyan/20 rounded-xl px-4 py-3 text-white placeholder:text-soft-white/40 focus:outline-none focus:border-hollywood-gold/50 transition-colors'
+                        placeholder='Type your message or click a quick action below...'
+                        className='flex-1 bg-white/5 border border-white/10 rounded-xl px-5 py-3.5 text-white placeholder:text-white/30 focus:outline-none focus:border-gold/50 transition-colors text-sm'
                       />
                       <motion.button
                         onClick={handleSendMessage}
@@ -674,8 +1595,8 @@ export default function FrontdeskAgentsPage() {
                         className={clsx(
                           'px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2',
                           inputValue.trim()
-                            ? 'bg-cinematic-red text-white hover:bg-cinematic-red/80'
-                            : 'bg-premium-navy/50 text-soft-white/40 cursor-not-allowed'
+                            ? 'bg-gradient-to-r from-gold to-goldDark text-deepNavy shadow-lg'
+                            : 'bg-white/10 text-white/40 cursor-not-allowed'
                         )}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
@@ -686,14 +1607,16 @@ export default function FrontdeskAgentsPage() {
                     
                     {/* Quick Actions */}
                     <div className='flex gap-2 mt-3 flex-wrap'>
-                      {['Book Appointment', 'Office Hours', 'Location', 'Speak to Human'].map((action) => (
-                        <button
+                      {['Book Appointment', 'Office Hours', 'Location Info', 'Speak to Human'].map((action) => (
+                        <motion.button
                           key={action}
-                          onClick={() => setInputValue(action)}
-                          className='px-3 py-1 rounded-full bg-premium-navy/30 text-xs text-soft-white/60 hover:text-hollywood-gold hover:bg-premium-navy/50 transition-colors'
+                          onClick={() => handleQuickAction(action)}
+                          className='px-3 py-1.5 rounded-full bg-white/5 text-xs text-white/50 hover:text-gold hover:bg-gold/10 transition-colors border border-transparent hover:border-gold/20'
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
                         >
                           {action}
-                        </button>
+                        </motion.button>
                       ))}
                     </div>
                   </div>
@@ -702,170 +1625,89 @@ export default function FrontdeskAgentsPage() {
             </div>
           </motion.div>
         )}
-
-        {/* Features Section */}
-        {currentView === 'features' && (
-          <motion.div 
-            className='py-20'
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-          >
-            <div className='text-center mb-16'>
-              <span className='text-hollywood-gold text-sm font-semibold tracking-wider'>CUTTING-EDGE TECHNOLOGY</span>
-              <h2 className='font-display text-5xl font-bold text-white mt-4 mb-6'>Hollywood-Grade AI Capabilities</h2>
-              <p className='text-soft-white/60 text-lg max-w-2xl mx-auto'>
-                Experience the future of customer interaction with our revolutionary AI agent technology
-              </p>
-            </div>
-
-            <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto'>
-              {[
-                {
-                  icon: <Bot className='w-8 h-8' />,
-                  title: 'Multi-Agent System',
-                  description: 'Coordinated AI agents work together to handle any receptionist task with precision and empathy.',
-                  color: 'from-cinematic-red to-neon-purple'
-                },
-                {
-                  icon: <Globe className='w-8 h-8' />,
-                  title: '50+ Languages',
-                  description: 'Fluently communicate with visitors in any language, breaking down global communication barriers.',
-                  color: 'from-aurora-cyan to-blue-500'
-                },
-                {
-                  icon: <Calendar className='w-8 h-8' />,
-                  title: 'Smart Scheduling',
-                  description: 'AI-powered appointment booking that learns your business patterns and optimizes availability.',
-                  color: 'from-hollywood-gold to-orange-500'
-                },
-                {
-                  icon: <Shield className='w-8 h-8' />,
-                  title: 'Enterprise Security',
-                  description: 'Bank-grade encryption and compliance with GDPR, HIPAA, and SOC2 standards.',
-                  color: 'from-green-500 to-emerald-500'
-                },
-                {
-                  icon: <Zap className='w-8 h-8' />,
-                  title: 'Instant Response',
-                  description: 'Sub-second response times with intelligent caching and predictive assistance.',
-                  color: 'from-yellow-500 to-amber-500'
-                },
-                {
-                  icon: <Users className='w-8 h-8' />,
-                  title: 'Human Handoff',
-                  description: 'Seamless escalation to human staff when AI reaches confidence thresholds.',
-                  color: 'from-purple-500 to-pink-500'
-                }
-              ].map((feature, i) => (
-                <motion.div
-                  key={i}
-                  className='glass-strong rounded-2xl p-6 hover:border-hollywood-gold/30 transition-all group'
-                  initial={{ opacity: 0, y: 40 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                  whileHover={{ y: -5 }}
-                >
-                  <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                    {feature.icon}
-                  </div>
-                  <h3 className='font-semibold text-xl text-white mb-2'>{feature.title}</h3>
-                  <p className='text-soft-white/60'>{feature.description}</p>
-                </motion.div>
-              ))}
-            </div>
-
-            <div className='text-center mt-12'>
-              <button 
-                onClick={() => setCurrentView('industries')}
-                className='cinematic-btn inline-flex items-center gap-2'
+      </AnimatePresence>
+      
+      {/* CTA Section */}
+      <motion.section 
+        className='relative py-32 px-4 md:px-8'
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+      >
+        <div className='max-w-4xl mx-auto text-center'>
+          <GlassCard>
+            <div className='py-8'>
+              <motion.div
+                className='relative w-24 h-24 mx-auto mb-8'
               >
-                View Industry Solutions
-                <ChevronRight className='w-5 h-5' />
-              </button>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Industries Section */}
-        {currentView === 'industries' && (
-          <motion.div 
-            className='py-20'
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-          >
-            <div className='text-center mb-16'>
-              <span className='text-hollywood-gold text-sm font-semibold tracking-wider'>UNIVERSAL COMPATIBILITY</span>
-              <h2 className='font-display text-5xl font-bold text-white mt-4 mb-6'>Works With Every Industry</h2>
-              <p className='text-soft-white/60 text-lg max-w-2xl mx-auto'>
-                From healthcare to government, FRONTDESK AGENTS adapts to your unique business needs
+                <motion.div 
+                  className='absolute inset-0 rounded-full border-2 border-gold/30'
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+                />
+                <motion.div 
+                  className='absolute inset-2 rounded-full border border-cyan-500/30'
+                  animate={{ rotate: -360 }}
+                  transition={{ duration: 15, repeat: Infinity, ease: 'linear' }}
+                />
+                <div className='absolute inset-0 flex items-center justify-center'>
+                  <Bot className='w-10 h-10 text-gold' />
+                </div>
+              </motion.div>
+              
+              <h2 className='text-4xl md:text-5xl font-bold text-white mb-6'>
+                Ready to Transform Your Office?
+              </h2>
+              <p className='text-silver text-lg mb-10 max-w-2xl mx-auto'>
+                Experience the future of customer interaction with our AI-powered virtual receptionist. 
+                Start your free demo today.
               </p>
-            </div>
-
-            <div className='grid md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto'>
-              {industries.map((industry, i) => (
-                <motion.div
-                  key={industry.id}
-                  className={clsx(
-                    'glass rounded-xl p-6 cursor-pointer transition-all',
-                    activeIndustry === industry.id 
-                      ? 'border-hollywood-gold/50 bg-hollywood-gold/5' 
-                      : 'hover:border-aurora-cyan/30'
-                  )}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: i * 0.1 }}
-                  onClick={() => setActiveIndustry(activeIndustry === industry.id ? null : industry.id)}
-                  whileHover={{ scale: 1.02 }}
+              <div className='flex flex-wrap justify-center gap-4'>
+                <motion.button
+                  onClick={() => setIsDemoOpen(true)}
+                  className='px-10 py-5 rounded-2xl bg-gradient-to-r from-gold to-goldDark text-deepNavy font-bold text-lg flex items-center gap-3 shadow-2xl'
+                  style={{ boxShadow: `0 20px 60px ${colors.gold}40` }}
+                  whileHover={{ scale: 1.05, y: -3 }}
+                  whileTap={{ scale: 0.98 }}
                 >
-                  <div className='text-4xl mb-4'>{industry.icon}</div>
-                  <h3 className='font-semibold text-white mb-2'>{industry.name}</h3>
-                  <p className='text-soft-white/60 text-sm'>{industry.description}</p>
-                  
-                  {activeIndustry === industry.id && (
-                    <motion.div 
-                      className='mt-4 pt-4 border-t border-hollywood-gold/20'
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                    >
-                      <div className='flex items-center gap-2 text-hollywood-gold text-sm'>
-                        <CheckCircle2 className='w-4 h-4' />
-                        Active Integration
-                      </div>
-                    </motion.div>
-                  )}
-                </motion.div>
-              ))}
+                  <PlayCircle className='w-7 h-7' />
+                  Start Free Demo
+                </motion.button>
+              </div>
             </div>
-
-            <div className='text-center mt-12'>
-              <button 
-                onClick={() => setIsDemoMode(true)}
-                className='cinematic-btn inline-flex items-center gap-2'
-              >
-                <Sparkles className='w-5 h-5' />
-                Try It Now - Free Demo
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </div>
-
+          </GlassCard>
+        </div>
+      </motion.section>
+      
       {/* Footer */}
-      <footer className='relative z-10 border-t border-hollywood-gold/10 py-8'>
-        <div className='container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4'>
-          <div className='flex items-center gap-2'>
-            <Bot className='w-5 h-5 text-cinematic-red' />
-            <span className='text-soft-white/60 text-sm'>© 2026 FRONTDESK AGENTS. All rights reserved.</span>
+      <footer className='relative py-12 px-4 md:px-8 border-t border-white/10'>
+        <div className='max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6'>
+          <div className='flex items-center gap-3'>
+            <div 
+              className='w-10 h-10 rounded-xl flex items-center justify-center'
+              style={{ background: `linear-gradient(135deg, ${colors.gold}, ${colors.goldDark})` }}
+            >
+              <Bot className='w-5 h-5 text-deepNavy' />
+            </div>
+            <div>
+              <h3 className='font-bold text-white'>FRONTDESK AGENTS</h3>
+              <p className='text-xs text-silver'>World's Most Advanced AI Receptionist</p>
+            </div>
           </div>
-          <div className='flex items-center gap-6'>
-            <span className='text-soft-white/40 text-xs'>Powered by Advanced AI Agent Technology</span>
+          
+          <div className='flex items-center gap-6 text-sm text-silver'>
+            <span>© 2026 All Rights Reserved</span>
             <div className='flex items-center gap-2'>
-              <span className='w-2 h-2 rounded-full bg-aurora-cyan status-online' />
-              <span className='text-aurora-cyan text-xs'>All Systems Operational</span>
+              <motion.span 
+                className='w-2 h-2 rounded-full bg-green-400'
+                animate={{ opacity: [1, 0.5, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+              All Systems Operational
             </div>
           </div>
         </div>
       </footer>
-    </main>
+    </div>
   )
 }

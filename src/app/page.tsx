@@ -18,6 +18,17 @@ import {
 } from 'lucide-react'
 import { clsx } from 'clsx'
 
+// Import BUFFY & HERMES AI Brain System
+import { 
+  buffyHermesEngine, 
+  autonomousDecisionEngine,
+  selfLearningEngine,
+  MonitoringDashboard,
+  BuffyBrain,
+  HermesBrain 
+} from '@/lib/ai-brain'
+import type { AutonomousDecision, AgentMessage } from '@/lib/ai-brain'
+
 // ==========================================
 // ULTIMATE HOLLYWOOD OFFICE ENVIRONMENT
 // The Most Advanced UI/UX Ever Built
@@ -77,6 +88,7 @@ interface Message {
   agentType?: string
 }
 
+// BUFFY & HERMES AI Brain Integration
 interface Agent {
   id: string
   name: string
@@ -88,6 +100,8 @@ interface Agent {
   languages: string[]
   responseTime: string
   color: string
+  isBuffyOrHermes?: boolean
+  aiRole?: 'buffy' | 'hermes'
 }
 
 interface OfficeZone {
@@ -103,6 +117,34 @@ interface OfficeZone {
 // AI AGENTS CONFIGURATION
 // ==========================================
 const aiAgents: Agent[] = [
+  {
+    id: 'buffy-core',
+    name: 'BUFFY',
+    title: 'Chief Strategic Intelligence',
+    type: 'buffy',
+    status: 'online',
+    avatar: '🧠',
+    specialties: ['Strategic Planning', 'Decision Making', 'Business Optimization', 'Pattern Recognition', 'Autonomous Learning'],
+    languages: ['All Languages'],
+    responseTime: '0.8ms',
+    color: '#00f5ff',
+    isBuffyOrHermes: true,
+    aiRole: 'buffy'
+  },
+  {
+    id: 'hermes-core',
+    name: 'HERMES',
+    title: 'Chief Operations Executor',
+    type: 'hermes',
+    status: 'online',
+    avatar: '⚡',
+    specialties: ['Lightning Delivery', 'Multi-channel Communication', 'Message Optimization', 'Real-time Execution'],
+    languages: ['All Languages'],
+    responseTime: '0.3ms',
+    color: '#ffd700',
+    isBuffyOrHermes: true,
+    aiRole: 'hermes'
+  },
   {
     id: 'agent-aria',
     name: 'ARIA',
@@ -812,6 +854,9 @@ export default function FrontdeskAgentsPage() {
   const [showWelcome, setShowWelcome] = useState(true)
   const [currentView, setCurrentView] = useState<'hero' | 'features' | 'industries' | 'pricing'>('hero')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [showMonitoring, setShowMonitoring] = useState(false)
+  const [buffyHermesStatus, setBuffyHermesStatus] = useState<any>(null)
+  const [lastDecision, setLastDecision] = useState<AutonomousDecision | null>(null)
   
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -853,8 +898,8 @@ export default function FrontdeskAgentsPage() {
     }
   }, [isLoading, showWelcome])
   
-  // Send Message Handler
-  const handleSendMessage = () => {
+  // Send Message Handler with BUFFY & HERMES AI Brain Integration
+  const handleSendMessage = async () => {
     if (!inputValue.trim()) return
     
     const userMsg: Message = {
@@ -869,8 +914,74 @@ export default function FrontdeskAgentsPage() {
     setInputValue('')
     setIsSpeaking(true)
     
-    // AI Response with typing delay
-    setTimeout(() => {
+    // Process through BUFFY & HERMES AI Brain
+    try {
+      // Use the DecisionContext format expected by profitEngine.ts
+      const context = {
+        customerTier: 'pro' as const,
+        conversationCount: messages.length,
+        isNegativeSentiment: false,
+        isCritical: false,
+        businessValue: 0.5,
+        timeOfDay: new Date(),
+        previousInteractions: 0
+      }
+      
+      // BUFFY makes autonomous decision
+      const decision = await autonomousDecisionEngine.decide('customer_engagement', context)
+      setLastDecision(decision)
+      
+      // HERMES prepares optimized response
+      const agentMessage: AgentMessage = {
+        id: 'msg-' + Date.now(),
+        agent: 'BUFFY-HERMES',
+        content: currentInput,
+        timestamp: new Date(),
+        priority: 'medium',
+        sentiment: 'neutral'
+      }
+      
+      // Process through BuffyHermes collaboration
+      const result = await buffyHermesEngine.process(agentMessage, {
+        industry: 'corporate',
+        customerTier: 'pro',
+        conversationCount: messages.length,
+        lastMessage: currentInput,
+        sentiment: 'neutral',
+        intent: 'general_inquiry',
+        entities: [],
+        isVoiceActive: isListening,
+        officeZone: selectedZone
+      })
+      
+      // Update status display
+      setBuffyHermesStatus(buffyHermesEngine.getSystemStatus())
+      
+      // Get AI response
+      const aiResponse = generateAIResponse(currentInput, selectedAgent.type)
+      const enhancedResponse = `[BUFFY Decision: ${decision.selectedOption}] ${aiResponse}`
+      
+      const agentMsg: Message = {
+        id: 'agent-' + Date.now(),
+        role: 'agent',
+        content: enhancedResponse,
+        timestamp: new Date(),
+        agentType: selectedAgent.aiRole === 'buffy' ? 'BUFFY' : selectedAgent.aiRole === 'hermes' ? 'HERMES' : selectedAgent.name
+      }
+      setMessages(prev => [...prev, agentMsg])
+      
+      // Learn from interaction
+      await selfLearningEngine.learn({
+        id: 'learning-' + Date.now(),
+        initialSentiment: 'neutral' as const,
+        finalSentiment: 'positive' as const,
+        responseTime: result.totalProcessingTime,
+        outcome: 'resolved'
+      } as any)
+      
+    } catch (error) {
+      console.error('BUFFY & HERMES processing error:', error)
+      // Fallback to standard response
       const agentMsg: Message = {
         id: 'agent-' + Date.now(),
         role: 'agent',
@@ -879,8 +990,9 @@ export default function FrontdeskAgentsPage() {
         agentType: selectedAgent.name
       }
       setMessages(prev => [...prev, agentMsg])
-      setIsSpeaking(false)
-    }, 1000 + Math.random() * 1000)
+    }
+    
+    setIsSpeaking(false)
   }
   
   // Voice Toggle Handler

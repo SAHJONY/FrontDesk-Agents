@@ -12,7 +12,7 @@ export default function OwnerDashboard() {
   const router = useRouter()
   const [isDarkMode, setIsDarkMode] = useState(true)
   const [loading, setLoading] = useState(true)
-  const [metrics, setMetrics] = useState({
+  const [metrics, setMetrics] = useState<any>({
     totalCustomers: 0,
     totalRevenue: 0,
     activeAgents: 0,

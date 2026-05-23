@@ -13,7 +13,7 @@ interface TranslationContextType {
 
 const TranslationContext = createContext<TranslationContextType | undefined>(undefined)
 
-export function TranslationProvider({ children }: { children: ReactNode }) {
+export function TranslationProvider({ children }: { children: ReactNode }): ReactNode {
   const [language, setLanguageState] = useState<Language>('en')
   const [translations, setTranslations] = useState<Record<string, string>>({})
 

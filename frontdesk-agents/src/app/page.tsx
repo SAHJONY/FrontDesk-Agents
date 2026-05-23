@@ -41,24 +41,95 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="py-12 border-y border-white/10 bg-white/5">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <p className="text-sm text-gray-500 mb-6">TRUSTED BY INNOVATIVE COMPANIES</p>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-8 opacity-60">
-            {['TechCorp', 'MediCare', 'LegalEase', 'RealtyPro', 'FinanceHub'].map((name, i) => (<div key={i} className="h-12 bg-white/20 rounded-lg flex items-center justify-center text-xs font-bold">{name}</div>))}
+      {/* Trust Signals - Premium */}
+      <section className="py-16 border-y border-white/10 bg-gradient-to-b from-white/[0.03] to-transparent">
+        <div className="max-w-7xl mx-auto px-4">
+          <p className="text-center text-gray-500 text-sm font-medium mb-8 uppercase tracking-widest">Trusted by Industry Leaders Worldwide</p>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-8 items-center">
+            {['Healthcare', 'Legal', 'Real Estate', 'Finance', 'Hospitality'].map((industry, i) => (
+              <div key={i} className="group flex flex-col items-center justify-center p-4 hover:bg-white/5 rounded-xl transition-all duration-300">
+                <div className="text-3xl mb-2 opacity-70 group-hover:opacity-100 transition-opacity">
+                  {['🏥', '⚖️', '🏢', '💼', '🏨'][i]}
+                </div>
+                <span className="text-xs font-semibold text-gray-400 group-hover:text-white transition-colors uppercase tracking-wide">{industry}</span>
+              </div>
+            ))}
+          </div>
+          <div className="mt-12 flex flex-wrap justify-center gap-8 text-center">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-green-400 mb-1">10k+</div>
+              <div className="text-xs text-gray-500 uppercase tracking-wide">Calls/Month</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-blue-400 mb-1">98%</div>
+              <div className="text-xs text-gray-500 uppercase tracking-wide">Accuracy</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-purple-400 mb-1">50+</div>
+              <div className="text-xs text-gray-500 uppercase tracking-wide">Languages</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-yellow-400 mb-1">24/7</div>
+              <div className="text-xs text-gray-500 uppercase tracking-wide">Support</div>
+            </div>
           </div>
         </div>
       </section>
 
+      {/* Features Section */}
       <section id="features" className="py-20 px-4">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-12">Intelligent by Design</h2>
+          <h2 className="text-4xl font-bold text-center mb-4 bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">Intelligent by Design</h2>
+          <p className="text-gray-400 text-center mb-12">Built for performance, security, and seamless integration.</p>
           <div className="grid md:grid-cols-3 gap-8">
-            {[{ icon: Globe, title: '50+ Languages', desc: 'Real-time translation and native accent support.' }, { icon: Zap, title: 'Sub-Second Response', desc: 'Average answer time ≤ 2 seconds.' }, { icon: Shield, title: 'HIPAA & SOC2', desc: 'Enterprise-grade security with encryption.' }].map((feature, i) => (
-              <div key={i} className="p-6 bg-white/5 border border-white/10 rounded-xl">
-                <feature.icon className="w-12 h-12 text-green-400 mb-4" />
-                <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
+            {[
+              { icon: Globe, title: '50+ Languages', desc: 'Real-time translation with native accent support', color: 'from-blue-400 to-cyan-400' },
+              { icon: Zap, title: 'Sub-Second Response', desc: 'Average answer time under 2 seconds', color: 'from-yellow-400 to-orange-400' },
+              { icon: Shield, title: 'HIPAA & SOC2', desc: 'Enterprise-grade security with end-to-end encryption', color: 'from-green-400 to-emerald-400' }
+            ].map((feature, i) => (
+              <div key={i} className="group p-8 rounded-2xl border border-white/10 bg-white/[0.02] hover:border-white/20 transition-all duration-300">
+                <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+                  <feature.icon className="w-7 h-7 text-black" />
+                </div>
+                <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
                 <p className="text-gray-400">{feature.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section id="pricing" className="py-20 px-4 bg-gradient-to-b from-black to-white/[0.02]">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-4xl font-bold text-center mb-4 bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">Simple, Transparent Pricing</h2>
+          <p className="text-gray-400 text-center mb-12">No hidden fees. Cancel anytime. 14-day free trial.</p>
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              { name: 'Starter', price: '$299', period: '/mo', features: ['1 AI Agent', '1,000 minutes', 'Basic Call Routing', 'Email Support'], color: 'from-blue-500 to-cyan-500' },
+              { name: 'Professional', price: '$499', period: '/mo', features: ['3 AI Agents', '3,000 minutes', 'Advanced Routing', 'HIPAA Compliance', 'Priority Support', 'Custom Integrations'], color: 'from-green-500 to-emerald-500', popular: true },
+              { name: 'Enterprise', price: 'Custom', period: '', features: ['Unlimited Agents', 'Unlimited Minutes', 'Dedicated Manager', '24/7 Phone Support', 'SLA Guarantees', 'Custom Training'], color: 'from-purple-500 to-pink-500' }
+            ].map((tier, i) => (
+              <div key={i} className={`relative p-8 rounded-2xl border transition-all duration-300 hover:scale-105 ${tier.popular ? 'border-green-500 bg-gradient-to-b from-green-900/20 to-black' : 'border-white/10 bg-black hover:border-white/20'}`}>
+                {tier.popular && <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full text-xs font-bold uppercase tracking-wide">Most Popular</div>}
+                <h3 className="text-2xl font-bold mb-2">{tier.name}</h3>
+                <div className="mb-6">
+                  <span className={`text-5xl font-bold bg-gradient-to-r ${tier.color} bg-clip-text text-transparent`}>{tier.price}</span>
+                  <span className="text-gray-400">{tier.period}</span>
+                </div>
+                <ul className="space-y-3 mb-8">
+                  {tier.features.map((f, j) => (
+                    <li key={j} className="flex items-center gap-2 text-sm text-gray-300">
+                      <div className={`w-5 h-5 rounded-full bg-gradient-to-r ${tier.color} flex items-center justify-center flex-shrink-0`}>
+                        <svg className="w-3 h-3 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
+                      </div>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <button className={`w-full py-3 rounded-lg font-bold uppercase tracking-wide transition-all duration-300 ${tier.popular ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-black' : 'bg-white/10 hover:bg-white/20 text-white'}`}>
+                  {tier.name === 'Enterprise' ? 'Contact Sales' : 'Start Free Trial'}
+                </button>
               </div>
             ))}
           </div>

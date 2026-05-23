@@ -252,9 +252,15 @@ export default function CentralCommandCenter() {
               Systems Operational
             </div>
             {nvidiaMode && (
-              <div className="flex items-center gap-1 px-2 py-1 bg-green-900/50 border border-green-500 rounded text-green-300 text-xs">
-                <Cpu className="w-3 h-3" /> NVIDIA NIM
-              </div>
+              <a
+                href="https://build.nvidia.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 px-3 py-1.5 bg-green-900/50 border border-green-500 rounded text-green-300 text-xs hover:bg-green-900/70 transition"
+              >
+                <Cpu className="w-3 h-3" /> NVIDIA NIM Dashboard
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+              </a>
             )}
           </div>
         </header>
@@ -322,7 +328,17 @@ export default function CentralCommandCenter() {
 
           {activeTab === 'settings' && (
             <div className="max-w-4xl">
-              <h2 className="text-2xl font-bold mb-6">Environment & API Configuration</h2>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold">Environment & API Configuration</h2>
+                <a
+                  href="https://build.nvidia.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-500 rounded-lg text-sm font-medium transition"
+                >
+                  <Cpu className="w-4 h-4" /> Open NVIDIA Dashboard
+                </a>
+              </div>
               <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
                 <div className="p-4 border-b border-white/10 bg-white/5 flex items-center gap-2">
                   <Shield className="w-5 h-5 text-blue-400" />

@@ -15,7 +15,7 @@ import {
 // Types
 interface SystemStatus {
   name: string
-  status: 'active' | 'idle' | 'error' | 'thinking'
+  status: 'active' | 'idle' | 'error' | 'thinking' | 'paused'
   uptime: string
   lastAction: string
   model?: string

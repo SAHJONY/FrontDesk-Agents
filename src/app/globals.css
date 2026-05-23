@@ -22,296 +22,38 @@
 
 html {
   scroll-behavior: smooth;
+  color-scheme: dark;
+}
+
+html.light {
+  --deep-space: #FFFFFF;
+  --midnight-blue: #F3F4F6;
+  --cinematic-red: #DC2626;
+  --hollywood-gold: #D97706;
+  --premium-navy: #E5E7EB;
+  --aurora-cyan: #0891B2;
+  --neon-purple: #7C3AED;
+  color-scheme: light;
+}
+
+html.dark {
+  --deep-space: #0A0A0F;
+  --midnight-blue: #1A1A2E;
+  --cinematic-red: #E94560;
+  --hollywood-gold: #FFD700;
+  --premium-navy: #16213E;
+  --aurora-cyan: #00D9FF;
+  --neon-purple: #B829DD;
+  color-scheme: dark;
+}
+
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 body {
   font-family: 'Inter', sans-serif;
   background: var(--deep-space);
   color: #F8F9FA;
-  overflow-x: hidden;
-}
-
-/* Cinematic Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--deep-space);
-}
-
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, var(--cinematic-red), var(--hollywood-gold));
-  border-radius: 4px;
-}
-
-/* Hollywood Glow Effects */
-.hollywood-glow {
-  box-shadow: 0 0 60px rgba(233, 69, 96, 0.3),
-              0 0 120px rgba(255, 215, 0, 0.2),
-              inset 0 0 60px rgba(0, 217, 255, 0.1);
-}
-
-.gold-glow {
-  box-shadow: 0 0 40px rgba(255, 215, 0, 0.4),
-              0 0 80px rgba(255, 215, 0, 0.2);
-}
-
-.cyan-glow {
-  box-shadow: 0 0 40px rgba(0, 217, 255, 0.4),
-              0 0 80px rgba(0, 217, 255, 0.2);
-}
-
-/* Cinematic Gradients */
-.cinematic-gradient {
-  background: linear-gradient(135deg, 
-    rgba(10, 10, 15, 0.95) 0%, 
-    rgba(26, 26, 46, 0.9) 50%, 
-    rgba(22, 33, 62, 0.95) 100%);
-}
-
-.gold-gradient-text {
-  background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FFD700 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Particle Effects */
-.particles {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.particle {
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  background: radial-gradient(circle, var(--hollywood-gold) 0%, transparent 70%);
-  border-radius: 50%;
-  animation: float-particle 10s infinite;
-  opacity: 0.6;
-}
-
-@keyframes float-particle {
-  0%, 100% {
-    transform: translateY(100vh) rotate(0deg);
-    opacity: 0;
-  }
-  10% {
-    opacity: 0.6;
-  }
-  90% {
-    opacity: 0.6;
-  }
-  100% {
-    transform: translateY(-100vh) rotate(720deg);
-    opacity: 0;
-  }
-}
-
-/* Cinematic Reveal Animation */
-.cinematic-enter {
-  animation: cinematic-reveal 1.5s ease-out forwards;
-}
-
-@keyframes cinematic-reveal {
-  0% {
-    opacity: 0;
-    transform: scale(1.1) translateY(20px);
-    filter: blur(10px);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-    filter: blur(0);
-  }
-}
-
-/* Shimmer Effect */
-.shimmer {
-  position: relative;
-  overflow: hidden;
-}
-
-.shimmer::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 215, 0, 0.2),
-    transparent
-  );
-  animation: shimmer 3s infinite;
-}
-
-@keyframes shimmer {
-  0% { left: -100%; }
-  100% { left: 100%; }
-}
-
-/* Glass Morphism */
-.glass {
-  background: rgba(26, 26, 46, 0.6);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 215, 0, 0.1);
-}
-
-.glass-strong {
-  background: rgba(10, 10, 15, 0.8);
-  backdrop-filter: blur(30px);
-  border: 1px solid rgba(255, 215, 0, 0.2);
-}
-
-/* Typography Classes */
-.display-font {
-  font-family: 'Playfair Display', serif;
-}
-
-.body-font {
-  font-family: 'Inter', sans-serif;
-}
-
-/* 8K Visual Quality */
-.high-quality {
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: crisp-edges;
-}
-
-/* Responsive Text */
-.responsive-text {
-  font-size: clamp(1rem, 2.5vw, 2rem);
-  line-height: 1.4;
-  letter-spacing: -0.02em;
-}
-
-/* Cinematic Button */
-.cinematic-btn {
-  position: relative;
-  padding: 16px 32px;
-  background: linear-gradient(135deg, var(--cinematic-red) 0%, #C73E54 100%);
-  border: none;
-  border-radius: 8px;
-  color: white;
-  font-weight: 600;
-  font-size: 16px;
-  cursor: pointer;
-  overflow: hidden;
-  transition: all 0.3s ease;
-}
-
-.cinematic-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-  transition: left 0.5s ease;
-}
-
-.cinematic-btn:hover::before {
-  left: 100%;
-}
-
-.cinematic-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 20px 40px rgba(233, 69, 96, 0.4);
-}
-
-.cinematic-btn:active {
-  transform: translateY(0);
-}
-
-/* Agent Status Indicators */
-.status-online {
-  animation: pulse-status 2s infinite;
-}
-
-@keyframes pulse-status {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(0, 217, 255, 0.7);
-  }
-  50% {
-    box-shadow: 0 0 0 10px rgba(0, 217, 255, 0);
-  }
-}
-
-/* Loading Spinner */
-.spinner {
-  border: 3px solid rgba(255, 215, 0, 0.1);
-  border-top-color: var(--hollywood-gold);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* Voice Wave Animation */
-.voice-wave {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  height: 40px;
-}
-
-.voice-wave span {
-  width: 3px;
-  background: linear-gradient(180deg, var(--aurora-cyan), var(--cinematic-red));
-  border-radius: 2px;
-  animation: wave 1s ease-in-out infinite;
-}
-
-.voice-wave span:nth-child(1) { animation-delay: 0s; height: 20px; }
-.voice-wave span:nth-child(2) { animation-delay: 0.1s; height: 35px; }
-.voice-wave span:nth-child(3) { animation-delay: 0.2s; height: 50px; }
-.voice-wave span:nth-child(4) { animation-delay: 0.3s; height: 35px; }
-.voice-wave span:nth-child(5) { animation-delay: 0.4s; height: 20px; }
-
-@keyframes wave {
-  0%, 100% { transform: scaleY(0.5); }
-  50% { transform: scaleY(1); }
-}
-
-/* 3D Avatar Container */
-.avatar-container {
-  perspective: 1000px;
-}
-
-.avatar-3d {
-  transform-style: preserve-3d;
-  transition: transform 0.5s ease;
-}
-
-.avatar-3d:hover {
-  transform: rotateY(5deg) rotateX(5deg);
-}
-
-/* Office Environment Background */
-.office-bg {
-  background: 
-    linear-gradient(180deg, 
-      rgba(10, 10, 15, 0.7) 0%, 
-      rgba(26, 26, 46, 0.5) 50%,
-      rgba(22, 33, 62, 0.7) 100%),
-    url('https://images.unsplash.com/photo-1497366216548-37526070297c?w=3840&q=80');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
+  line-height: 1.6;
 }

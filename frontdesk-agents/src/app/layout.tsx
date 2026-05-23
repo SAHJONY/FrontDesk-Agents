@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { ThemeProvider } from '../components/ThemeProvider'
-import { TranslationProvider } from '@/lib/useTranslation'
+import { TranslationProvider } from '../lib/useTranslation'
 import './globals.css'
 
 export const metadata: Metadata = {

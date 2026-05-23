@@ -48,7 +48,7 @@ export default function OwnerDashboard() {
         totalRevenue,
         activeAgents,
         totalCalls,
-        customers: customers || []
+        customers: (customers as any[]) || []
       })
     } catch (error) {
       console.error('Error fetching metrics:', error)

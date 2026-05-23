@@ -8,23 +8,74 @@ import {
   Menu, X, Search, Mic, Database, BarChart3, Zap
 } from 'lucide-react'
 
+// Module configurations for all 6 enterprise modules
+const moduleConfigs: Record<string, { title: string; icon: string; color: string; prompt: string; features: string[] }> = {
+ 'real estate': {
+  title: 'Real Estate AI',
+  icon: '🏠',
+  color: 'from-emerald-600 to-teal-700',
+  prompt: 'You are a Real Estate AI assistant. Help users with property analysis, market trends, investment opportunities, rental calculations, and real estate documentation. Provide data-driven insights for buying, selling, or investing in properties.',
+  features: ['Property Analysis', 'Market Trends', 'Investment Calculator', 'Rental Estimates', 'Document Generation']
+ },
+ 'energy': {
+  title: 'Energy Trading AI',
+  icon: '⚡',
+  color: 'from-yellow-500 to-orange-600',
+  prompt: 'You are an Energy Trading AI assistant. Help users analyze energy markets, track commodity prices, understand regulatory changes, and optimize energy trading strategies. Focus on electricity, natural gas, oil, and renewable energy markets.',
+  features: ['Market Analysis', 'Price Tracking', 'Regulatory Updates', 'Trading Strategies', 'Risk Assessment']
+ },
+ 'marketing': {
+  title: 'Marketing AI',
+  icon: '📈',
+  color: 'from-pink-500 to-rose-600',
+  prompt: 'You are a Marketing AI assistant. Help users create marketing campaigns, analyze customer data, optimize ad spend, generate content ideas, and track marketing ROI. Provide actionable insights for digital and traditional marketing.',
+  features: ['Campaign Planning', 'Content Generation', 'Audience Analysis', 'ROI Tracking', 'Ad Optimization']
+ },
+ 'lottery': {
+  title: 'Lottery Analysis AI',
+  icon: '🎰',
+  color: 'from-purple-500 to-violet-600',
+  prompt: 'You are a Lottery Analysis AI assistant. Help users understand lottery odds, analyze historical patterns, generate number combinations, and provide statistical insights. Always remind users that lottery outcomes are random and to play responsibly.',
+  features: ['Odds Calculator', 'Pattern Analysis', 'Number Generator', 'Historical Data', 'Statistics']
+ },
+ 'crypto': {
+  title: 'Crypto AI',
+  icon: '🪙',
+  color: 'from-cyan-500 to-blue-600',
+  prompt: 'You are a Crypto AI assistant. Help users understand cryptocurrency markets, analyze blockchain data, track portfolio performance, and stay updated on crypto regulations. Provide educational content and market analysis without giving financial advice.',
+  features: ['Market Analysis', 'Portfolio Tracking', 'Blockchain Data', 'News Aggregation', 'Educational Resources']
+ },
+ 'legal ai': {
+  title: 'Legal AI',
+  icon: '⚖️',
+  color: 'from-blue-600 to-indigo-700',
+  prompt: 'You are a Legal AI assistant with access to US Legal Corpus. Help users search federal and state laws, analyze case law, understand legal precedents, and navigate legal research. Always remind users this is not legal advice and they should consult an attorney for legal matters.',
+  features: ['Case Law Search', 'Statute Lookup', 'Legal Precedents', 'Document Review', 'Compliance Check']
+ }
+};
+
 export default function EnterpriseDashboard() {
-  const router = useRouter()
-  const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [activeTab, setActiveTab] = useState('overview')
-  const [showReceptionistModal, setShowReceptionistModal] = useState(false)
-  const [showLegalModal, setShowLegalModal] = useState(false)
-  
-  // Enterprise User Data (Hardcoded for Free Unlimited Access)
-  const user = {
-    name: 'Juan Gonzalez',
-    email: 'sahjonycapitalllc@outlook.com',
-    company: 'Sahjony Capital LLC',
-    tier: 'Enterprise',
-    status: 'Active',
-    limit: 'Unlimited',
-    features: ['real estate', 'energy', 'marketing', 'lottery', 'crypto', 'legal ai']
-  }
+ const router = useRouter()
+ const [sidebarOpen, setSidebarOpen] = useState(true)
+ const [activeTab, setActiveTab] = useState('overview')
+ const [showReceptionistModal, setShowReceptionistModal] = useState(false)
+ const [showLegalModal, setShowLegalModal] = useState(false)
+ const [selectedModule, setSelectedModule] = useState<string | null>(null)
+ 
+ // Enterprise User Data (Hardcoded for Free Unlimited Access)
+ const user = {
+ name: 'Juan Gonzalez',
+ email: 'sahjonycapitalllc@outlook.com',
+ company: 'Sahjony Capital LLC',
+ tier: 'Enterprise',
+ status: 'Active',
+ limit: 'Unlimited',
+ features: ['real estate', 'energy', 'marketing', 'lottery', 'crypto', 'legal ai']
+ }
+
+ const handleModuleClick = (moduleName: string) => {
+  setSelectedModule(moduleName)
+ }
 
   // Mock Metrics
   const metrics = {
@@ -170,20 +221,28 @@ export default function EnterpriseDashboard() {
               </div>
             </div>
 
-            {/* Active Features */}
-            <div className="p-6 rounded-2xl border border-white/10 bg-white/5">
-              <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                <Database className="w-5 h-5 text-purple-400" />
-                Active Enterprise Modules
-              </h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                {user.features.map((feature) => (
-                  <div key={feature} className="p-4 rounded-xl bg-black/50 border border-white/10 text-center capitalize hover:border-green-500/50 transition-colors">
-                    {feature}
-                  </div>
-                ))}
-              </div>
-            </div>
+ {/* Active Features */}
+ <div className="p-6 rounded-2xl border border-white/10 bg-white/5">
+ <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+ <Database className="w-5 h-5 text-purple-400" />
+ Active Enterprise Modules
+ </h3>
+ <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+ {user.features.map((feature) => {
+ const config = moduleConfigs[feature]
+ return (
+ <div
+ key={feature}
+ onClick={() => handleModuleClick(feature)}
+ className="p-4 rounded-xl bg-black/50 border border-white/10 text-center capitalize hover:border-green-500/50 transition-all cursor-pointer hover:scale-105 group"
+ >
+ <div className="text-2xl mb-2">{config?.icon}</div>
+ <div className="text-sm font-medium group-hover:text-green-400 transition-colors">{feature}</div>
+ </div>
+ )
+ })}
+ </div>
+ </div>
           </div>
         )}
 
@@ -232,39 +291,94 @@ export default function EnterpriseDashboard() {
         </div>
       )}
 
-      {/* Legal Research Modal */}
-      {showLegalModal && (
-        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setShowLegalModal(false)}>
-          <div className="bg-black border border-blue-800/50 rounded-2xl max-w-3xl w-full p-8 relative" onClick={e => e.stopPropagation()}>
-            <button onClick={() => setShowLegalModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X /></button>
-            <h2 className="text-2xl font-bold mb-2 text-blue-400">US Legal Research Engine</h2>
-            <p className="text-gray-400 mb-6">Search federal, state, and local laws with AI precision.</p>
-            
-            <div className="relative mb-6">
-              <input 
-                type="text" 
-                placeholder="Search cases, statutes, local rules..." 
-                className="w-full bg-white/5 border border-white/20 rounded-xl px-12 py-4 focus:border-blue-500 outline-none text-lg"
-              />
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400" />
-            </div>
+ {/* Legal Research Modal */}
+ {showLegalModal && (
+ <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setShowLegalModal(false)}>
+ <div className="bg-black border border-blue-800/50 rounded-2xl max-w-3xl w-full p-8 relative" onClick={e => e.stopPropagation()}>
+ <button onClick={() => setShowLegalModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X /></button>
+ <h2 className="text-2xl font-bold mb-2 text-blue-400">US Legal Research Engine</h2>
+ <p className="text-gray-400 mb-6">Search federal, state, and local laws with AI precision.</p>
+ 
+ <div className="relative mb-6">
+ <input 
+ type="text" 
+ placeholder="Search cases, statutes, local rules..." 
+ className="w-full bg-white/5 border border-white/20 rounded-xl px-12 py-4 focus:border-blue-500 outline-none text-lg"
+ />
+ <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400" />
+ </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <button className="p-4 rounded-xl bg-blue-900/20 border border-blue-800/50 hover:border-blue-500 transition-colors text-left">
-                <div className="font-bold text-blue-400 mb-1">Federal Courts</div>
-                <div className="text-xs text-gray-400">94 District Courts, 13 Circuits</div>
-              </button>
-              <button className="p-4 rounded-xl bg-blue-900/20 border border-blue-800/50 hover:border-blue-500 transition-colors text-left">
-                <div className="font-bold text-blue-400 mb-1">State Laws</div>
-                <div className="text-xs text-gray-400">All 50 States + DC</div>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
+ <div className="grid grid-cols-2 gap-4">
+ <button className="p-4 rounded-xl bg-blue-900/20 border border-blue-800/50 hover:border-blue-500 transition-colors text-left">
+ <div className="font-bold text-blue-400 mb-1">Federal Courts</div>
+ <div className="text-xs text-gray-400">94 District Courts, 13 Circuits</div>
+ </button>
+ <button className="p-4 rounded-xl bg-blue-900/20 border border-blue-800/50 hover:border-blue-500 transition-colors text-left">
+ <div className="font-bold text-blue-400 mb-1">State Laws</div>
+ <div className="text-xs text-gray-400">All 50 States + DC</div>
+ </button>
+ </div>
+ </div>
+ </div>
+ )}
+
+ {/* Module Detail Modal */}
+ {selectedModule && moduleConfigs[selectedModule] && (
+ <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setSelectedModule(null)}>
+ <div className="bg-black border border-white/20 rounded-2xl max-w-2xl w-full p-8 relative overflow-hidden" onClick={e => e.stopPropagation()}>
+ <button onClick={() => setSelectedModule(null)} className="absolute top-4 right-4 text-gray-400 hover:text-white z-10"><X /></button>
+ 
+ {(() => {
+ const config = moduleConfigs[selectedModule]
+ return (
+ <>
+ <div className={`absolute inset-0 bg-gradient-to-br ${config.color} opacity-10`} />
+ <div className="relative z-10">
+ <div className="flex items-center gap-4 mb-6">
+ <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${config.color} flex items-center justify-center text-3xl`}>
+ {config.icon}
+ </div>
+ <div>
+ <h2 className="text-2xl font-bold">{config.title}</h2>
+ <p className="text-gray-400 capitalize">{selectedModule}</p>
+ </div>
+ </div>
+
+ <div className="mb-6">
+ <h3 className="text-lg font-bold mb-3 text-green-400">System Prompt</h3>
+ <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+ <p className="text-gray-300 text-sm leading-relaxed">{config.prompt}</p>
+ </div>
+ </div>
+
+ <div className="mb-6">
+ <h3 className="text-lg font-bold mb-3 text-blue-400">Features</h3>
+ <div className="grid grid-cols-2 gap-3">
+ {config.features.map((feature, idx) => (
+ <div key={idx} className="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center gap-2">
+ <div className="w-2 h-2 rounded-full bg-green-400" />
+ <span className="text-sm">{feature}</span>
+ </div>
+ ))}
+ </div>
+ </div>
+
+ <button 
+ className="w-full py-3 rounded-xl bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-500 hover:to-blue-500 font-bold transition-all hover:scale-105"
+ onClick={() => {
+ console.log('Opening module:', selectedModule)
+ }}
+ >
+ Open {config.title}
+ </button>
+ </div>
+ </>
+ )
+ })()}
+ </div>
+ </div>
+ )}
+ </div>
 
 function StatusCard({ title, value, icon: Icon, color, subtext }: any) {
   return (

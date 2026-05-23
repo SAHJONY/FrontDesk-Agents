@@ -114,7 +114,7 @@ class AutonomousCoreClass {
         this.emitSignal({
           type: 'performance',
           event: 'slow_response',
-          metadata: { duration, intent, action }
+          metadata: { duration, intent, action }, timestamp: Date.now()
         })
       }
 

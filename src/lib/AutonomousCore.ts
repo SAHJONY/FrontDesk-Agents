@@ -127,7 +127,7 @@ class AutonomousCoreClass {
         this.emitSignal({
           type: 'error',
           event: 'database_error',
-          metadata: { error: error.message }
+          metadata: { error: error.message }, timestamp: Date.now()
         })
       }
 

@@ -1,213 +1,131 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
-import { motion } from 'framer-motion'
-import { Eye, EyeOff, Lock, Mail, ArrowRight, Loader2, AlertCircle, Sun, Moon } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@supabase/supabase-js'
+import { Mail, Lock, Eye, EyeOff, Bot } from 'lucide-react'
 
-// Tesla-style colors
-const tesla = {
-  black: '#000000',
-  darkGray: '#171717',
-  mediumGray: '#393c41',
-  lightGray: '#5c5c5c',
-  white: '#ffffff',
-  offWhite: '#f4f4f4',
-  gold: '#f0b429',
-  goldDark: '#c4920a'
-}
-
-export default function CustomerLoginPage() {
+export default function CustomerLogin() {
+  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-  const [isDark, setIsDark] = useState(true)
+  const [loading, setLoading] = useState(false)
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    setLoading(true)
     setError('')
-    setIsLoading(true)
 
     try {
-      const response = await fetch('/api/customer/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      )
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       })
 
-      const data = await response.json()
+      if (error) throw error
 
-      if (response.ok && data.success) {
-        window.location.href = '/customer/dashboard'
-      } else {
-        setError(data.message || 'Invalid email or password')
-      }
-    } catch {
-      setError('Connection error. Please try again.')
+      // Login successful - redirect to dashboard
+      router.push('/customer/dashboard')
+    } catch (err: any) {
+      setError(err.message || 'Failed to login')
     } finally {
-      setIsLoading(false)
+      setLoading(false)
     }
   }
 
   return (
-    <div className={`min-h-screen flex flex-col ${isDark ? 'bg-black text-white' : 'bg-white text-gray-900'}`}>
-      {/* Navigation */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 px-8 py-5 ${isDark ? 'bg-black/90' : 'bg-white/90'} backdrop-blur-md border-b ${isDark ? 'border-white/10' : 'border-black/10'}`}>
-        <div className={`max-w-5xl mx-auto flex items-center justify-between`}>
-          {/* Logo */}
-          <Link href='/' className='flex items-center gap-3'>
-            <div className='w-10 h-10 rounded-lg flex items-center justify-center' style={{ background: `linear-gradient(135deg, ${tesla.gold}, ${tesla.goldDark})` }}>
-              <span className='text-lg font-bold' style={{ color: tesla.black }}>FA</span>
-            </div>
-            <span className='text-xl font-semibold tracking-wide'>FRONTDESK</span>
-          </Link>
-
-          {/* Theme Toggle */}
-          <button 
-            onClick={() => setIsDark(!isDark)}
-            className={`p-2.5 rounded-full transition-colors ${isDark ? 'bg-white/10 hover:bg-white/20' : 'bg-black/10 hover:bg-black/20'}`}
-          >
-            {isDark ? <Sun className='w-5 h-5' /> : <Moon className='w-5 h-5' />}
-          </button>
+    <div className="min-h-screen bg-black flex items-center justify-center p-4">
+      <div className="w-full max-w-md bg-white/5 border border-white/10 rounded-2xl p-8">
+        {/* Logo */}
+        <div className="flex justify-center mb-6">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center">
+            <Bot className="w-7 h-7 text-black" />
+          </div>
         </div>
-      </nav>
 
-      {/* Main Content */}
-      <main className='flex-1 flex items-center justify-center px-6 pt-24 pb-16'>
-        <motion.div 
-          className='w-full max-w-md'
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          {/* Header */}
-          <div className='text-center mb-10'>
-            <h1 className={`text-4xl font-semibold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>Sign In</h1>
-            <p className={`text-base ${isDark ? 'text-gray-500' : 'text-gray-600'}`}>Access your AI Receptionist dashboard</p>
+        <h1 className="text-2xl font-bold text-white text-center mb-2">Customer Login</h1>
+        <p className="text-gray-400 text-center mb-6">Sign in to manage your AI receptionist</p>
+
+        {/* Error Message */}
+        {error && (
+          <div className="bg-red-900/30 border border-red-700 text-red-200 p-3 rounded-lg mb-4 text-sm">
+            {error}
+          </div>
+        )}
+
+        {/* Form */}
+        <form onSubmit={handleLogin} className="space-y-4">
+          {/* Email */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
+            <div className="relative">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@company.com"
+                className="w-full bg-black/50 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-white focus:outline-none focus:border-yellow-500 transition"
+                required
+              />
+              <Mail className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" />
+            </div>
           </div>
 
-          {/* Login Card */}
-          <div className={`rounded-2xl p-8 ${isDark ? 'bg-white/5 border border-white/10' : 'bg-gray-50 border border-black/10'}`}>
-            {error && (
-              <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 ${isDark ? 'bg-red-500/10 border border-red-500/20' : 'bg-red-50 border border-red-200'}`}>
-                <AlertCircle className={`w-5 h-5 ${isDark ? 'text-red-400' : 'text-red-600'}`} />
-                <p className={`text-sm ${isDark ? 'text-red-400' : 'text-red-600'}`}>{error}</p>
-              </div>
-            )}
-
-            <form className='space-y-5' onSubmit={handleLogin}>
-              {/* Email */}
-              <div>
-                <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-400' : 'text-gray-700'}`}>Email</label>
-                <div className='relative'>
-                  <Mail className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 ${isDark ? 'text-gray-500' : 'text-gray-400'}`} />
-                  <input
-                    type='email'
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder='you@company.com'
-                    className={`w-full pl-12 pr-4 py-4 rounded-xl text-base transition-colors ${
-                      isDark 
-                        ? 'bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-white/30 focus:bg-white/10' 
-                        : 'bg-white border border-black/10 text-gray-900 placeholder-gray-400 focus:border-black/30'
-                    }`}
-                  />
-                </div>
-              </div>
-
-              {/* Password */}
-              <div>
-                <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-400' : 'text-gray-700'}`}>Password</label>
-                <div className='relative'>
-                  <Lock className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 ${isDark ? 'text-gray-500' : 'text-gray-400'}`} />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder='Enter your password'
-                    className={`w-full pl-12 pr-12 py-4 rounded-xl text-base transition-colors ${
-                      isDark 
-                        ? 'bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-white/30 focus:bg-white/10' 
-                        : 'bg-white border border-black/10 text-gray-900 placeholder-gray-400 focus:border-black/30'
-                    }`}
-                  />
-                  <button
-                    type='button'
-                    onClick={() => setShowPassword(!showPassword)}
-                    className={`absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded transition-colors ${isDark ? 'hover:bg-white/10' : 'hover:bg-black/10'}`}
-                  >
-                    {showPassword ? (
-                      <EyeOff className={`w-5 h-5 ${isDark ? 'text-gray-500' : 'text-gray-400'}`} />
-                    ) : (
-                      <Eye className={`w-5 h-5 ${isDark ? 'text-gray-500' : 'text-gray-400'}`} />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {/* Forgot Password */}
-              <div className='text-right'>
-                <Link href='/customer/forgot-password' className={`text-sm ${isDark ? 'text-gray-500 hover:text-white' : 'text-gray-600 hover:text-gray-900'} transition-colors`}>
-                  Forgot password?
-                </Link>
-              </div>
-
-              {/* Submit Button */}
+          {/* Password */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full bg-black/50 border border-white/10 rounded-xl pl-10 pr-12 py-3 text-white focus:outline-none focus:border-yellow-500 transition"
+                required
+              />
+              <Lock className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" />
               <button
-                type='submit'
-                disabled={isLoading || !email || !password}
-                className={`w-full py-4 rounded-xl font-semibold text-base flex items-center justify-center gap-2 transition-all ${
-                  isLoading 
-                    ? `${isDark ? 'bg-gray-800 text-gray-500' : 'bg-gray-200 text-gray-400'} cursor-not-allowed` 
-                    : email && password 
-                      ? 'text-black' : `${isDark ? 'bg-gray-800 text-gray-500' : 'bg-gray-200 text-gray-400'} cursor-not-allowed`
-                }`}
-                style={!isLoading && email && password ? { background: `linear-gradient(135deg, ${tesla.gold}, ${tesla.goldDark})` } : {}}
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-3.5 text-gray-400 hover:text-white"
               >
-                {isLoading ? (
-                  <>
-                    <Loader2 className='w-5 h-5 animate-spin' />
-                    Signing in...
-                  </>
-                ) : (
-                  <>
-                    Sign In
-                    <ArrowRight className='w-4 h-4' />
-                  </>
-                )}
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
-            </form>
-
-            {/* Divider */}
-            <div className={`my-6 flex items-center gap-4 ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
-              <div className={`flex-1 h-px ${isDark ? 'bg-white/10' : 'bg-black/10'}`} />
-              <span className='text-sm'>or</span>
-              <div className={`flex-1 h-px ${isDark ? 'bg-white/10' : 'bg-black/10'}`} />
-            </div>
-
-            {/* Sign Up Link */}
-            <div className='text-center'>
-              <p className={`text-sm ${isDark ? 'text-gray-500' : 'text-gray-600'}`}>
-                New to FRONTDESK?{' '}
-                <Link href='/customer/signup' className='font-semibold' style={{ color: tesla.gold }}>
-                  Create account
-                </Link>
-              </p>
             </div>
           </div>
-        </motion.div>
-      </main>
 
-      {/* Footer */}
-      <footer className={`px-8 py-6 text-center ${isDark ? 'border-t border-white/10' : 'border-t border-black/10'}`}>
-        <p className={`text-xs ${isDark ? 'text-gray-600' : 'text-gray-500'}`}>
-          © 2026 FRONTDESK AGENTS. All rights reserved.
-        </p>
-      </footer>
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3 bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 disabled:from-gray-600 disabled:to-gray-700 text-black font-bold rounded-xl transition flex items-center justify-center gap-2"
+          >
+            {loading ? 'Signing in...' : 'Sign In'}
+          </button>
+        </form>
+
+        {/* Footer Links */}
+        <div className="mt-6 text-center text-sm text-gray-400">
+          <p>
+            Don't have an account?{' '}
+            <a href="/customer/signup" className="text-yellow-400 hover:text-yellow-300 font-medium">
+              Sign up
+            </a>
+          </p>
+          <p className="mt-2">
+            <a href="/" className="text-gray-500 hover:text-white">
+              ← Back to Home
+            </a>
+          </p>
+        </div>
+      </div>
     </div>
   )
 }

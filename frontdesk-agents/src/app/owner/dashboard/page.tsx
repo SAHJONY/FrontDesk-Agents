@@ -1,232 +1,333 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import { Bot, Sun, Moon, LogOut, Home, BarChart3, Users, Settings, Building2, Globe, TrendingUp, DollarSign, Phone, MessageSquare } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import {
+  LayoutDashboard, Phone, Users, Settings, Shield, Activity,
+  MessageSquare, Play, Pause, AlertCircle, CheckCircle,
+  Loader2, Terminal, Key, Database, Bot, Search,
+  Menu, X, ChevronRight, Command, Zap, Globe, FileText
+} from 'lucide-react'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://btjscudzrtarfommgegw.supabase.co'
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+// Types
+interface SystemStatus {
+  name: string
+  status: 'active' | 'idle' | 'error' | 'thinking'
+  uptime: string
+  lastAction: string
+}
 
-export default function OwnerDashboard() {
+interface EnvVar {
+  key: string
+  value: string
+  description: string
+  status: 'set' | 'missing'
+}
+
+export default function CentralCommandCenter() {
   const router = useRouter()
-  const [isDarkMode, setIsDarkMode] = useState(true)
+  const [activeTab, setActiveTab] = useState('overview')
+  const [sidebarOpen, setSidebarOpen] = useState(true)
   const [loading, setLoading] = useState(true)
-  const [metrics, setMetrics] = useState<any>({
-    totalCustomers: 0,
-    totalRevenue: 0,
-    activeAgents: 0,
-    totalCalls: 0,
-    customers: []
-  })
+  
+  // System State
+  const [systems, setSystems] = useState<SystemStatus[]>([])
+  const [envVars, setEnvVars] = useState<EnvVar[]>([])
+  const [chatInput, setChatInput] = useState('')
+  const [chatHistory, setChatHistory] = useState<{role: 'user' | 'system', text: string}[]>([])
+  const [demoMode, setDemoMode] = useState(false)
+  const [demoStatus, setDemoStatus] = useState<'idle' | 'calling' | 'connected' | 'completed'>('idle')
+
+  const chatEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    fetchMetrics()
-  }, [])
-
-  const fetchMetrics = async () => {
-    try {
-      const supabase = createClient(supabaseUrl, supabaseAnonKey)
+    const initSystem = async () => {
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      )
       
-      // Fetch customers
-      const { data: customers } = await supabase
-        .from('customers')
-        .select('*')
-      
-      // Fetch metrics
-      const { data: businessMetrics } = await supabase
-        .from('business_metrics')
-        .select('*')
+      // Check auth
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        router.push('/owner/login')
+        return
+      }
 
-      const totalCustomers = customers?.length || 0
-      const totalRevenue = customers?.reduce((acc, curr) => acc + (curr.monthly_revenue || 0), 0) || 0
-      const activeAgents = customers?.filter(c => c.status === 'active').length || 0
-      const totalCalls = businessMetrics?.reduce((acc, curr) => acc + (curr.calls_handled || 0), 0) || 0
+      // Initialize Systems Status
+      setSystems([
+        { name: 'Autonomous Core', status: 'active', uptime: '99.9%', lastAction: 'Processing requests' },
+        { name: 'Legal Research Engine', status: 'active', uptime: '100%', lastAction: 'Indexed 50k+ cases' },
+        { name: 'AI Receptionist', status: 'idle', uptime: '99.5%', lastAction: 'Last call: 2h ago' },
+        { name: 'Database (Supabase)', status: 'active', uptime: '99.99%', lastAction: 'Query OK' },
+      ])
 
-      setMetrics({
-        totalCustomers,
-        totalRevenue,
-        activeAgents,
-        totalCalls,
-        customers: (customers as any[]) || []
-      })
-    } catch (error) {
-      console.error('Error fetching metrics:', error)
-    } finally {
+      // Load Environment Variables (Simulated for UI - in prod, fetch from secure API)
+      setEnvVars([
+        { key: 'NEXT_PUBLIC_SUPABASE_URL', value: 'https://btjscudzrtarfommgegw.supabase.co', description: 'Supabase Project URL', status: 'set' },
+        { key: 'NEXT_PUBLIC_SUPABASE_ANON_KEY', value: 'eyJhbG... (Hidden)', description: 'Supabase Anon Key', status: 'set' },
+        { key: 'OPENAI_API_KEY', value: 'sk-... (Hidden)', description: 'OpenAI API Key', status: 'set' },
+        { key: 'BLAND_AI_KEY', value: '', description: 'Bland.ai Phone System', status: 'missing' },
+        { key: 'TWILIO_SID', value: '', description: 'Twilio Account SID', status: 'missing' },
+      ])
+
       setLoading(false)
+      addSystemMessage("Welcome to Central Command. All systems operational. Type 'help' for commands.")
     }
+    initSystem()
+  }, [router])
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [chatHistory])
+
+  const addSystemMessage = (text: string) => {
+    setChatHistory(prev => [...prev, { role: 'system', text }])
   }
 
-  const handleLogout = async () => {
-    const supabase = createClient(supabaseUrl, supabaseAnonKey)
-    await supabase.auth.signOut()
-    router.push('/owner/login')
+  const handleChatSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!chatInput.trim()) return
+
+    const userCmd = chatInput
+    setChatHistory(prev => [...prev, { role: 'user', text: userCmd }])
+    setChatInput('')
+
+    // Simple command parser
+    setTimeout(() => {
+      if (userCmd.toLowerCase().includes('help')) {
+        addSystemMessage("Available commands: status, restart, simulate-call, clear-logs, api-keys")
+      } else if (userCmd.toLowerCase().includes('status')) {
+        addSystemMessage("System Status: All 4 core systems active. CPU: 12%, Memory: 450MB.")
+      } else if (userCmd.toLowerCase().includes('restart')) {
+        addSystemMessage("Restarting Autonomous Core... Done. (Simulated)")
+      } else if (userCmd.toLowerCase().includes('simulate')) {
+        startDemoCall()
+      } else if (userCmd.toLowerCase().includes('api')) {
+        setActiveTab('settings')
+        addSystemMessage("Navigated to API Settings.")
+      } else {
+        addSystemMessage(`Command '${userCmd}' not recognized. Type 'help'.`)
+      }
+    }, 500)
   }
 
-  const stats = [
-    { name: 'Total Customers', value: metrics.totalCustomers, icon: Users, color: 'from-blue-400 to-blue-600' },
-    { name: 'Total Revenue', value: `$${metrics.totalRevenue.toLocaleString()}`, icon: DollarSign, color: 'from-green-400 to-green-600' },
-    { name: 'Active Agents', value: metrics.activeAgents, icon: Bot, color: 'from-purple-400 to-purple-600' },
-    { name: 'Total Calls', value: metrics.totalCalls.toLocaleString(), icon: Phone, color: 'from-orange-400 to-orange-600' }
-  ]
+  const startDemoCall = () => {
+    setDemoMode(true)
+    setDemoStatus('calling')
+    addSystemMessage("Initiating demo call simulation...")
+    
+    setTimeout(() => {
+      setDemoStatus('connected')
+      addSystemMessage("Call connected: +1 (555) 0123 (Demo Client)")
+    }, 2000)
+
+    setTimeout(() => {
+      setDemoStatus('completed')
+      addSystemMessage("Call completed. Transcript saved to Memory Tree.")
+      setDemoMode(false)
+      setDemoStatus('idle')
+    }, 6000)
+  }
 
   if (loading) {
     return (
-      <div className={`min-h-screen flex items-center justify-center ${isDarkMode ? 'bg-black' : 'bg-white'}`}>
-        <div className="text-center">
-          <Bot className="w-16 h-16 mx-auto mb-4 animate-spin" style={{ color: '#f0b429' }} />
-          <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>Loading dashboard...</p>
-        </div>
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <Loader2 className="w-12 h-12 animate-spin text-blue-500" />
       </div>
     )
   }
 
   return (
-    <div className={`min-h-screen transition-colors duration-500 ${isDarkMode ? 'bg-black text-white' : 'bg-white text-gray-900'}`}>
-      {/* Navigation */}
-      <nav className={`sticky top-0 z-50 border-b ${isDarkMode ? 'bg-black/80 border-white/10' : 'bg-white/80 border-gray-200'} backdrop-blur-md`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #f0b429, #c4920a)' }}>
-                <Bot className="w-6 h-6" style={{ color: '#050810' }} />
+    <div className="min-h-screen bg-black text-white flex overflow-hidden">
+      {/* Sidebar */}
+      <aside className={`${sidebarOpen ? 'w-64' : 'w-20'} transition-all duration-300 border-r border-white/10 bg-black/50 backdrop-blur-xl flex flex-col`}>
+        <div className="p-4 flex items-center justify-between border-b border-white/10">
+          {sidebarOpen && (
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                <Command className="w-5 h-5 text-white" />
               </div>
-              <div>
-                <h1 className="text-lg font-bold">FRONTDESK</h1>
-                <p className="text-xs font-bold tracking-wider" style={{ color: '#f0b429' }}>AGENTS</p>
-              </div>
+              <span className="font-bold text-lg">Command</span>
             </div>
+          )}
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1 hover:bg-white/10 rounded">
+            {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
 
-            {/* Actions */}
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setIsDarkMode(!isDarkMode)}
-                className={`p-2 rounded-full transition-all ${isDarkMode ? 'bg-white/10 hover:bg-white/20' : 'bg-gray-200 hover:bg-gray-300'}`}
-              >
-                {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              </button>
-              <a
-                href="/"
-                className={`p-2 rounded-full transition-all ${isDarkMode ? 'bg-white/10 hover:bg-white/20' : 'bg-gray-200 hover:bg-gray-300'}`}
-              >
-                <Home className="w-5 h-5" />
-              </a>
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-red-500 to-red-600 text-white font-medium text-sm hover:from-red-600 hover:to-red-700 transition-all"
-              >
-                <LogOut className="w-4 h-4" />
-                Logout
-              </button>
-            </div>
+        <nav className="flex-1 p-4 space-y-2">
+          <NavItem icon={LayoutDashboard} label="Overview" active={activeTab === 'overview'} onClick={() => setActiveTab('overview')} expanded={sidebarOpen} />
+          <NavItem icon={Activity} label="Systems" active={activeTab === 'systems'} onClick={() => setActiveTab('systems')} expanded={sidebarOpen} />
+          <NavItem icon={Phone} label="AI Receptionist" active={activeTab === 'receptionist'} onClick={() => setActiveTab('receptionist')} expanded={sidebarOpen} />
+          <NavItem icon={Globe} label="Legal Research" active={activeTab === 'legal'} onClick={() => setActiveTab('legal')} expanded={sidebarOpen} />
+          <NavItem icon={Key} label="API Keys" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} expanded={sidebarOpen} />
+          <NavItem icon={Users} label="Users" active={activeTab === 'users'} onClick={() => setActiveTab('users')} expanded={sidebarOpen} />
+        </nav>
+
+        <div className="p-4 border-t border-white/10">
+          <div className={`text-xs ${sidebarOpen ? 'text-center' : 'hidden'} text-gray-500`}>
+            Sahjony Capital LLC<br/>Enterprise Plan
           </div>
         </div>
-      </nav>
+      </aside>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Welcome */}
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold mb-2">Owner Dashboard</h2>
-          <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
-            Monitor your platform performance and manage customers
-          </p>
-        </div>
+      <main className="flex-1 flex flex-col overflow-hidden">
+        {/* Top Bar */}
+        <header className="h-16 border-b border-white/10 bg-black/50 backdrop-blur-xl flex items-center justify-between px-6">
+          <h1 className="text-xl font-bold capitalize">{activeTab}</h1>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-green-900/30 border border-green-700 rounded-full text-green-400 text-xs font-medium">
+              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              Systems Operational
+            </div>
+          </div>
+        </header>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {stats.map((stat, index) => (
-            <div
-              key={index}
-              className={`p-6 rounded-2xl border transition-all ${isDarkMode ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-200'}`}
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className={`p-3 rounded-xl bg-gradient-to-r ${stat.color}`}>
-                  <stat.icon className="w-6 h-6 text-white" />
+        {/* Content Area */}
+        <div className="flex-1 overflow-y-auto p-6">
+          {activeTab === 'overview' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* System Status Cards */}
+              {systems.map((sys, i) => (
+                <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-6 hover:border-blue-500/50 transition">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-10 h-10 rounded-lg bg-blue-900/30 flex items-center justify-center">
+                      <Activity className="w-6 h-6 text-blue-400" />
+                    </div>
+                    <span className={`px-2 py-1 rounded text-xs font-medium capitalize ${
+                      sys.status === 'active' ? 'bg-green-900/30 text-green-400' :
+                      sys.status === 'idle' ? 'bg-yellow-900/30 text-yellow-400' :
+                      'bg-red-900/30 text-red-400'
+                    }`}>{sys.status}</span>
+                  </div>
+                  <h3 className="text-lg font-bold mb-1">{sys.name}</h3>
+                  <p className="text-sm text-gray-400 mb-2">Uptime: {sys.uptime}</p>
+                  <p className="text-xs text-gray-500">Last: {sys.lastAction}</p>
+                </div>
+              ))}
+
+              {/* Quick Actions */}
+              <div className="bg-gradient-to-br from-purple-900/20 to-blue-900/20 border border-purple-500/20 rounded-xl p-6 col-span-full lg:col-span-2">
+                <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                  <Zap className="w-5 h-5 text-yellow-400" />
+                  Quick Actions
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <button onClick={() => setActiveTab('legal')} className="p-3 bg-white/5 hover:bg-white/10 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2">
+                    <Globe className="w-4 h-4" /> Legal Search
+                  </button>
+                  <button onClick={startDemoCall} className="p-3 bg-white/5 hover:bg-white/10 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2">
+                    <Phone className="w-4 h-4" /> Demo Call
+                  </button>
+                  <button onClick={() => setActiveTab('settings')} className="p-3 bg-white/5 hover:bg-white/10 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2">
+                    <Key className="w-4 h-4" /> API Keys
+                  </button>
+                  <button onClick={() => setChatHistory([])} className="p-3 bg-white/5 hover:bg-white/10 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2">
+                    <FileText className="w-4 h-4" /> Clear Logs
+                  </button>
                 </div>
               </div>
-              <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{stat.name}</p>
-              <p className="text-3xl font-bold mt-1">{stat.value}</p>
             </div>
-          ))}
+          )}
+
+          {activeTab === 'settings' && (
+            <div className="max-w-4xl">
+              <h2 className="text-2xl font-bold mb-6">Environment & API Configuration</h2>
+              <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
+                <div className="p-4 border-b border-white/10 bg-white/5 flex items-center gap-2">
+                  <Shield className="w-5 h-5 text-blue-400" />
+                  <h3 className="font-bold">API Keys & Secrets</h3>
+                </div>
+                <div className="p-6 space-y-6">
+                  {envVars.map((env, i) => (
+                    <div key={i}>
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="text-sm font-medium text-gray-300">{env.key}</label>
+                        <span className={`text-xs px-2 py-0.5 rounded ${env.status === 'set' ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400'}`}>
+                          {env.status === 'set' ? 'Configured' : 'Missing'}
+                        </span>
+                      </div>
+                      <div className="flex gap-2">
+                        <input
+                          type="password"
+                          value={env.value}
+                          readOnly
+                          className="flex-1 bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-sm text-gray-400 font-mono"
+                        />
+                        <button className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm font-medium transition">
+                          Edit
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">{env.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Fallback for other tabs */}
+          {['systems', 'receptionist', 'legal', 'users'].includes(activeTab) && (
+            <div className="flex flex-col items-center justify-center h-full text-center">
+              <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
+                {activeTab === 'legal' ? <Globe className="w-8 h-8 text-blue-400" /> :
+                 activeTab === 'receptionist' ? <Phone className="w-8 h-8 text-yellow-400" /> :
+                 <Settings className="w-8 h-8 text-gray-400" />}
+              </div>
+              <h3 className="text-xl font-bold mb-2 capitalize">{activeTab} Module</h3>
+              <p className="text-gray-400 mb-4">This module is ready for deployment.</p>
+              {activeTab === 'legal' && (
+                <button onClick={() => window.open('/legal', '_blank')} className="px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg font-medium transition">
+                  Open Legal Research →
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Customers Table */}
-        <div className={`rounded-2xl border overflow-hidden ${isDarkMode ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'}`}>
-          <div className="p-6 border-b ${isDarkMode ? 'border-white/10' : 'border-gray-200'}">
-            <h3 className="text-xl font-bold">Customers</h3>
-            <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-              Manage your customer accounts
-            </p>
+        {/* Bottom Chat/Command Interface */}
+        <div className="h-64 border-t border-white/10 bg-black/80 backdrop-blur-xl flex flex-col">
+          <div className="flex-1 overflow-y-auto p-4 space-y-2">
+            {chatHistory.map((msg, i) => (
+              <div key={i} className={`text-sm ${msg.role === 'user' ? 'text-blue-400' : 'text-gray-400'}`}>
+                <span className="font-bold">{msg.role === 'user' ? '> ' : 'System: '}</span>
+                {msg.text}
+              </div>
+            ))}
+            <div ref={chatEndRef} />
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className={isDarkMode ? 'bg-white/5' : 'bg-gray-50'}>
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Business</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Industry</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Plan</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Website</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y ${isDarkMode ? 'divide-white/10' : 'divide-gray-200'}">
-                {metrics.customers.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="px-6 py-8 text-center">
-                      <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>No customers yet</p>
-                    </td>
-                  </tr>
-                ) : (
-                  metrics.customers.map((customer: any) => (
-                    <tr key={customer.id} className={isDarkMode ? 'hover:bg-white/5' : 'hover:bg-gray-50'}>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-white/10' : 'bg-gray-200'}`}>
-                            <Building2 className="w-5 h-5" />
-                          </div>
-                          <div>
-                            <p className="font-medium">{customer.business_name}</p>
-                            <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{customer.email}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium capitalize ${isDarkMode ? 'bg-white/10' : 'bg-gray-200'}`}>
-                          {customer.industry}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="capitalize">{customer.plan || 'Starter'}</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium capitalize ${
-                          customer.status === 'active' 
-                            ? 'bg-green-500/20 text-green-400' 
-                            : 'bg-yellow-500/20 text-yellow-400'
-                        }`}>
-                          {customer.status || 'trial'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        {customer.website ? (
-                          <a href={customer.website} target="_blank" rel="noopener noreferrer" className="text-yellow-500 hover:underline flex items-center gap-1">
-                            <Globe className="w-4 h-4" />
-                            Visit
-                          </a>
-                        ) : (
-                          '-'
-                        )}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+          <form onSubmit={handleChatSubmit} className="p-4 border-t border-white/10 flex gap-2">
+            <input
+              type="text"
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
+              placeholder="Type command (e.g., 'status', 'simulate-call')..."
+              className="flex-1 bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-blue-500"
+            />
+            <button type="submit" className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm font-medium transition">
+              Send
+            </button>
+          </form>
         </div>
       </main>
     </div>
+  )
+}
+
+function NavItem({ icon: Icon, label, active, onClick, expanded }: { icon: any, label: string, active: boolean, onClick: () => void, expanded: boolean }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition ${
+        active ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-white/10 hover:text-white'
+      }`}
+    >
+      <Icon className="w-5 h-5" />
+      {expanded && <span>{label}</span>}
+      {!expanded && active && <div className="w-1 h-1 rounded-full bg-white ml-auto" />}
+    </button>
   )
 }

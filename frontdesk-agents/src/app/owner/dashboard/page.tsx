@@ -3,12 +3,13 @@
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
+import { useTranslation } from '../../lib/useTranslation'
 import {
   LayoutDashboard, Phone, Users, Settings, Shield, Activity,
   MessageSquare, Play, Pause, AlertCircle, CheckCircle,
   Loader2, Terminal, Key, Database, Bot, Search,
   Menu, X, ChevronRight, Command, Zap, Globe, FileText, Cpu, Wifi,
-  Plus, Trash2, Edit2, Save, XCircle, Wallet
+  Plus, Trash2, Edit2, Save, XCircle, Wallet, Languages
 } from 'lucide-react'
 
 // Types
@@ -40,9 +41,11 @@ interface AIModel {
 
 export default function CentralCommandCenter() {
   const router = useRouter()
+  const { t, language, setLanguage } = useTranslation()
   const [activeTab, setActiveTab] = useState('overview')
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [loading, setLoading] = useState(true)
+  const [showLanguageMenu, setShowLanguageMenu] = useState(false)
   
   // AI Model State
   const [selectedModel, setSelectedModel] = useState('meta/llama-3.1-405b-instruct')
@@ -76,7 +79,6 @@ export default function CentralCommandCenter() {
   const [chatInput, setChatInput] = useState('')
   const [chatHistory, setChatHistory] = useState<{role: 'user' | 'system', text: string}[]>([])
   const [demoStatus, setDemoStatus] = useState<'idle' | 'calling' | 'connected' | 'completed'>('idle')
-  const [isAddingModel, setIsAddingModel] = useState(false)
   
   // Live Mode State
   const [liveStats, setLiveStats] = useState({ calls: 0, users: 0, tokens: 0, uptime: '99.9%' })
@@ -90,46 +92,6 @@ export default function CentralCommandCenter() {
     loading: true
   })
   const chatEndRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const initSystem = async () => {
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
-      
-      // Check auth
-  useEffect(() => {
-    const initSystem = async () => {
-      const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/owner/login'); return }
-
-      // Fetch Square POS Data (Simulated for now - replace with real API call)
-      const fetchSquareData = async () => {
-        setSquareData(prev => ({ ...prev, loading: true }))
-        try {
-          // TODO: Replace with actual Square API call
-          // const response = await fetch('/api/square/transactions')
-          // const data = await response.json()
-          
-          // Mock data for demonstration
-          setTimeout(() => {
-            setSquareData({
-              totalSales: 12450.75,
-              transactions: [
-                { id: '1', amount: 125.50, item: 'AI Consultation', time: '2 min ago', status: 'success' },
-                { id: '2', amount: 299.00, item: 'Legal Research Package', time: '15 min ago', status: 'success' },
-                { id: '3', amount: 49.99, item: 'Monthly Subscription', time: '1 hour ago', status: 'success' },
-              ],
-              loading: false
-            })
-          }, 1000)
-        } catch (error) {
-          console.error('Square API Error:', error)
-          setSquareData(prev => ({ ...prev, loading: false }))
-        }
-      }
 
       fetchSquareData()
       
@@ -331,6 +293,35 @@ export default function CentralCommandCenter() {
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
               </a>
             )}
+            
+            {/* Language Switcher */}
+            <div className="relative">
+              <button
+                onClick={() => setShowLanguageMenu(!showLanguageMenu)}
+                className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition"
+              >
+                <Languages className="w-4 h-4" />
+                <span className="uppercase">{language}</span>
+              </button>
+              
+              {showLanguageMenu && (
+                <div className="absolute right-0 mt-2 w-48 bg-black/95 border border-white/10 rounded-lg shadow-xl overflow-hidden z-50">
+                  {['en', 'es', 'zh', 'fr', 'de', 'ja'].map((lang) => (
+                    <button
+                      key={lang}
+                      onClick={() => {
+                        setLanguage(lang as any)
+                        setShowLanguageMenu(false)
+                      }}
+                      className="w-full px-4 py-2 text-left text-sm hover:bg-white/10 transition flex items-center gap-2"
+                    >
+                      <span className="text-lg">{lang === 'en' ? '🇺🇸' : lang === 'es' ? '🇪🇸' : lang === 'zh' ? '🇨🇳' : lang === 'fr' ? '🇫🇷' : lang === 'de' ? '🇩🇪' : '🇯🇵'}</span>
+                      <span>{lang === 'en' ? 'English' : lang === 'es' ? 'Español' : lang === 'zh' ? '中文' : lang === 'fr' ? 'Français' : lang === 'de' ? 'Deutsch' : '日本語'}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </header>
 

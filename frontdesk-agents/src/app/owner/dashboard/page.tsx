@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
-import { useTranslation } from '@/lib/useTranslation'
+import { useTranslation } from '../../../lib/useTranslation'
 import {
   LayoutDashboard, Phone, Users, Settings, Shield, Activity,
   MessageSquare, Play, Pause, AlertCircle, CheckCircle,

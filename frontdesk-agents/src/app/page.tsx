@@ -23,7 +23,7 @@ export default function LandingPage() {
             <a href="#faq" className="text-gray-300 hover:text-white">FAQ</a>
             <button onClick={() => setShowVideo(true)} className="flex items-center gap-2 text-gray-300 hover:text-white"><Play className="w-4 h-4" /> Demo</button>
             <a href="/customer/login" className="text-gray-300 hover:text-white">Sign In</a>
-            <a href="/customer/signup" className="px-4 py-2 bg-green-600 hover:bg-green-500 rounded-lg">Get Started</a>
+            <a href="/customer/signup" className="group relative px-6 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 rounded-xl font-bold text-sm uppercase tracking-wide transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-green-500/25">Get Started</a>
           </div>
         </div>
       </nav>
@@ -38,45 +38,66 @@ export default function LandingPage() {
           </h1>
           <p className="text-xl text-gray-400 mb-8">Reduce costs by 80% while capturing every missed opportunity. Handle 10k+ calls/month with zero staffing.</p>
           <form onSubmit={handleSubmit} className="max-w-md mx-auto mb-8 flex gap-2">
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your work email" className="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:border-green-500" required />
-            <button type="submit" className="px-6 py-3 bg-green-600 hover:bg-green-500 rounded-lg">Start Free Trial</button>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your work email" className="flex-1 px-4 py-4 bg-white/10 border border-white/20 rounded-xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all" required />
+            <button type="submit" className="group relative px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 rounded-xl font-bold uppercase tracking-wide transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-green-500/25 whitespace-nowrap">
+              Start Free Trial
+            </button>
           </form>
           <p className="text-sm text-gray-500">No credit card required • 14-day free trial</p>
-          <button onClick={() => setShowVideo(true)} className="mt-8 flex items-center gap-2 mx-auto px-6 py-3 bg-white/10 hover:bg-white/20 rounded-lg"><Play className="w-5 h-5" /> Watch Demo</button>
+          <button onClick={() => setShowVideo(true)} className="group relative px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 rounded-xl font-bold uppercase tracking-wide transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-green-500/25 flex items-center gap-2">
+            <Play className="w-5 h-5 group-hover:scale-110 transition-transform" />
+            Watch Demo
+          </button>
         </div>
       </section>
 
       {/* Trust Signals - Premium */}
-      <section className="py-16 border-y border-white/10 bg-gradient-to-b from-white/[0.03] to-transparent">
+      <section className="py-20 border-y border-white/10 bg-gradient-to-b from-white/[0.05] via-white/[0.02] to-transparent">
         <div className="max-w-7xl mx-auto px-4">
-          <p className="text-center text-gray-500 text-sm font-medium mb-8 uppercase tracking-widest">Trusted by Industry Leaders Worldwide</p>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-8 items-center">
-            {['Healthcare', 'Legal', 'Real Estate', 'Finance', 'Hospitality'].map((industry, i) => (
-              <div key={i} className="group flex flex-col items-center justify-center p-4 hover:bg-white/5 rounded-xl transition-all duration-300">
-                <div className="text-3xl mb-2 opacity-70 group-hover:opacity-100 transition-opacity">
-                  {['🏥', '⚖️', '🏢', '💼', '🏨'][i]}
+          <div className="text-center mb-12">
+            <p className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-blue-400 to-purple-400 text-sm font-bold uppercase tracking-[0.3em] mb-4">
+              Trusted by Industry Leaders Worldwide
+            </p>
+            <div className="w-24 h-0.5 bg-gradient-to-r from-transparent via-green-500 to-transparent mx-auto"></div>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-8 items-center mb-16">
+            {[
+              { name: 'Healthcare', icon: '🏥', color: 'from-blue-500 to-cyan-500' },
+              { name: 'Legal', icon: '⚖️', color: 'from-purple-500 to-pink-500' },
+              { name: 'Real Estate', icon: '🏢', color: 'from-green-500 to-emerald-500' },
+              { name: 'Finance', icon: '💼', color: 'from-yellow-500 to-orange-500' },
+              { name: 'Hospitality', icon: '🏨', color: 'from-red-500 to-rose-500' }
+            ].map((item, i) => (
+              <div key={i} className="group relative p-6 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all duration-500 hover:-translate-y-2">
+                <div className={`absolute inset-0 bg-gradient-to-br ${item.color} opacity-0 group-hover:opacity-10 rounded-2xl transition-opacity duration-500`}></div>
+                <div className="relative">
+                  <div className="text-4xl mb-3 opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500">{item.icon}</div>
+                  <span className="text-xs font-semibold text-gray-400 group-hover:text-white transition-colors duration-300 uppercase tracking-wider block text-center">
+                    {item.name}
+                  </span>
                 </div>
-                <span className="text-xs font-semibold text-gray-400 group-hover:text-white transition-colors uppercase tracking-wide">{industry}</span>
               </div>
             ))}
           </div>
-          <div className="mt-12 flex flex-wrap justify-center gap-8 text-center">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-400 mb-1">10k+</div>
-              <div className="text-xs text-gray-500 uppercase tracking-wide">Calls/Month</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-400 mb-1">98%</div>
-              <div className="text-xs text-gray-500 uppercase tracking-wide">Accuracy</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-purple-400 mb-1">50+</div>
-              <div className="text-xs text-gray-500 uppercase tracking-wide">Languages</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-yellow-400 mb-1">24/7</div>
-              <div className="text-xs text-gray-500 uppercase tracking-wide">Support</div>
-            </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {[
+              { value: '10k+', label: 'Calls/Month', color: 'from-green-400 to-cyan-400' },
+              { value: '98%', label: 'Accuracy Rate', color: 'from-blue-400 to-purple-400' },
+              { value: '50+', label: 'Languages', color: 'from-purple-400 to-pink-400' },
+              { value: '24/7', label: 'Support', color: 'from-yellow-400 to-orange-400' }
+            ].map((stat, i) => (
+              <div key={i} className="text-center group">
+                <div className={`text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${stat.color} mb-2 group-hover:scale-110 transition-transform duration-300`}>
+                  {stat.value}
+                </div>
+                <div className="text-xs font-medium text-gray-500 uppercase tracking-wider group-hover:text-gray-400 transition-colors">
+                  {stat.label}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -132,7 +153,7 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <button className={`w-full py-3 rounded-lg font-bold uppercase tracking-wide transition-all duration-300 ${tier.popular ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-black' : 'bg-white/10 hover:bg-white/20 text-white'}`}>
+                <button className={`w-full py-4 rounded-xl font-bold uppercase tracking-wide transition-all duration-300 hover:scale-105 hover:shadow-lg ${tier.popular ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-black shadow-lg shadow-green-500/25' : 'bg-gradient-to-r from-white/10 to-white/5 hover:from-white/20 hover:to-white/10 text-white border border-white/10'}`}>
                   {tier.name === 'Enterprise' ? 'Contact Sales' : 'Start Free Trial'}
                 </button>
               </div>

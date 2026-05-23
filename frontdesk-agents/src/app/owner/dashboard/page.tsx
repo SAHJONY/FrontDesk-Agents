@@ -7,7 +7,8 @@ import {
   LayoutDashboard, Phone, Users, Settings, Shield, Activity,
   MessageSquare, Play, Pause, AlertCircle, CheckCircle,
   Loader2, Terminal, Key, Database, Bot, Search,
-  Menu, X, Command, Zap, Globe, FileText, Cpu, Wifi
+  Menu, X, ChevronRight, Command, Zap, Globe, FileText, Cpu, Wifi,
+  Plus, Trash2, Edit2, Save, XCircle
 } from 'lucide-react'
 
 // Types
@@ -27,6 +28,16 @@ interface EnvVar {
   editable?: boolean
 }
 
+interface AIModel {
+  id: string
+  name: string
+  provider: 'NVIDIA' | 'OpenAI' | 'Anthropic' | 'Custom'
+  modelString: string
+  apiKey?: string
+  baseUrl?: string
+  active: boolean
+}
+
 export default function CentralCommandCenter() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState('overview')
@@ -36,6 +47,18 @@ export default function CentralCommandCenter() {
   // AI Model State
   const [selectedModel, setSelectedModel] = useState('meta/llama-3.1-405b-instruct')
   const [nvidiaMode, setNvidiaMode] = useState(false)
+  
+  // Hermes-Style Model Manager State
+  const [models, setModels] = useState<AIModel[]>([
+    { id: '1', name: 'NVIDIA Llama-3.1 405B', provider: 'NVIDIA', modelString: 'meta/llama-3.1-405b-instruct', baseUrl: 'https://integrate.api.nvidia.com/v1', active: true },
+    { id: '2', name: 'NVIDIA Llama-3.1 70B', provider: 'NVIDIA', modelString: 'meta/llama-3.1-70b-instruct', baseUrl: 'https://integrate.api.nvidia.com/v1', active: false },
+    { id: '3', name: 'OpenAI GPT-4o', provider: 'OpenAI', modelString: 'gpt-4o', active: false },
+  ])
+  const [isAddingModel, setIsAddingModel] = useState(false)
+  
+  // Chat Interface State
+  const [chatOpen, setChatOpen] = useState(false)
+  const [chatMinimized, setChatMinimized] = useState(false)
   
   // Available NVIDIA Models
   const nvidiaModels = [
@@ -202,7 +225,8 @@ export default function CentralCommandCenter() {
           <NavItem icon={LayoutDashboard} label="Overview" active={activeTab === 'overview'} onClick={() => setActiveTab('overview')} expanded={sidebarOpen} />
           <NavItem icon={Activity} label="Systems" active={activeTab === 'systems'} onClick={() => setActiveTab('systems')} expanded={sidebarOpen} />
           <NavItem icon={Phone} label="AI Receptionist" active={activeTab === 'receptionist'} onClick={() => setActiveTab('receptionist')} expanded={sidebarOpen} />
-          <NavItem icon={Globe} label="Legal Research" active={activeTab === 'legal'} onClick={() => setActiveTab('legal')} expanded={sidebarOpen} />
+          <NavItem icon={Globe} label="Legal" active={activeTab === 'legal'} onClick={() => setActiveTab('legal')} expanded={sidebarOpen} />
+          <NavItem icon={Cpu} label="Hermes Config" active={activeTab === 'hermes'} onClick={() => setActiveTab('hermes')} expanded={sidebarOpen} />
           <NavItem icon={Key} label="API Keys" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} expanded={sidebarOpen} />
           <NavItem icon={Users} label="Users" active={activeTab === 'users'} onClick={() => setActiveTab('users')} expanded={sidebarOpen} />
         </nav>
@@ -396,9 +420,81 @@ export default function CentralCommandCenter() {
               )}
             </div>
           )}
+
+          {/* Hermes Configuration Tab */}
+          {activeTab === 'hermes' && (
+            <div className="max-w-5xl">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                  <Command className="w-6 h-6 text-purple-400" />
+                  Hermes Agent Configuration
+                </h2>
+                <button 
+                  onClick={() => setIsAddingModel(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded-lg text-sm font-medium transition"
+                >
+                  <Plus className="w-4 h-4" /> Add Model
+                </button>
+              </div>
+
+              {/* Active Profile */}
+              <div className="bg-white/5 border border-white/10 rounded-xl p-6 mb-6">
+                <h3 className="text-lg font-bold mb-4 text-purple-400">Active Profile</h3>
+                <div className="flex items-center gap-4">
+                  <div className="px-4 py-2 bg-purple-900/30 border border-purple-500/30 rounded-lg">
+                    <span className="text-sm font-mono text-purple-300">default</span>
+                  </div>
+                  <span className="text-sm text-gray-400">Models: {models.length} active</span>
+                </div>
+              </div>
+
+              {/* Model List */}
+              <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
+                <div className="p-4 border-b border-white/10 bg-white/5 flex items-center gap-2">
+                  <Cpu className="w-5 h-5 text-blue-400" />
+                  <h3 className="font-bold">Configured Models</h3>
+                </div>
+                <div className="divide-y divide-white/5">
+                  {models.map((model) => (
+                    <div key={model.id} className="p-4 flex items-center justify-between hover:bg-white/5 transition">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-2 h-2 rounded-full ${model.active ? 'bg-green-500' : 'bg-gray-600'}`} />
+                        <div>
+                          <p className="font-bold text-white">{model.name}</p>
+                          <p className="text-xs text-gray-400 font-mono">{model.modelString}</p>
+                          {model.baseUrl && <p className="text-xs text-gray-500">{model.baseUrl}</p>}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs px-2 py-1 rounded bg-white/10 text-gray-300">{model.provider}</span>
+                        {!model.active ? (
+                          <button 
+                            onClick={() => {
+                              setModels(models.map(m => ({ ...m, active: m.id === model.id })))
+                              addSystemMessage(`🔄 Switched to ${model.name}`)
+                            }}
+                            className="px-3 py-1 text-xs bg-green-600 hover:bg-green-500 rounded transition"
+                          >
+                            Activate
+                          </button>
+                        ) : (
+                          <span className="text-xs text-green-400 flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3" /> Active
+                          </span>
+                        )}
+                        <button className="p-1 hover:bg-white/10 rounded text-gray-400">
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* CHAT INTERFACE - FIXED & CLICKABLE */}
+        {/* Bottom Chat/Command Interface (Fixed at bottom) */}
         <div className="h-48 border-t border-white/10 bg-black/80 backdrop-blur-xl flex flex-col shrink-0">
           <div className="flex-1 overflow-y-auto p-4 space-y-2">
             {chatHistory.map((msg, i) => (
@@ -421,6 +517,63 @@ export default function CentralCommandCenter() {
             </button>
           </form>
         </div>
+
+        {/* Floating Chat Toggle Button (Hermes Style) */}
+        {!chatOpen && (
+          <button
+            onClick={() => { setChatOpen(true); setChatMinimized(false); }}
+            className="fixed bottom-6 right-6 w-14 h-14 bg-purple-600 hover:bg-purple-500 rounded-full shadow-lg shadow-purple-900/50 flex items-center justify-center transition transform hover:scale-110 z-50"
+          >
+            <MessageSquare className="w-6 h-6 text-white" />
+          </button>
+        )}
+
+        {/* Floating Chat Window */}
+        {chatOpen && (
+          <div className="fixed bottom-6 right-6 w-96 max-w-[calc(100vw-3rem)] bg-black/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden z-50 transition-all">
+            {/* Chat Header */}
+            <div className="flex items-center justify-between p-4 border-b border-white/10 bg-white/5">
+              <div className="flex items-center gap-2">
+                <Command className="w-5 h-5 text-purple-400" />
+                <span className="font-bold text-sm">Hermes Command</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button onClick={() => setChatMinimized(!chatMinimized)} className="p-1 hover:bg-white/10 rounded">
+                  {chatMinimized ? <Plus className="w-4 h-4" /> : <div className="w-4 h-0.5 bg-current" />}
+                </button>
+                <button onClick={() => setChatOpen(false)} className="p-1 hover:bg-white/10 rounded">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Chat Body */}
+            {!chatMinimized && (
+              <>
+                <div className="h-64 overflow-y-auto p-4 space-y-2">
+                  {chatHistory.map((msg, i) => (
+                    <div key={i} className={`text-sm ${msg.role === 'user' ? 'text-blue-400' : 'text-gray-400'}`}>
+                      <span className="font-bold">{msg.role === 'user' ? '> ' : 'System: '}</span>{msg.text}
+                    </div>
+                  ))}
+                  <div ref={chatEndRef} />
+                </div>
+                <form onSubmit={handleChatSubmit} className="p-4 border-t border-white/10 flex gap-2">
+                  <input
+                    type="text"
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    placeholder="Type command..."
+                    className="flex-1 bg-black/50 border border-white/10 rounded px-3 py-2 text-sm focus:outline-none focus:border-purple-500"
+                  />
+                  <button type="submit" className="px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded text-sm font-medium transition">
+                    <MessageSquare className="w-4 h-4" />
+                  </button>
+                </form>
+              </>
+            )}
+          </div>
+        )}
       </main>
     </div>
   )

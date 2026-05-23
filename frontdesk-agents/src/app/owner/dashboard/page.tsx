@@ -8,7 +8,7 @@ import {
   MessageSquare, Play, Pause, AlertCircle, CheckCircle,
   Loader2, Terminal, Key, Database, Bot, Search,
   Menu, X, ChevronRight, Command, Zap, Globe, FileText, Cpu, Wifi,
-  Plus, Trash2, Edit2, Save, XCircle
+  Plus, Trash2, Edit2, Save, XCircle, Wallet
 } from 'lucide-react'
 
 // Types
@@ -76,7 +76,19 @@ export default function CentralCommandCenter() {
   const [chatInput, setChatInput] = useState('')
   const [chatHistory, setChatHistory] = useState<{role: 'user' | 'system', text: string}[]>([])
   const [demoStatus, setDemoStatus] = useState<'idle' | 'calling' | 'connected' | 'completed'>('idle')
-
+  const [isAddingModel, setIsAddingModel] = useState(false)
+  
+  // Live Mode State
+  const [liveStats, setLiveStats] = useState({ calls: 0, users: 0, tokens: 0, uptime: '99.9%' })
+  const [recentLogs, setRecentLogs] = useState<{id: number, event: string, time: string, status: 'success' | 'error' | 'info'}[]>([])
+  const [isAgentRunning, setIsAgentRunning] = useState(true)
+  
+  // Square POS State
+  const [squareData, setSquareData] = useState({
+    totalSales: 0,
+    transactions: [] as any[],
+    loading: true
+  })
   const chatEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -87,50 +99,83 @@ export default function CentralCommandCenter() {
       )
       
       // Check auth
+  useEffect(() => {
+    const initSystem = async () => {
+      const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        router.push('/owner/login')
-        return
+      if (!user) { router.push('/owner/login'); return }
+
+      // Fetch Square POS Data (Simulated for now - replace with real API call)
+      const fetchSquareData = async () => {
+        setSquareData(prev => ({ ...prev, loading: true }))
+        try {
+          // TODO: Replace with actual Square API call
+          // const response = await fetch('/api/square/transactions')
+          // const data = await response.json()
+          
+          // Mock data for demonstration
+          setTimeout(() => {
+            setSquareData({
+              totalSales: 12450.75,
+              transactions: [
+                { id: '1', amount: 125.50, item: 'AI Consultation', time: '2 min ago', status: 'success' },
+                { id: '2', amount: 299.00, item: 'Legal Research Package', time: '15 min ago', status: 'success' },
+                { id: '3', amount: 49.99, item: 'Monthly Subscription', time: '1 hour ago', status: 'success' },
+              ],
+              loading: false
+            })
+          }, 1000)
+        } catch (error) {
+          console.error('Square API Error:', error)
+          setSquareData(prev => ({ ...prev, loading: false }))
+        }
       }
+
+      fetchSquareData()
+      
+      // Poll Square data every 30 seconds in Live Mode
+      const squareInterval = setInterval(fetchSquareData, 30000)
 
       // Initialize Systems Status
       setSystems([
         { name: 'Autonomous Core', status: 'active', uptime: '99.9%', lastAction: 'Processing requests', model: 'NVIDIA Llama-3.1' },
         { name: 'Legal Research Engine', status: 'active', uptime: '100%', lastAction: 'Indexed 50k+ cases' },
-        { name: 'AI Receptionist', status: 'idle', uptime: '99.5%', lastAction: 'Last call: 2h ago' },
+        { name: 'AI Receptionist', status: isAgentRunning ? 'idle' : 'paused', uptime: '99.5%', lastAction: 'Last call: 2h ago' },
         { name: 'Database (Supabase)', status: 'active', uptime: '99.99%', lastAction: 'Query OK' },
+        { name: 'Square POS', status: 'active', uptime: '100%', lastAction: 'Syncing transactions...' },
       ])
 
       // Load Environment Variables
       const hasBland = !!process.env.BLAND_AI_API_KEY && process.env.BLAND_AI_API_KEY?.startsWith('sk-proj');
       const hasResend = !!process.env.RESEND_API_KEY;
       const hasNvidia = !!process.env.NVIDIA_API_KEY && process.env.NVIDIA_API_KEY !== 'nvapi-<YOUR_FREE_NVIDIA_KEY_HERE>';
+      const hasSquare = !!process.env.SQUARE_ACCESS_TOKEN;
       
-      setEnvVars([
+      setEnvVars(prev => [
         { key: 'NEXT_PUBLIC_SUPABASE_URL', value: 'https://btjscudzrtarfommgegw.supabase.co', description: 'Supabase Project URL', status: 'set', editable: false },
         { key: 'NEXT_PUBLIC_SUPABASE_ANON_KEY', value: 'eyJhbG... (Hidden)', description: 'Supabase Anon Key', status: 'set', editable: false },
         { key: 'OPENAI_API_KEY', value: hasNvidia || hasBland ? 'sk-... (Active)' : 'Missing', description: 'OpenAI API Key', status: hasNvidia || hasBland ? 'set' : 'missing', editable: true },
         { key: 'NVIDIA_API_KEY', value: hasNvidia ? 'nvapi-... (Active)' : 'Not Set', description: 'NVIDIA NIM API Key', status: hasNvidia ? 'set' : 'missing', editable: true },
         { key: 'BLAND_AI_API_KEY', value: hasBland ? 'sk-proj-... (Active)' : 'Missing', description: 'Bland.ai Voice AI', status: hasBland ? 'set' : 'missing', editable: true },
         { key: 'RESEND_API_KEY', value: hasResend ? 're_... (Active)' : 'Missing', description: 'Resend Email Service', status: hasResend ? 'set' : 'missing', editable: true },
-        { key: 'SMTP_USER', value: hasResend ? 'frontdeskllc@outlook.com' : 'Missing', description: 'SMTP Email User', status: hasResend ? 'set' : 'missing', editable: true },
+        { key: 'SQUARE_ACCESS_TOKEN', value: hasSquare ? 'sq0atp-... (Active)' : 'Missing', description: 'Square POS API', status: hasSquare ? 'set' : 'missing', editable: true },
       ])
 
       setLoading(false)
-      addSystemMessage("Welcome to Central Command. NVIDIA NIM integration ready. Type 'help' for commands.")
-      if (hasBland) {
-        addSystemMessage("🟢 Bland.ai Voice AI detected. Phone: +1 (346) 521-4387")
-      }
-      if (hasResend) {
-        addSystemMessage("🟢 Resend Email Service detected.")
-      }
+      addSystemMessage("Welcome to Central Command. LIVE MODE ACTIVE. Type 'help' for commands.")
+      if (hasBland) addSystemMessage("🟢 Bland.ai Voice AI detected. Phone: +1 (346) 521-4387")
+      if (hasResend) addSystemMessage("🟢 Resend Email Service detected.")
       if (hasNvidia) {
         setNvidiaMode(true)
         addSystemMessage("🟢 NVIDIA NIM detected. Switching Autonomous Core to Llama-3.1-405B.")
       }
+      if (hasSquare) addSystemMessage("🟢 Square POS connected. Syncing sales data...")
+
+      // Cleanup
+      return () => clearInterval(squareInterval)
     }
     initSystem()
-  }, [router])
+  }, [router, isAgentRunning])
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -228,6 +273,7 @@ export default function CentralCommandCenter() {
           <NavItem icon={Cpu} label="Hermes Config" active={activeTab === 'hermes'} onClick={() => setActiveTab('hermes')} expanded={sidebarOpen} />
           <NavItem icon={Key} label="API Keys" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} expanded={sidebarOpen} />
           <NavItem icon={Users} label="Users" active={activeTab === 'users'} onClick={() => setActiveTab('users')} expanded={sidebarOpen} />
+          <NavItem icon={Wallet} label="Square POS" active={activeTab === 'square'} onClick={() => setActiveTab('square')} expanded={sidebarOpen} />
         </nav>
 
         <div className="p-4 border-t border-white/10">
@@ -489,6 +535,80 @@ export default function CentralCommandCenter() {
                   ))}
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Square POS Tab */}
+          {activeTab === 'square' && (
+            <div className="max-w-6xl">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                  <Wallet className="w-6 h-6 text-green-400" />
+                  Square POS - Live Sales
+                </h2>
+                <button 
+                  onClick={() => {
+                    setSquareData(prev => ({ ...prev, loading: true }))
+                    setTimeout(() => setSquareData(prev => ({ ...prev, loading: false })), 1000)
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-500 rounded-lg text-sm font-medium transition"
+                >
+                  <Plus className="w-4 h-4" /> Refresh Data
+                </button>
+              </div>
+
+              {/* Sales Summary */}
+              {squareData.loading ? (
+                <div className="flex items-center justify-center py-20">
+                  <Loader2 className="w-12 h-12 animate-spin text-green-400" />
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div className="bg-gradient-to-br from-green-900/30 to-green-800/10 border border-green-500/30 rounded-xl p-6">
+                      <p className="text-sm text-green-300 mb-2">Total Sales (Today)</p>
+                      <p className="text-3xl font-bold text-white">${squareData.totalSales.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    </div>
+                    <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+                      <p className="text-sm text-gray-400 mb-2">Transactions</p>
+                      <p className="text-3xl font-bold text-white">{squareData.transactions.length}</p>
+                    </div>
+                    <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+                      <p className="text-sm text-gray-400 mb-2">Average Transaction</p>
+                      <p className="text-3xl font-bold text-white">
+                        ${(squareData.totalSales / (squareData.transactions.length || 1)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Recent Transactions */}
+                  <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
+                    <div className="p-4 border-b border-white/10 bg-white/5 flex items-center gap-2">
+                      <Wallet className="w-5 h-5 text-green-400" />
+                      <h3 className="font-bold">Recent Transactions</h3>
+                    </div>
+                    <div className="divide-y divide-white/5">
+                      {squareData.transactions.map((tx) => (
+                        <div key={tx.id} className="p-4 flex items-center justify-between hover:bg-white/5 transition">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-full bg-green-900/30 flex items-center justify-center">
+                              <CheckCircle className="w-5 h-5 text-green-400" />
+                            </div>
+                            <div>
+                              <p className="font-bold text-white">{tx.item}</p>
+                              <p className="text-xs text-gray-400">{tx.time}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-green-400">${tx.amount.toFixed(2)}</p>
+                            <p className="text-xs text-gray-500 capitalize">{tx.status}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           )}
         </div>

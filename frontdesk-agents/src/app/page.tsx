@@ -30,7 +30,12 @@ export default function LandingPage() {
 
       <section className="pt-32 pb-20 px-4 text-center">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-7xl font-bold mb-6">World's Most Advanced<br /><span className="bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">AI Receptionist</span></h1>
+          <h1 className="text-5xl md:text-7xl font-bold mb-6">
+            World's Most Advanced<br />
+            <span className="bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
+              AI Receptionist
+            </span>
+          </h1>
           <p className="text-xl text-gray-400 mb-8">Reduce costs by 80% while capturing every missed opportunity. Handle 10k+ calls/month with zero staffing.</p>
           <form onSubmit={handleSubmit} className="max-w-md mx-auto mb-8 flex gap-2">
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your work email" className="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:border-green-500" required />

@@ -15,6 +15,19 @@ export default function EnterpriseDashboard() {
   const [showReceptionistModal, setShowReceptionistModal] = useState(false)
   const [showLegalModal, setShowLegalModal] = useState(false)
   
+  // Handle navigation clicks
+  const handleNavClick = (tabId: string) => {
+    if (tabId === 'receptionist') {
+      setShowReceptionistModal(true)
+      setActiveTab('receptionist')
+    } else if (tabId === 'legal') {
+      setShowLegalModal(true)
+      setActiveTab('legal')
+    } else {
+      setActiveTab(tabId)
+    }
+  }
+  
   // Enterprise User Data (Hardcoded for Free Unlimited Access)
   const user = {
     name: 'Juan Gonzalez',
@@ -62,7 +75,7 @@ export default function EnterpriseDashboard() {
           {navItems.map((item) => (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => handleNavClick(item.id)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                 activeTab === item.id 
                   ? 'bg-green-600/20 text-green-400 border border-green-600/30' 
@@ -104,9 +117,8 @@ export default function EnterpriseDashboard() {
           </div>
         </header>
 
-        {/* Content Area */}
-        {activeTab === 'overview' && (
-          <div className="space-y-8">
+        {/* Content Area - Always show Overview for now as it contains the main cards */}
+        <div className="space-y-8">
             {/* Status Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <StatusCard 
@@ -182,19 +194,9 @@ export default function EnterpriseDashboard() {
                     {feature}
                   </div>
                 ))}
-              </div>
             </div>
           </div>
-        )}
-
-        {/* Placeholder tabs */}
-        {activeTab !== 'overview' && (
-          <div className="text-center py-20">
-            <Settings className="w-16 h-16 mx-auto mb-4 text-gray-700" />
-            <h2 className="text-2xl font-bold mb-2 capitalize">{activeTab}</h2>
-            <p className="text-gray-500">This module is under development for Enterprise users.</p>
-          </div>
-        )}
+        </div>
       </main>
 
       {/* AI Receptionist Modal */}

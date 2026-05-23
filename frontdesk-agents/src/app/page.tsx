@@ -138,6 +138,7 @@ export default function LandingPage() {
               <Play className="w-4 h-4" /> {t.nav.demo}
             </button>
             <a href="/customer/login" className="text-gray-300 hover:text-white transition-colors">{t.nav.signIn}</a>
+            <a href="/enterprise/dashboard" className="px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded-lg text-sm font-bold transition-colors">Enterprise</a>
             
             {/* Theme Toggle */}
             <button

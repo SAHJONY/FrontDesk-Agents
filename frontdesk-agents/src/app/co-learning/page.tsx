@@ -31,7 +31,7 @@ interface Experiment {
 }
 
 export default function CoLearningDashboard() {
-  const [isDarkMode, useState(true)
+  const [isDarkMode, setIsDarkMode] = useState(true)
   const [signals, setSignals] = useState<Signal[]>([])
   const [patterns, setPatterns] = useState<Pattern[]>([])
   const [autoImprove, setAutoImprove] = useState(true)

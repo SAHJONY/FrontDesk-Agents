@@ -33,13 +33,26 @@ export default function CentralCommandCenter() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [loading, setLoading] = useState(true)
   
+  // AI Model State
+  const [selectedModel, setSelectedModel] = useState('meta/llama-3.1-405b-instruct')
+  const [nvidiaMode, setNvidiaMode] = useState(false)
+  
+  // Available NVIDIA Models
+  const nvidiaModels = [
+    { id: 'meta/llama-3.1-405b-instruct', name: 'Llama-3.1 405B (Most Powerful)', provider: 'NVIDIA' },
+    { id: 'meta/llama-3.1-70b-instruct', name: 'Llama-3.1 70B (Balanced)', provider: 'NVIDIA' },
+    { id: 'meta/llama-3-70b-instruct', name: 'Llama-3 70B', provider: 'NVIDIA' },
+    { id: 'mistralai/mistral-large', name: 'Mistral Large', provider: 'NVIDIA' },
+    { id: 'google/gemma-7b', name: 'Gemma 7B', provider: 'NVIDIA' },
+    { id: 'openai/gpt-4o', name: 'GPT-4o (OpenAI)', provider: 'OpenAI' },
+  ]
+  
   // System State
   const [systems, setSystems] = useState<SystemStatus[]>([])
   const [envVars, setEnvVars] = useState<EnvVar[]>([])
   const [chatInput, setChatInput] = useState('')
   const [chatHistory, setChatHistory] = useState<{role: 'user' | 'system', text: string}[]>([])
   const [demoStatus, setDemoStatus] = useState<'idle' | 'calling' | 'connected' | 'completed'>('idle')
-  const [nvidiaMode, setNvidiaMode] = useState(false)
 
   const chatEndRef = useRef<HTMLDivElement>(null)
 
@@ -208,7 +221,31 @@ export default function CentralCommandCenter() {
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Top Bar */}
         <header className="h-16 border-b border-white/10 bg-black/50 backdrop-blur-xl flex items-center justify-between px-6">
-          <h1 className="text-xl font-bold capitalize">{activeTab}</h1>
+          <div className="flex items-center gap-4">
+            <h1 className="text-xl font-bold capitalize">{activeTab}</h1>
+            {/* Model Selector Dropdown */}
+            <div className="relative">
+              <select
+                value={selectedModel}
+                onChange={(e) => {
+                  setSelectedModel(e.target.value)
+                  addSystemMessage(`🔄 Switched AI model to: ${e.target.options[e.target.selectedIndex].text}`)
+                }}
+                className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-blue-500 cursor-pointer hover:bg-white/20 transition"
+              >
+                {nvidiaModels.map((model) => (
+                  <option key={model.id} value={model.id} className="bg-black text-white">
+                    {model.name}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+          </div>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 px-3 py-1.5 bg-green-900/30 border border-green-700 rounded-full text-green-400 text-xs font-medium">
               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />

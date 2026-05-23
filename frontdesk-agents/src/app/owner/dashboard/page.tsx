@@ -93,9 +93,30 @@ export default function CentralCommandCenter() {
   })
   const chatEndRef = useRef<HTMLDivElement>(null)
 
+  useEffect(() => {
+    const initSystem = async () => {
+      const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { router.push('/owner/login'); return }
+
+      // Fetch Square POS Data
+      const fetchSquareData = async () => {
+        setSquareData(prev => ({ ...prev, loading: true }))
+        try {
+          const response = await fetch('/api/square/transactions')
+          const data = await response.json()
+          setSquareData({
+            totalSales: data.totalSales || 0,
+            transactions: data.transactions || [],
+            loading: false
+          })
+        } catch (error) {
+          console.error('Square API Error:', error)
+          setSquareData(prev => ({ ...prev, loading: false }))
+        }
+      }
+
       fetchSquareData()
-      
-      // Poll Square data every 30 seconds in Live Mode
       const squareInterval = setInterval(fetchSquareData, 30000)
 
       // Initialize Systems Status
@@ -133,7 +154,6 @@ export default function CentralCommandCenter() {
       }
       if (hasSquare) addSystemMessage("🟢 Square POS connected. Syncing sales data...")
 
-      // Cleanup
       return () => clearInterval(squareInterval)
     }
     initSystem()

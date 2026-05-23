@@ -5,6 +5,7 @@ import { Phone, Globe, Shield, Zap, Check, Play, Mail, Bot } from 'lucide-react'
 export default function LandingPage() {
   const [showVideo, setShowVideo] = useState(false)
   const [email, setEmail] = useState('')
+  const heroTitle = "World's Most Advanced"
   const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); setEmail('') }
 
   return (
@@ -31,7 +32,7 @@ export default function LandingPage() {
       <section className="pt-32 pb-20 px-4 text-center">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-5xl md:text-7xl font-bold mb-6">
-            World's Most Advanced<br />
+            {heroTitle}<br />
             <span className="bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
               AI Receptionist
             </span>

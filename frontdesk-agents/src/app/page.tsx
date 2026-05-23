@@ -380,6 +380,172 @@ export default function LandingPage() {
                   }`}
                 >
                   <h3 className="text-2xl font-bold mb-2">{tier.name}</h3>
-                  <div className="mb-4">
-                    <span className="text-4xl font-bold">{tier.price}</span>
-                    {tier.period && <span className="text-gray-400">{tier.period}</span>
+              <div className="mb-4">
+                <span className="text-4xl font-bold">{tier.price}</span>
+                {tier.period && <span className="text-gray-400">{tier.period}</span>}
+              </div>
+              <p className="text-gray-400 mb-6">{tier.description}</p>
+              <button className={`w-full py-3 rounded-lg font-medium mb-6 ${
+                tier.highlight 
+                  ? 'bg-green-600 hover:bg-green-500' 
+                  : 'bg-white/10 hover:bg-white/20'
+              } transition`}>
+                {tier.cta}
+              </button>
+              <ul className="space-y-3">
+                {tier.features.map((feature, j) => (
+                  <li key={j} className="flex items-center gap-2 text-sm">
+                    <Check className="w-4 h-4 text-green-400 flex-shrink-0" />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        {comparePlans && (
+          <div className="mt-12 p-6 bg-white/5 border border-white/10 rounded-xl">
+            <h4 className="font-bold mb-4">Detailed Comparison</h4>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-white/10">
+                    <th className="text-left py-2">Feature</th>
+                    <th>Starter</th>
+                    <th>Professional</th>
+                    <th>Enterprise</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b border-white/10">
+                    <td className="py-2">Agents</td>
+                    <td>1</td>
+                    <td>3</td>
+                    <td>Unlimited</td>
+                  </tr>
+                  <tr className="border-b border-white/10">
+                    <td className="py-2">Minutes</td>
+                    <td>1,000</td>
+                    <td>3,000</td>
+                    <td>Unlimited</td>
+                  </tr>
+                  <tr className="border-b border-white/10">
+                    <td className="py-2">HIPAA</td>
+                    <td>-</td>
+                    <td>✓</td>
+                    <td>✓</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+
+    {/* FAQ Section */}
+    <section id="faq" className="py-20 px-4">
+      <div className="max-w-3xl mx-auto">
+        <h2 className="text-4xl font-bold text-center mb-12">Frequently Asked Questions</h2>
+        <div className="space-y-4">
+          {faqs.map((faq, i) => (
+            <details key={i} className="group bg-white/5 border border-white/10 rounded-xl overflow-hidden">
+              <summary className="flex justify-between items-center p-6 cursor-pointer list-none">
+                <h3 className="font-bold">{faq.question}</h3>
+                <span className="transform group-open:rotate-180 transition">▼</span>
+              </summary>
+              <div className="px-6 pb-6 text-gray-400">
+                {faq.answer}
+              </div>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    {/* Footer */}
+    <footer className="py-12 px-4 border-t border-white/10">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid md:grid-cols-4 gap-8 mb-8">
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center">
+                <Phone className="w-5 h-5 text-white" />
+              </div>
+              <span className="font-bold">FrontDesk Agents</span>
+            </div>
+            <p className="text-gray-400 text-sm">
+              World's most advanced AI receptionist for modern businesses.
+            </p>
+          </div>
+          
+          <div>
+            <h4 className="font-bold mb-4">Product</h4>
+            <ul className="space-y-2 text-sm text-gray-400">
+              <li><a href="#features" className="hover:text-white">Features</a></li>
+              <li><a href="#pricing" className="hover:text-white">Pricing</a></li>
+              <li><a href="#industries" className="hover:text-white">Industries</a></li>
+              <li><a href="#" className="hover:text-white">Integrations</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h4 className="font-bold mb-4">Company</h4>
+            <ul className="space-y-2 text-sm text-gray-400">
+              <li><a href="#" className="hover:text-white">About</a></li>
+              <li><a href="#" className="hover:text-white">Blog</a></li>
+              <li><a href="#" className="hover:text-white">Careers</a></li>
+              <li><a href="#" className="hover:text-white">Contact</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h4 className="font-bold mb-4">Legal</h4>
+            <ul className="space-y-2 text-sm text-gray-400">
+              <li><a href="#" className="hover:text-white">Privacy Policy</a></li>
+              <li><a href="#" className="hover:text-white">Terms of Service</a></li>
+              <li><a href="#" className="hover:text-white">HIPAA</a></li>
+              <li><a href="#" className="hover:text-white">Security</a></li>
+            </ul>
+          </div>
+        </div>
+        
+        <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-sm text-gray-500">
+            © 2026 FrontDesk Agents. All rights reserved.
+          </p>
+          <div className="flex gap-4">
+            {/* Social placeholders */}
+            <a href="#" className="text-gray-400 hover:text-white">Twitter</a>
+            <a href="#" className="text-gray-400 hover:text-white">LinkedIn</a>
+            <a href="#" className="text-gray-400 hover:text-white">GitHub</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    {/* Video Modal */}
+    {showVideo && (
+      <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setShowVideo(false)}>
+        <div className="max-w-4xl w-full aspect-video bg-black rounded-xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+          <div className="h-full flex items-center justify-center text-gray-400">
+            <div className="text-center">
+              <Play className="w-16 h-16 mx-auto mb-4 text-green-400" />
+              <p>Demo Video Placeholder</p>
+              <p className="text-sm mt-2">(Integrate with Vimeo/YouTube or upload custom demo)</p>
+              <button 
+                onClick={() => setShowVideo(false)}
+                className="mt-4 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+  </div>
+</>
+)
+}

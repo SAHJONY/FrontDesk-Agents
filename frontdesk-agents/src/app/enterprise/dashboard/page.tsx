@@ -16,6 +16,20 @@ export default function EnterpriseDashboard() {
   const [showLegalModal, setShowLegalModal] = useState(false)
   const [activeModule, setActiveModule] = useState<string | null>(null)
   
+  // Debug helper
+  const debugLog = (msg: string) => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Enterprise Dashboard]', msg)
+    }
+  }
+  
+  // Handle module click
+  const handleModuleClick = (moduleName: string) => {
+    debugLog(`Clicked module: ${moduleName}`)
+    debugLog(`Config exists: ${!!moduleConfigs[moduleName]}`)
+    setActiveModule(moduleName)
+  }
+  
   // Module Configurations
   const moduleConfigs: Record<string, any> = {
     'real estate': {
@@ -290,7 +304,7 @@ Opening: "Welcome to Sahjony Legal AI. I have access to the full US Legal Corpus
                   return (
                     <button
                       key={feature}
-                      onClick={() => setActiveModule(feature)}
+                      onClick={() => handleModuleClick(feature)}
                       className="p-4 rounded-xl bg-black/50 border border-white/10 text-center capitalize hover:border-green-500/50 transition-all hover:scale-105 hover:bg-white/5 group cursor-pointer"
                     >
                       <div className="text-2xl mb-2 group-hover:scale-110 transition-transform">{config.icon}</div>
@@ -468,11 +482,12 @@ Opening Line: "Thank you for calling Sahjony Capital, this is the AI assistant. 
       )}
 
       {/* Enterprise Module Modal */}
-      {activeModule && moduleConfigs[activeModule] && (
+      {activeModule && (
         <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto" onClick={() => setActiveModule(null)}>
+          {moduleConfigs[activeModule] ? (
           <div className="bg-[#0a0a0a] border border-white/10 rounded-xl max-w-4xl w-full my-8 relative shadow-2xl" onClick={e => e.stopPropagation()}>
-            {(() => {
-              const config = moduleConfigs[activeModule]
+          {(() => {
+          const config = moduleConfigs[activeModule]
               const colorMap: Record<string, string> = {
                 blue: 'text-blue-400 border-blue-800 bg-blue-900/20',
                 yellow: 'text-yellow-400 border-yellow-800 bg-yellow-900/20',

@@ -66,17 +66,28 @@ export default function CentralCommandCenter() {
       ])
 
       // Load Environment Variables
-      const hasNvidia = !!process.env.NVIDIA_API_KEY && process.env.NVIDIA_API_KEY !== 'nvapi-<YOUR_FREE_NVIDIA_KEY_HERE>'
+      const hasBland = !!process.env.BLAND_AI_API_KEY && process.env.BLAND_AI_API_KEY?.startsWith('sk-proj');
+      const hasResend = !!process.env.RESEND_API_KEY;
+      const hasNvidia = !!process.env.NVIDIA_API_KEY && process.env.NVIDIA_API_KEY !== 'nvapi-<YOUR_FREE_NVIDIA_KEY_HERE>';
+      
       setEnvVars([
         { key: 'NEXT_PUBLIC_SUPABASE_URL', value: 'https://btjscudzrtarfommgegw.supabase.co', description: 'Supabase Project URL', status: 'set', editable: false },
         { key: 'NEXT_PUBLIC_SUPABASE_ANON_KEY', value: 'eyJhbG... (Hidden)', description: 'Supabase Anon Key', status: 'set', editable: false },
-        { key: 'OPENAI_API_KEY', value: hasNvidia ? 'sk-... (Active)' : 'Missing', description: 'OpenAI API Key', status: hasNvidia ? 'set' : 'missing', editable: true },
+        { key: 'OPENAI_API_KEY', value: hasNvidia || hasBland ? 'sk-... (Active)' : 'Missing', description: 'OpenAI API Key', status: hasNvidia || hasBland ? 'set' : 'missing', editable: true },
         { key: 'NVIDIA_API_KEY', value: hasNvidia ? 'nvapi-... (Active)' : 'Not Set', description: 'NVIDIA NIM API Key', status: hasNvidia ? 'set' : 'missing', editable: true },
-        { key: 'BLAND_AI_KEY', value: '', description: 'Bland.ai Phone System', status: 'missing', editable: true },
+        { key: 'BLAND_AI_API_KEY', value: hasBland ? 'sk-proj-... (Active)' : 'Missing', description: 'Bland.ai Voice AI', status: hasBland ? 'set' : 'missing', editable: true },
+        { key: 'RESEND_API_KEY', value: hasResend ? 're_... (Active)' : 'Missing', description: 'Resend Email Service', status: hasResend ? 'set' : 'missing', editable: true },
+        { key: 'SMTP_USER', value: hasResend ? 'frontdeskllc@outlook.com' : 'Missing', description: 'SMTP Email User', status: hasResend ? 'set' : 'missing', editable: true },
       ])
 
       setLoading(false)
       addSystemMessage("Welcome to Central Command. NVIDIA NIM integration ready. Type 'help' for commands.")
+      if (hasBland) {
+        addSystemMessage("🟢 Bland.ai Voice AI detected. Phone: +1 (346) 521-4387")
+      }
+      if (hasResend) {
+        addSystemMessage("🟢 Resend Email Service detected.")
+      }
       if (hasNvidia) {
         setNvidiaMode(true)
         addSystemMessage("🟢 NVIDIA NIM detected. Switching Autonomous Core to Llama-3.1-405B.")

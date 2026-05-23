@@ -190,7 +190,6 @@ export default function CentralCommandCenter() {
     setTimeout(() => {
       setDemoStatus('completed')
       addSystemMessage("Call completed. Transcript saved to Memory Tree.")
-      setDemoMode(false)
       setDemoStatus('idle')
     }, 6000)
   }

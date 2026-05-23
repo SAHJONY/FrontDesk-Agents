@@ -213,8 +213,6 @@ export default function LandingPage() {
           </button>
         </div>
       </section>
-        </div>
-      </section>
 
       {/* Trust Signals - Premium */}
       <section id="trust" className="py-20 border-y border-white/10 bg-gradient-to-b from-white/[0.05] to-transparent">

@@ -68,12 +68,12 @@ export default function OwnerDashboard() {
     { id: 'settings', label: 'Settings', icon: Settings }
   ]
 
-  const handleSaveEnv = (id, newValue) => {
+  const handleSaveEnv = (id: number, newValue: string) => {
     setEnvVars(envVars.map(v => v.id === id ? { ...v, value: newValue, status: 'active' } : v))
     setEditingVar(null)
   }
 
-  const handleDeleteEnv = (id) => {
+  const handleDeleteEnv = (id: number) => {
     setEnvVars(envVars.filter(v => v.id !== id))
   }
 

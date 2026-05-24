@@ -39,11 +39,11 @@ export default function LandingPage() {
 
             {/* Language Selector */}
             <div className="flex items-center gap-4">
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-                className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
+<select
+  value={language}
+  onChange={(e) => setLanguage(e.target.value as any)}
+  className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+>
                 {Object.entries(languages).map(([code, data]: any) => (
                   <option key={code} value={code}>
                     {data.flag} {data.nativeName}

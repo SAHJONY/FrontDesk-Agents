@@ -8,26 +8,12 @@ import {
   Menu, X, Shield, Database, Server, Clock, AlertCircle, Play, Pause
 } from 'lucide-react'
 import HermesChat from './HermesChat'
-
 export default function OwnerDashboard() {
   const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [activeTab, setActiveTab] = useState('overview')
   const [harnessRunning, setHarnessRunning] = useState(true)
   const [harnessStatus, setHarnessStatus] = useState<any>(null)
-  const [showChat, setShowChat] = useState(false)
-  const [chatInput, setChatInput] = useState('')
-  const [isChatTyping, setIsChatTyping] = useState(false)
-  const chatEndRef = useRef<HTMLDivElement>(null)
-  
-  // Chat history with context
-  const [chatHistory, setChatHistory] = useState<Array<{role: 'user' | 'assistant', content: string, timestamp: Date}>>([
-    {
-      role: 'assistant',
-      content: "Hello Juan! I'm your Hermes Agent integrated directly into the Owner Dashboard. I have full access to your platform metrics, enterprise modules, and autonomous harness. How can I assist you today?",
-      timestamp: new Date()
-    }
-  ])
   
   // Mock data for demonstration
   const [metrics, setMetrics] = useState({
@@ -68,74 +54,16 @@ export default function OwnerDashboard() {
     { id: 'settings', label: 'Settings', icon: Settings }
   ]
 
-  const handleSendMessage = async () => {
-    if (!chatInput.trim()) return
-    
-    const userMessage = { role: 'user' as const, content: chatInput, timestamp: new Date() }
-    setChatHistory(prev => [...prev, userMessage])
-    setChatInput('')
-    setIsChatTyping(true)
-    
-    // Simulate Hermes Agent response with context awareness
-    setTimeout(() => {
-      let response = ''
-      const lowerInput = chatInput.toLowerCase()
-      
-      if (lowerInput.includes('status') || lowerInput.includes('how are')) {
-        response = `## Platform Status Report\n\n**Overall Health:** ✅ Operational\n\n### Key Metrics:\n- **Users:** ${metrics.totalUsers.toLocaleString()} (Active: ${metrics.activeUsers})\n- **Revenue (MTD):** $${metrics.revenue.toLocaleString()}\n- **Calls Today:** ${metrics.callsToday.toLocaleString()}\n- **Success Rate:** ${metrics.successRate}%\n- **Uptime:** ${metrics.uptime}%\n\n### Enterprise Modules:\nAll 6 modules operational with 1,467 total users.\n\n### Autonomous Harness:\n- Status: ${harnessRunning ? '✅ Running' : '⏸️ Paused'}\n- Cycles: ${metrics.harnessCycles}\n- Deployments: ${metrics.autonomousDeployments}\n\nAnything specific you'd like me to analyze or optimize?`
-      } else if (lowerInput.includes('revenue') || lowerInput.includes('money')) {
-        response = `## Revenue Analysis\n\n**Current MTD Revenue:** $${metrics.revenue.toLocaleString()}\n\n### By Module:\n- Marketing AI: $15,600 (32%)\n- Real Estate AI: $12,400 (26%)\n- Legal AI: $11,200 (23%)\n- Crypto AI: $8,900 (18%)\n- Energy AI: $9,800 (20%)\n- Lottery AI: $4,200 (9%)\n\n**Growth:** +15% vs last period\n**Projection:** $58K by month-end\n\nWould you like a detailed breakdown or optimization suggestions?`
-      } else if (lowerInput.includes('harness') || lowerInput.includes('autonomous')) {
-        response = `## Autonomous Harness Status\n\n**Current State:** ${harnessRunning ? '🟢 Running' : '🟡 Paused'}\n\n### Performance:\n- **Total Cycles:** ${metrics.harnessCycles}\n- **Successful Deployments:** ${metrics.autonomousDeployments}\n- **Success Rate:** 99.2%\n- **Learnings Stored:** 156\n\n### Recent Actions:\n1. Simplified signup flow (+18% conversion)\n2. Fixed latency spike in API gateway\n3. Deployed multi-language support\n\n### Next Cycle: in 4m 32s\n\nWant me to trigger a manual cycle or show detailed logs?`
-      } else if (lowerInput.includes('module') || lowerInput.includes('enterprise')) {
-        response = `## Enterprise Modules Overview\n\nAll **6 modules operational**:\n\n| Module | Users | Revenue | Status |\n|--------|-------|---------|--------|\n| 🏠 Real Estate | 234 | $12.4K | ✅ Active |\n| ⚡ Energy | 189 | $9.8K | ✅ Active |\n| 📈 Marketing | 412 | $15.6K | ✅ Active |\n| 🎰 Lottery | 156 | $4.2K | ✅ Active |\n| 🪙 Crypto | 298 | $8.9K | ✅ Active |\n| ⚖️ Legal | 178 | $11.2K | ✅ Active |\n\n**Total:** 1,467 users | $62.1K MTD\n\nWhich module would you like to analyze or optimize?`
-      } else if (lowerInput.includes('help') || lowerInput.includes('what can')) {
-        response = `## Hermes Agent Capabilities\n\nI'm your integrated AI assistant with full platform access. I can:\n\n### 📊 Analytics & Reporting\n- Real-time status reports\n- Revenue analysis and projections\n- User behavior insights\n- Module performance metrics\n\n### 🔧 Operations\n- Trigger harness cycles\n- Monitor autonomous deployments\n- Alert on anomalies\n- System health checks\n\n### 📈 Optimization\n- Identify growth opportunities\n- Suggest module improvements\n- Analyze conversion funnels\n- Recommend resource allocation\n\n### 🎯 Examples:\n- \"Show me today's status\"\n- \"Analyze revenue trends\"\n- \"How's the harness performing?\"\n- \"Which module is most profitable?\"\n- \"Trigger a manual harness cycle\"\n\nWhat would you like to explore?`
-      } else {
-        response = `I understand you're asking about: \"${chatInput}\"\n\nBased on current platform data:\n- **Users:** ${metrics.totalUsers.toLocaleString()} active\n- **Revenue:** $${metrics.revenue.toLocaleString()} MTD\n- **Modules:** All 6 operational\n- **Harness:** ${harnessRunning ? 'Running' : 'Paused'}\n\nI can help with:\n- Status reports\n- Revenue analysis  \n- Module performance\n- Harness operations\n- Optimization suggestions\n\nWhat specific aspect would you like me to analyze?`
-      }
-      
-      setChatHistory(prev => [...prev, { role: 'assistant', content: response, timestamp: new Date() }])
-      setIsChatTyping(false)
-    }, 1000)
-  }
-  
-  // Auto-scroll to bottom of chat
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [chatHistory])
-
-  const handleSendMessage = async () => {
-    if (!chatInput.trim()) return
-    
-    const userMessage = { role: 'user' as const, content: chatInput, timestamp: new Date() }
-    setChatHistory(prev => [...prev, userMessage])
-    setChatInput('')
-    setIsChatTyping(true)
-    
-    // Simulate Hermes Agent response with context awareness
-    setTimeout(() => {
-      let response = ''
-      const lowerInput = chatInput.toLowerCase()
-      
-      if (lowerInput.includes('status') || lowerInput.includes('how are')) {
-        response = `## Platform Status Report\\n\\n**Overall Health:** ✅ Operational\\n\\n### Key Metrics:\\n- **Users:** ${metrics.totalUsers.toLocaleString()} (Active: ${metrics.activeUsers})\\n- **Revenue (MTD):** $${metrics.revenue.toLocaleString()}\\n- **Calls Today:** ${metrics.callsToday.toLocaleString()}\\n- **Success Rate:** ${metrics.successRate}%\\n- **Uptime:** ${metrics.uptime}%\\n\\n### Enterprise Modules:\\nAll 6 modules operational with 1,467 total users.\\n\\n### Autonomous Harness:\\n- Status: ${harnessRunning ? '✅ Running' : '⏸️ Paused'}\\n- Cycles: ${metrics.harnessCycles}\\n- Deployments: ${metrics.autonomousDeployments}\\n\\nAnything specific you'd like me to analyze or optimize?`
-      } else if (lowerInput.includes('revenue') || lowerInput.includes('money')) {
-        response = `## Revenue Analysis\\n\\n**Current MTD Revenue:** $${metrics.revenue.toLocaleString()}\\n\\n### By Module:\\n- Marketing AI: $15,600 (32%)\\n- Real Estate AI: $12,400 (26%)\\n- Legal AI: $11,200 (23%)\\n- Crypto AI: $8,900 (18%)\\n- Energy AI: $9,800 (20%)\\n- Lottery AI: $4,200 (9%)\\n\\n**Growth:** +15% vs last period\\n**Projection:** $58K by month-end\\n\\nWould you like a detailed breakdown or optimization suggestions?`
-      } else if (lowerInput.includes('harness') || lowerInput.includes('autonomous')) {
-        response = `## Autonomous Harness Status\\n\\n**Current State:** ${harnessRunning ? '🟢 Running' : '🟡 Paused'}\\n\\n### Performance:\\n- **Total Cycles:** ${metrics.harnessCycles}\\n- **Successful Deployments:** ${metrics.autonomousDeployments}\\n- **Success Rate:** 99.2%\\n- **Learnings Stored:** 156\\n\\n### Recent Actions:\\n1. Simplified signup flow (+18% conversion)\\n2. Fixed latency spike in API gateway\\n3. Deployed multi-language support\\n\\n### Next Cycle: in 4m 32s\\n\\nWant me to trigger a manual cycle or show detailed logs?`
-      } else if (lowerInput.includes('module') || lowerInput.includes('enterprise')) {
-        response = `## Enterprise Modules Overview\\n\\nAll **6 modules operational**:\\n\\n| Module | Users | Revenue | Status |\\n|--------|-------|---------|--------|\\n| 🏠 Real Estate | 234 | $12.4K | ✅ Active |\\n| ⚡ Energy | 189 | $9.8K | ✅ Active |\\n| 📈 Marketing | 412 | $15.6K | ✅ Active |\\n| 🎰 Lottery | 156 | $4.2K | ✅ Active |\\n| 🪙 Crypto | 298 | $8.9K | ✅ Active |\\n| ⚖️ Legal | 178 | $11.2K | ✅ Active |\\n\\n**Total:** 1,467 users | $62.1K MTD\\n\\nWhich module would you like to analyze or optimize?`
-      } else if (lowerInput.includes('help') || lowerInput.includes('what can')) {
-        response = `## Hermes Agent Capabilities\\n\\nI'm your integrated AI assistant with full platform access. I can:\\n\\n### 📊 Analytics & Reporting\\n- Real-time status reports\\n- Revenue analysis and projections\\n- User behavior insights\\n- Module performance metrics\\n\\n### 🔧 Operations\\n- Trigger harness cycles\\n- Monitor autonomous deployments\\n- Alert on anomalies\\n- System health checks\\n\\n### 📈 Optimization\\n- Identify growth opportunities\\n- Suggest module improvements\\n- Analyze conversion funnels\\n- Recommend resource allocation\\n\\n### 🎯 Examples:\\n- "Show me today's status"\\n- "Analyze revenue trends"\\n- "How's the harness performing?"\\n- "Which module is most profitable?"\\n- "Trigger a manual harness cycle"\\n\\nWhat would you like to explore?`
-      } else {
-        response = `I understand you're asking about: "${chatInput}"\\n\\nBased on current platform data:\\n- **Users:** ${metrics.totalUsers.toLocaleString()} active\\n- **Revenue:** $${metrics.revenue.toLocaleString()} MTD\\n- **Modules:** All 6 operational\\n- **Harness:** ${harnessRunning ? 'Running' : 'Paused'}\\n\\nI can help with:\\n- Status reports\\n- Revenue analysis  \\n- Module performance\\n- Harness operations\\n- Optimization suggestions\\n\\nWhat specific aspect would you like me to analyze?`
-      }
-      
-      setChatHistory(prev => [...prev, { role: 'assistant', content: response, timestamp: new Date() }])
-      setIsChatTyping(false)
-    }, 1000)
-  }
+    // Simulate real-time updates
+    const interval = setInterval(() => {
+      setMetrics(prev => ({
+        ...prev,
+        callsToday: prev.callsToday + Math.floor(Math.random() * 10)
+      }))
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [])
 
   const renderContent = () => {
     switch (activeTab) {
@@ -379,95 +307,7 @@ export default function OwnerDashboard() {
           {renderContent()}
         </div>
       </main>
-
-      {/* Floating Chat Button */}
-      <button
-        onClick={() => setShowChat(!showChat)}
-        className="fixed bottom-6 right-6 z-50 p-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full shadow-lg hover:scale-110 transition-all"
-      >
-        <Bot className="w-6 h-6 text-white" />
-      </button>
-
-      {/* Chat Interface */}
-      {showChat && (
-        <div className="fixed bottom-24 right-6 z-50 w-96 max-h-[600px] bg-black border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden">
-          {/* Chat Header */}
-          <div className="p-4 border-b border-white/10 bg-gradient-to-r from-blue-900/50 to-purple-900/50 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-600 rounded-lg">
-                <Bot className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h3 className="font-bold text-white">Hermes Agent</h3>
-                <p className="text-xs text-gray-400">Autonomous Platform Assistant</p>
-              </div>
-            </div>
-            <button onClick={() => setShowChat(false)} className="text-gray-400 hover:text-white">
-              <ChevronDown className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Chat Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[400px]">
-            {chatHistory.map((message, index) => (
-              <div
-                key={index}
-                className={`flex gap-3 ${message.role === 'user' ? 'flex-row-reverse' : ''}`}
-              >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                  message.role === 'assistant' ? 'bg-blue-600' : 'bg-purple-600'
-                }`}>
-                  {message.role === 'assistant' ? <Bot className="w-4 h-4" /> : <User className="w-4 h-4" />}
-                </div>
-                <div className={`max-w-[80%] p-3 rounded-2xl ${
-                  message.role === 'assistant' 
-                    ? 'bg-white/10 text-white' 
-                    : 'bg-blue-600 text-white'
-                }`}>
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                  <p className="text-xs opacity-50 mt-1">
-                    {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </p>
-                </div>
-              </div>
-            ))}
-            {isChatTyping && (
-              <div className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
-                  <Bot className="w-4 h-4" />
-                </div>
-                <div className="flex items-center gap-1 text-gray-400">
-                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                </div>
-              </div>
-            )}
-            <div ref={chatEndRef} />
-          </div>
-
-          {/* Chat Input */}
-          <div className="p-4 border-t border-white/10 bg-black/50">
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                placeholder="Ask about platform status, revenue, modules..."
-                className="flex-1 px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none text-sm"
-              />
-              <button
-                onClick={handleSendMessage}
-                disabled={!chatInput.trim() || isChatTyping}
-                className="p-2 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 rounded-lg transition-colors"
-              >
-                <Send className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <HermesChat metrics={metrics} harnessRunning={harnessRunning} />
     </div>
   )
 }

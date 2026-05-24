@@ -8,6 +8,7 @@ import {
   Menu, X, Shield, Database, Server, Clock, AlertCircle, Play, Pause
 } from 'lucide-react'
 import HermesChat from './HermesChat'
+
 export default function OwnerDashboard() {
   const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -303,10 +304,13 @@ export default function OwnerDashboard() {
               </div>
             </div>
           </div>
+      <HermesChat metrics={metrics} harnessRunning={harnessRunning} />
 
           {renderContent()}
         </div>
+      </main>
       <HermesChat metrics={metrics} harnessRunning={harnessRunning} />
+    </div>
   )
 }
 

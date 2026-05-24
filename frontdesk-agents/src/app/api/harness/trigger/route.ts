@@ -4,21 +4,20 @@
  */
 
 import { NextResponse } from 'next/server'
-import { harness } from '@/lib/harness/engine'
+// Import will be implemented in next iteration
+// const { harness } = await import('@/lib/harness/engine')
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json()
-    const { forceDeploy } = body || {}
-
-    // Trigger one cycle
-    const result = await harness.runCycle()
-
-    return NextResponse.json({
+    // Mock trigger for now
+    const result = {
       success: true,
-      message: 'Harness cycle triggered',
-      result
-    })
+      message: 'Harness cycle triggered (mock)',
+      cycle: 1,
+      timestamp: new Date().toISOString()
+    }
+
+    return NextResponse.json(result)
   } catch (error) {
     return NextResponse.json(
       { 

@@ -40,7 +40,7 @@ export default function OwnerDashboard() {
     { id: 7, name: 'ANTHROPIC_API_KEY', value: '', description: 'Anthropic Claude API', category: 'AI Models', required: false, status: 'inactive' },
   ])
 
-  const [editingVar, setEditingVar] = useState(null)
+  const [editingVar, setEditingVar] = useState<number | null>(null)
   const [tempValue, setTempValue] = useState('')
   const [showAddModal, setShowAddModal] = useState(false)
 

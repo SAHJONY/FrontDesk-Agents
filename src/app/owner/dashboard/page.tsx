@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { 
   LayoutDashboard, Phone, Scale, Building2, Activity, Settings, LogOut,
   Zap, CheckCircle, TrendingUp, Users, DollarSign, BarChart3,
-  Menu, X, Shield, Database, Server, Clock, AlertCircle, Play, Pause,
-  Send, Bot, User, Trash2, Copy, ChevronDown, Sparkles
+  Menu, X, Shield, Database, Server, Clock, AlertCircle, Play, Pause
+} from 'lucide-react'
+import HermesChat from './HermesChat'
 } from 'lucide-react'
 
 export default function OwnerDashboard() {

@@ -1,18 +1,31 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useTranslation } from '@/lib/i18n/useTranslation'
+import { useState } from 'react'
 import { 
   LayoutDashboard, BarChart3, Building2, Languages, Settings, LogOut,
-  Globe, TrendingUp, Users, DollarSign, Activity, Phone, MessageSquare
+  Globe, TrendingUp, Users, DollarSign, Activity, Phone
 } from 'lucide-react'
 
+const LANGUAGES = {
+  en: { name: 'English', nativeName: 'English', flag: '🇺🇸' },
+  es: { name: 'Spanish', nativeName: 'Español', flag: '🇪🇸' },
+  'zh-cn': { name: 'Chinese', nativeName: '简体中文', flag: '🇨🇳' },
+  hi: { name: 'Hindi', nativeName: 'हिन्दी', flag: '🇮🇳' },
+  ar: { name: 'Arabic', nativeName: 'العربية', flag: '🇸🇦' },
+  pt: { name: 'Portuguese', nativeName: 'Português', flag: '🇧🇷' },
+  fr: { name: 'French', nativeName: 'Français', flag: '🇫🇷' },
+  de: { name: 'German', nativeName: 'Deutsch', flag: '🇩🇪' },
+  ja: { name: 'Japanese', nativeName: '日本語', flag: '🇯🇵' },
+  ru: { name: 'Russian', nativeName: 'Русский', flag: '🇷🇺' },
+  ko: { name: 'Korean', nativeName: '한국어', flag: '🇰🇷' },
+  it: { name: 'Italian', nativeName: 'Italiano', flag: '🇮🇹' },
+}
+
 export default function OwnerDashboard() {
-  const { t, language, setLanguage, languages } = useTranslation()
   const [activeTab, setActiveTab] = useState('overview')
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [language, setLanguage] = useState('en')
 
-  // Mock data - would come from Supabase
   const metrics = {
     totalBusinesses: 1247,
     activeUsers: 892,
@@ -22,19 +35,12 @@ export default function OwnerDashboard() {
     uptime: 99.97,
   }
 
-  const businesses = [
-    { id: 1, name: 'Smith & Associates Law', industry: 'legal', language: 'en', status: 'active', calls: 142 },
-    { id: 2, name: 'HealthFirst Medical', industry: 'medical', language: 'es', status: 'active', calls: 98 },
-    { id: 3, name: 'Premium Real Estate', industry: 'real_estate', language: 'zh', status: 'active', calls: 76 },
-    { id: 4, name: 'Global Finance Corp', industry: 'financial', language: 'en', status: 'active', calls: 234 },
-  ]
-
   const navItems = [
-    { id: 'overview', label: t('dashboard.overview'), icon: LayoutDashboard },
-    { id: 'analytics', label: t('dashboard.analytics'), icon: BarChart3 },
-    { id: 'businesses', label: t('dashboard.businesses'), icon: Building2 },
-    { id: 'languages', label: t('dashboard.languages'), icon: Languages },
-    { id: 'settings', label: t('dashboard.settings'), icon: Settings },
+    { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+    { id: 'businesses', label: 'Businesses', icon: Building2 },
+    { id: 'languages', label: 'Languages', icon: Languages },
+    { id: 'settings', label: 'Settings', icon: Settings },
   ]
 
   return (
@@ -68,12 +74,12 @@ export default function OwnerDashboard() {
         <div className="p-4 border-t border-white/10">
           <div className="flex items-center gap-2 mb-3">
             <Globe className="w-5 h-5 text-gray-400" />
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value as any)}
-                className="flex-1 bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-              {Object.entries(languages).map(([code, data]: any) => (
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+              className="flex-1 bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {Object.entries(LANGUAGES).map(([code, data]: any) => (
                 <option key={code} value={code}>
                   {data.flag} {data.nativeName}
                 </option>
@@ -84,14 +90,14 @@ export default function OwnerDashboard() {
 
         <button className="m-4 p-3 text-gray-400 hover:text-red-400 transition-colors flex items-center gap-3">
           <LogOut className="w-5 h-5" />
-          <span>{t('dashboard.logout')}</span>
+          <span>Logout</span>
         </button>
       </aside>
 
       {/* Main Content */}
       <main className="flex-1 p-8 overflow-auto">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold">{t(`dashboard.${activeTab}`)}</h1>
+          <h1 className="text-3xl font-bold capitalize">{activeTab}</h1>
           <button 
             className="md:hidden"
             onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -113,7 +119,7 @@ export default function OwnerDashboard() {
                   </div>
                 </div>
                 <div className="text-3xl font-bold mb-1">{metrics.totalBusinesses.toLocaleString()}</div>
-                <div className="text-gray-400">{t('metrics.totalBusinesses')}</div>
+                <div className="text-gray-400">Total Businesses</div>
               </div>
 
               <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
@@ -123,7 +129,7 @@ export default function OwnerDashboard() {
                   </div>
                 </div>
                 <div className="text-3xl font-bold mb-1">{metrics.activeUsers.toLocaleString()}</div>
-                <div className="text-gray-400">{t('metrics.activeUsers')}</div>
+                <div className="text-gray-400">Active Users</div>
               </div>
 
               <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
@@ -133,7 +139,7 @@ export default function OwnerDashboard() {
                   </div>
                 </div>
                 <div className="text-3xl font-bold mb-1">{metrics.callsToday.toLocaleString()}</div>
-                <div className="text-gray-400">{t('metrics.callsToday')}</div>
+                <div className="text-gray-400">Calls Today</div>
               </div>
 
               <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
@@ -143,7 +149,7 @@ export default function OwnerDashboard() {
                   </div>
                 </div>
                 <div className="text-3xl font-bold mb-1">${(metrics.revenue / 1000).toFixed(1)}K</div>
-                <div className="text-gray-400">{t('metrics.revenue')}</div>
+                <div className="text-gray-400">Revenue (MTD)</div>
               </div>
             </div>
 
@@ -151,7 +157,7 @@ export default function OwnerDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-semibold">{t('metrics.successRate')}</h3>
+                  <h3 className="text-xl font-semibold">Success Rate</h3>
                   <Activity className="w-6 h-6 text-green-400" />
                 </div>
                 <div className="text-4xl font-bold text-green-400 mb-2">{metrics.successRate}%</div>
@@ -160,55 +166,21 @@ export default function OwnerDashboard() {
 
               <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-semibold">{t('metrics.uptime')}</h3>
+                  <h3 className="text-xl font-semibold">Uptime</h3>
                   <TrendingUp className="w-6 h-6 text-blue-400" />
                 </div>
                 <div className="text-4xl font-bold text-blue-400 mb-2">{metrics.uptime}%</div>
                 <div className="text-gray-400">Platform availability</div>
               </div>
             </div>
-
-            {/* Active Businesses */}
-            <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
-              <h3 className="text-xl font-semibold mb-6">{t('dashboard.activeBusinesses')}</h3>
-              <div className="space-y-4">
-                {businesses.map((business) => (
-                  <div key={business.id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center">
-                        {business.name.charAt(0)}
-                      </div>
-                      <div>
-                        <div className="font-semibold">{business.name}</div>
-                        <div className="text-sm text-gray-400 capitalize">{business.industry}</div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <span className="text-2xl">{languages[business.language as keyof typeof languages]?.flag || '🌍'}</span>
-                      <div className="text-right">
-                        <div className="font-semibold">{business.calls} calls</div>
-                        <div className="text-sm text-green-400 capitalize">{business.status}</div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
           </>
-        )}
-
-        {activeTab === 'businesses' && (
-          <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
-            <h3 className="text-xl font-semibold mb-6">{t('dashboard.businesses')}</h3>
-            <p className="text-gray-400">Business management interface - coming soon</p>
-          </div>
         )}
 
         {activeTab === 'languages' && (
           <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
-            <h3 className="text-xl font-semibold mb-6">{t('dashboard.languages')}</h3>
+            <h3 className="text-xl font-semibold mb-6">Supported Languages</h3>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {Object.entries(languages).map(([code, data]: any) => (
+              {Object.entries(LANGUAGES).map(([code, data]: any) => (
                 <div key={code} className="p-4 bg-white/5 rounded-lg text-center">
                   <div className="text-3xl mb-2">{data.flag}</div>
                   <div className="font-semibold">{data.nativeName}</div>
@@ -216,6 +188,13 @@ export default function OwnerDashboard() {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {(activeTab === 'analytics' || activeTab === 'businesses' || activeTab === 'settings') && (
+          <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
+            <h3 className="text-xl font-semibold mb-6 capitalize">{activeTab}</h3>
+            <p className="text-gray-400">This section is coming soon. The platform is being built to support {Object.keys(LANGUAGES).length} languages and 50+ industries worldwide.</p>
           </div>
         )}
       </main>

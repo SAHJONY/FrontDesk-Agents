@@ -8,7 +8,6 @@ import {
   Menu, X, Shield, Database, Server, Clock, AlertCircle, Play, Pause
 } from 'lucide-react'
 import HermesChat from './HermesChat'
-} from 'lucide-react'
 
 export default function OwnerDashboard() {
   const router = useRouter()

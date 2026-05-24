@@ -257,7 +257,7 @@ export function useAIReceptionist(config: BusinessConfig) {
 
     setSession(prev => ({
       ...prev,
-      intake: { ...prev.intake, completed: true },
+      intake: { ...prev.intake, answers: prev.intake?.answers || {}, completed: true },
     }))
 
     return await response.json()

@@ -306,9 +306,7 @@ export default function OwnerDashboard() {
 
           {renderContent()}
         </div>
-      </main>
       <HermesChat metrics={metrics} harnessRunning={harnessRunning} />
-    </div>
   )
 }
 

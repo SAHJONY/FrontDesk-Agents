@@ -1,16 +1,28 @@
 import type { Metadata } from 'next'
-import { ThemeProvider } from '../components/ThemeProvider'
-import { TranslationProvider } from '../lib/useTranslation'
+import { Inter } from 'next/font/google'
+import { TranslationProvider } from '@/lib/i18n/useTranslation'
 import './globals.css'
 
+const inter = Inter({ subsets: ['latin'] })
+
 export const metadata: Metadata = {
-  title: 'FRONTDESK AGENTS | World Most Advanced AI Receptionist',
-  description: 'Transform your business reception with cutting-edge AI agent technology. 8K cinematic visuals, multi-language support, and universal industry compatibility.',
-  keywords: 'AI receptionist, artificial intelligence, virtual receptionist, AI agent, chatbot, customer service, front desk automation',
-  authors: [{ name: 'FRONTDESK AGENTS' }],
+  title: 'GlobalVoice AI - World\'s Most Advanced AI Receptionist',
+  description: 'Professional AI agents that speak 200+ languages, available 24/7/365. Any industry, any language, worldwide.',
+  keywords: 'AI receptionist, voice AI, multi-language, global business, 24/7 availability',
+  authors: [{ name: 'GlobalVoice AI' }],
   openGraph: {
-    title: 'FRONTDESK AGENTS - Hollywood-Grade AI Receptionist',
-    description: 'The world most advanced AI agentic receptionist with 8K cinematic visuals',
+    title: 'GlobalVoice AI - World\'s Most Advanced AI Receptionist',
+    description: 'Professional AI agents that speak 200+ languages, available 24/7/365.',
+    url: 'https://www.globalvoice.ai',
+    siteName: 'GlobalVoice AI',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+      },
+    ],
+    locale: 'en_US',
     type: 'website',
   },
 }
@@ -21,12 +33,10 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className="antialiased">
+    <html lang="en">
+      <body className={inter.className}>
         <TranslationProvider>
-          <ThemeProvider>
-            {children}
-          </ThemeProvider>
+          {children}
         </TranslationProvider>
       </body>
     </html>

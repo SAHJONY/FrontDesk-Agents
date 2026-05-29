@@ -152,7 +152,6 @@ const tools = [
   lookupBusinessTool,
   transferCallTool,
   takeVoicemailTool,
-  analyzeSentimentTool,
   checkAvailabilityTool
 ]
 
@@ -271,7 +270,7 @@ Steps:
 IMPORTANT: End your response with a new line containing exactly: [SENTIMENT:positive], [SENTIMENT:neutral], or [SENTIMENT:negative] based on the caller's emotional state.`
   
   // Invoke LLM with relevant tools
-  const llmToUse = additionalTools.length > 0 ? llm.bindTools(additionalTools) : llmWithTools
+  const llmToUse = additionalTools.length > 0 ? llm.bindTools(additionalTools) : llm
   
   const response = await llmToUse.invoke([
     new SystemMessage(systemPrompt + sentimentInstruction),

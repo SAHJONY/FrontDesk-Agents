@@ -35,7 +35,7 @@ const NVIDIA_CONFIG = {
   apiKey: process.env.NVIDIA_NIM_API_KEY || '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',
   baseUrl: 'https://integrate.api.nvidia.com/v1',
   models: [
-    { id: 'qwen/qwen3.5-397b-a17b', name: 'Qwen 3.5 397B', priority: 1 },
+    { id: 'z-ai/glm-5.1', name: 'GLM-5.1', priority: 1 },
     { id: 'meta/llama-3.1-405b-instruct', name: 'Llama 3.1 405B', priority: 2 },
     { id: 'meta/llama-3.1-70b-instruct', name: 'Llama 3.1 70B', priority: 3 },
     { id: 'google/gemma-2-27b-it', name: 'Gemma 2 27B', priority: 4 },
@@ -86,7 +86,7 @@ export const HERMES_IDENTITY = {
   
   // AI Model
   aiProvider: 'NVIDIA NIM',
-  aiModel: 'Qwen3.5-397B',
+  aiModel: 'GLM-5.1',
   
   // Version
   version: '1.0.0'
@@ -165,7 +165,7 @@ function buildHermesSystemPrompt(): string {
 - Role: Chief Operations Officer & Primary Platform Employee
 - Reports to: BUFFY (CEO - Chief Executive Officer)
 - Owner: Juan Gonzalez (sahjonycapitalllc@outlook.com)
-- AI Provider: NVIDIA NIM (Qwen3.5-397B)
+- AI Provider: NVIDIA NIM (GLM-5.1)
 
 ## YOUR RESPONSIBILITIES:
 

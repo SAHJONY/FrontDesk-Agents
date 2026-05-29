@@ -142,23 +142,29 @@ export class BusinessKnowledgeBase {
     return data
   }
   
-  // Search FAQs using semantic search
+  // Search FAQs using semantic search (cosine similarity with embeddings)
   async searchFAQs(query: string, limit = 5) {
     const queryEmbedding = await embeddings.embedQuery(query)
     
     const { data, error } = await getSupabase()
       .from('business_faqs')
-      .select('question, answer, category')
+      .select('question, answer, category, embedding')
       .eq('business_id', this.businessId)
     
     if (error) throw error
     
-    // Simple relevance scoring (in production, use vector similarity)
     const faqs = data || []
-    const scored = faqs.map(faq => ({
-      ...faq,
-      relevance: this.calculateRelevance(query, faq.question)
-    }))
+    // Compute cosine similarity using stored embeddings
+    const scored = faqs.map(faq => {
+      let relevance = 0
+      if (faq.embedding && Array.isArray(faq.embedding)) {
+        const dot = queryEmbedding.reduce((sum: number, v: number, i: number) => sum + v * (faq.embedding[i] || 0), 0)
+        const magQ = Math.sqrt(queryEmbedding.reduce((sum: number, v: number) => sum + v * v, 0))
+        const magF = Math.sqrt(faq.embedding.reduce((sum: number, v: number) => sum + v * v, 0))
+        relevance = magQ && magF ? dot / (magQ * magF) : 0
+      }
+      return { question: faq.question, answer: faq.answer, category: faq.category, relevance }
+    })
     
     return scored
       .sort((a, b) => b.relevance - a.relevance)
@@ -191,12 +197,7 @@ export class BusinessKnowledgeBase {
     return data || []
   }
   
-  private calculateRelevance(query: string, faqQuestion: string): number {
-    const queryWords = query.toLowerCase().split(' ')
-    const questionWords = faqQuestion.toLowerCase().split(' ')
-    const matches = queryWords.filter(w => questionWords.includes(w))
-    return matches.length / queryWords.length
-  }
+
 }
 
 // ============================================

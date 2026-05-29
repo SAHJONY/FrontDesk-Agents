@@ -228,12 +228,23 @@ Be efficient, confirm all details before booking.`
       
     case 'faq':
       const business = await lookupBusinessTool.invoke({ business_id: context.business_id })
-      systemPrompt = `You are a FAQ specialist with access to business information.
+      const faqList = (context.frequently_asked || [])
+        .map((f: { question?: string; answer?: string }) => `Q: ${f.question || ''}
+A: ${f.answer || ''}`)
+        .join('\n\n')
+      systemPrompt = `You are a FAQ specialist answering caller questions using the business's knowledge base.
       
-Business Info: ${JSON.stringify(business)}
+BUSINESS INFO:
+Name: ${business.business_name}
+Services: ${(business.services || []).join(', ')}
+Hours: ${business.operating_hours || 'Standard business hours'}
+
+RELEVANT FAQS (use these to answer):
+${faqList || 'No specific FAQs found. Use general knowledge or offer to transfer.'}
+
 Caller Question: ${messages[messages.length - 1]?.content || ''}
 
-Answer from business info. If unknown, offer to transfer to human.`
+Answer using the FAQs first. If the question isn't covered, offer to transfer to a human. Be specific, reference actual FAQ content, and keep responses concise (2-3 sentences).`
       additionalTools = [lookupBusinessTool]
       break
       

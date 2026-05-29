@@ -20,9 +20,11 @@ const llm = new ChatOpenAI({
 // TOOLS: Function calling capabilities
 // ============================================
 
-const scheduleAppointmentTool = tool(async ({ datetime, service, caller_name }: {
-  datetime: string; service: string; caller_name: string
-}) => {
+const scheduleAppointmentTool = tool(async (args: { datetime?: string; service?: string; caller_name?: string } | undefined) => {
+  const datetime = args?.datetime || ''
+  const service = args?.service || ''
+  const caller_name = args?.caller_name || ''
+  if (!datetime || !service) return { success: false, error: 'Missing required fields' }
   return {
     success: true,
     appointment_id: `APT-${Date.now()}`,
@@ -36,8 +38,10 @@ const scheduleAppointmentTool = tool(async ({ datetime, service, caller_name }: 
   description: 'Schedule an appointment. Provide datetime, service type, and caller name.'
 })
 
-const lookupBusinessTool = tool(async ({ business_id }: { business_id: string }) => {
+const lookupBusinessTool = tool(async (args: { business_id?: string } | undefined) => {
+  const businessId = args?.business_id || 'default'
   return {
+    business_id: businessId,
     business_name: 'FrontDesk Agents',
     industry: 'corporate',
     operating_hours: '24/7',
@@ -52,9 +56,9 @@ const lookupBusinessTool = tool(async ({ business_id }: { business_id: string })
   description: 'Look up business information, hours, services, and FAQs.'
 })
 
-const transferCallTool = tool(async ({ department, caller_name }: {
-  department: string; caller_name: string
-}) => {
+const transferCallTool = tool(async (args: { department?: string; caller_name?: string } | undefined) => {
+  const department = args?.department || 'general'
+  const caller_name = args?.caller_name || 'Unknown' 
   return {
     success: true,
     transfer_ext: '500',
@@ -67,9 +71,10 @@ const transferCallTool = tool(async ({ department, caller_name }: {
   description: 'Transfer call to a department or representative.'
 })
 
-const takeVoicemailTool = tool(async ({ message, caller_name, callback_number }: {
-  message: string; caller_name: string; callback_number: string
-}) => {
+const takeVoicemailTool = tool(async (args: { message?: string; caller_name?: string; callback_number?: string } | undefined) => {
+  const message = args?.message || 'No message'
+  const caller_name = args?.caller_name || 'Unknown'
+  const callback_number = args?.callback_number || 'Not provided' 
   return {
     success: true,
     voicemail_id: `VM-${Date.now()}`,
@@ -98,7 +103,9 @@ const analyzeSentimentTool = tool(async ({ text }: { text: string }) => {
   description: 'Analyze the sentiment of the conversation.'
 })
 
-const checkAvailabilityTool = tool(async ({ date, service }: { date: string; service: string }) => {
+const checkAvailabilityTool = tool(async (args: { date?: string; service?: string } | undefined) => {
+  const date = args?.date || 'today'
+  const service = args?.service || 'general' 
   return {
     available_slots: [
       { time: '9:00 AM', available: true },

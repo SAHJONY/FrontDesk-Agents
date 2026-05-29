@@ -88,44 +88,25 @@ const takeVoicemailTool = tool(async (args: { message?: string; caller_name?: st
   description: 'Take a detailed voicemail message.'
 })
 
-const analyzeSentimentTool = tool(async (args: { text?: string; context?: string } | undefined) => {
+const analyzeSentimentTool = tool(async (args: { text?: string } | undefined) => {
   const text = args?.text || ''
-  const context = args?.context || ''
 
-  if (!text && !context) return { sentiment: 'neutral', confidence: 0.5 }
+  if (!text) return { sentiment: 'neutral', confidence: 0.5 }
 
   const response = await llm.invoke([
-    new SystemMessage(`You are a sentiment analysis expert. Analyze the customer's message for sentiment.
+    new SystemMessage(`Analyze the sentiment of the customer message below.
+Respond with ONLY a single word: "positive", "neutral", or "negative".
 
-Return ONLY valid JSON with exactly two fields:
-- "sentiment": one of "positive", "neutral", or "negative"
-- "confidence": a number between 0 and 1
-
-Guidelines:
-- NEGATIVE: frustrated, angry, complaining, threatening, rude, urgent, demanding, cursing, upset
-- NEUTRAL: factual, asking questions, informational, indifferent
-- POSITIVE: satisfied, grateful, polite, happy, complimentary, calm
-
-IMPORTANT: If the customer uses words like "frustrated", "angry", "unacceptable", "demand", "terrible", "bad service", or complains strongly, classify as "negative".`),
-    new HumanMessage(`Customer message: ${text}
-
-Conversation context: ${context}`)
+- negative: frustrated, angry, complaining, demanding, upset, cursing, rude, threatening, unacceptable, bad service
+- neutral: factual, asking questions, informational
+- positive: satisfied, grateful, polite, happy, complimentary`),
+    new HumanMessage(text.slice(0, 1000))
   ])
 
-  try {
-    // Strip markdown code blocks that GLM-5.1 may wrap JSON in
-    const cleaned = (response.content as string)
-      .replace(/```json\s*/gi, '')
-      .replace(/```\s*/g, '')
-      .trim()
-    const parsed = JSON.parse(cleaned)
-    return {
-      sentiment: parsed.sentiment || 'neutral',
-      confidence: parsed.confidence || 0.85
-    }
-  } catch {
-    return { sentiment: 'neutral', confidence: 0.5 }
-  }
+  const lower = (response.content as string).toLowerCase().trim()
+  if (lower.includes('negative')) return { sentiment: 'negative', confidence: 0.85 }
+  if (lower.includes('positive')) return { sentiment: 'positive', confidence: 0.85 }
+  return { sentiment: 'neutral', confidence: 0.5 }
 }, {
   name: 'analyze_sentiment',
   description: 'Analyze the sentiment of the conversation using AI.'
@@ -280,10 +261,7 @@ Steps:
   const customerMessage = [...messages].reverse().find(m => m instanceof HumanMessage)
   const customerText = customerMessage?.content?.toString() || ''
   const sentimentResult = await analyzeSentimentTool.invoke({
-    text: customerText,
-    context: `Agent response: ${(response.content as string).slice(0, 300)}
-Stage: ${agentType}
-Intent: ${context.caller_intent || 'unknown'}`
+    text: customerText
   })
   
   // Determine next stage

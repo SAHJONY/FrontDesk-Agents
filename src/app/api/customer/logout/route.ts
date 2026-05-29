@@ -1,18 +1,18 @@
+// Customer Logout API Route
+// POST /api/customer/logout
+
 import { NextResponse } from 'next/server'
+import { signOutCustomer } from '@/lib/customer-auth'
 
 export async function POST() {
-  const response = NextResponse.json({
-    success: true,
-    message: 'Logged out successfully'
-  })
-
-  response.cookies.set('customer_session', '', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 0,
-    path: '/'
-  })
-
-  return response
+  try {
+    await signOutCustomer()
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Logout error:', error)
+    return NextResponse.json(
+      { error: 'An unexpected error occurred' },
+      { status: 500 }
+    )
+  }
 }

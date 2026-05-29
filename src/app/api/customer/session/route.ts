@@ -1,20 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { customerAuthService } from '@/lib/auth/customerAuth'
+// Customer Session API Route
+// GET /api/customer/session - Get current session
 
-export async function GET(request: NextRequest) {
+import { NextResponse } from 'next/server'
+import { getCustomerSession } from '@/lib/customer-auth'
+export const dynamic = 'force-dynamic'
+
+
+export async function GET() {
   try {
-    const sessionToken = request.cookies.get('customer_session')?.value
+    const session = await getCustomerSession()
 
-    if (!sessionToken) {
-      return NextResponse.json(
-        { authenticated: false },
-        { status: 401 }
-      )
-    }
-
-    const session = customerAuthService.validateCustomerSession(sessionToken)
-
-    if (!session || session.type !== 'customer') {
+    if (!session) {
       return NextResponse.json(
         { authenticated: false },
         { status: 401 }
@@ -23,17 +19,12 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       authenticated: true,
-      customer: {
-        email: session.email,
-        businessName: session.businessName,
-        industry: session.industry,
-        plan: session.plan
-      }
+      session
     })
   } catch (error) {
-    console.error('Session validation error:', error)
+    console.error('Session check error:', error)
     return NextResponse.json(
-      { authenticated: false },
+      { authenticated: false, error: 'An unexpected error occurred' },
       { status: 500 }
     )
   }

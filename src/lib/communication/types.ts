@@ -1,5 +1,5 @@
 // Communication Department Types
-// Twilio and Bland.ai Integration
+// Voice and SMS Integration Services
 
 export interface CallStatus {
   callId?: string;
@@ -37,6 +37,7 @@ export interface CallConfig {
   maxDuration?: number;
   temperature?: number;
   language?: string;
+  industry?: 'real-estate' | 'legal' | 'medical' | 'default';
 }
 
 export interface TranscriptSegment {

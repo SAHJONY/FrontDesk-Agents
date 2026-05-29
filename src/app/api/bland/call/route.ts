@@ -1,5 +1,5 @@
 /**
- * Bland.ai API - Initiate AI Voice Call
+ * Voice AI API - Initiate AI Voice Call
  */
 
 import { NextResponse } from 'next/server'
@@ -79,9 +79,9 @@ export async function POST(request: Request) {
         )
     }
   } catch (error: any) {
-    console.error('Bland.ai API error:', error)
+    console.error('Voice AI API error:', error)
     return NextResponse.json(
-      { error: error.message || 'Failed to process Bland.ai request' },
+      { error: error.message || 'Failed to process voice AI request' },
       { status: 500 }
     )
   }

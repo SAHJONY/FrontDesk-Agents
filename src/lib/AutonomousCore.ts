@@ -196,13 +196,13 @@ class AutonomousCoreClass {
   }
 
   private async handleAICall(action: string, payload: any, context: CoreContext): Promise<CoreResponse> {
-    // Placeholder for Bland.ai integration
+    // Placeholder for Voice AI integration
     console.log('[CORE] AI Call requested:', payload)
     return { success: true, data: { status: 'call_initiated', mock: true } }
   }
 
   private async handleBilling(action: string, payload: any, context: CoreContext): Promise<CoreResponse> {
-    // Placeholder for Stripe integration
+    // Placeholder for Payment integration
     console.log('[CORE] Billing action:', action)
     return { success: true, data: { status: 'billing_processed' } }
   }

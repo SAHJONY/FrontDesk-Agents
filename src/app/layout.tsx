@@ -2,13 +2,12 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'FRONTDESK AGENTS | World Most Advanced AI Receptionist',
-  description: 'Transform your business reception with cutting-edge AI agent technology. 8K cinematic visuals, multi-language support, and universal industry compatibility.',
-  keywords: 'AI receptionist, artificial intelligence, virtual receptionist, AI agent, chatbot, customer service, front desk automation',
-  authors: [{ name: 'FRONTDESK AGENTS' }],
+  title: 'FrontDesk Agents | #1 AI Receptionist Platform',
+  description: 'World most advanced AI receptionist. Works 24/7 for Law Firms, Dental Clinics, Med Spas, HVAC, Plumbing, Real Estate, Logistics & Insurance.',
+  keywords: 'AI receptionist, virtual receptionist, automated scheduling, 24/7 answering service',
   openGraph: {
-    title: 'FRONTDESK AGENTS - Hollywood-Grade AI Receptionist',
-    description: 'The world most advanced AI agentic receptionist with 8K cinematic visuals',
+    title: 'FrontDesk Agents - World Most Advanced AI Receptionist',
+    description: 'AI receptionist works 24/7, answers instantly, books appointments & qualifies leads.',
     type: 'website',
   },
 }

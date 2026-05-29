@@ -1,62 +1,49 @@
+// Customer Login API Route
+// POST /api/customer/login
+
 import { NextRequest, NextResponse } from 'next/server'
-import { customerAuthService } from '@/lib/auth/customerAuth'
+import { signInCustomer } from '@/lib/customer-auth'
+import { authRateLimit, getClientIp } from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
+  // Rate limiting
+  const clientIp = getClientIp(request)
+  const rateLimitResult = authRateLimit(clientIp)
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again later.' },
+      { status: 429, headers: { 'Retry-After': String(rateLimitResult.retryAfter) } }
+    )
+  }
+
   try {
     const body = await request.json()
     const { email, password } = body
 
     if (!email || !password) {
       return NextResponse.json(
-        { success: false, message: 'Email and password are required' },
+        { error: 'Email and password are required' },
         { status: 400 }
       )
     }
 
-    // For demo purposes, accept any business email with a valid password format
-    // In production, this would validate against a real database
-    const isValidEmail = email.includes('@') && email.includes('.')
-    const isValidPassword = password.length >= 6
+    const result = await signInCustomer(email, password)
 
-    if (!isValidEmail || !isValidPassword) {
+    if (!result.success) {
       return NextResponse.json(
-        { success: false, message: 'Invalid credentials' },
+        { error: result.error || 'Invalid credentials' },
         { status: 401 }
       )
     }
 
-    const businessName = email.split('@')[0].split('.').map((s: string) => s.charAt(0).toUpperCase() + s.slice(1)).join(' ')
-
-    // Create session token using customer auth service
-    const token = customerAuthService.createCustomerSession({
-      email,
-      businessName
-    })
-
-    const response = NextResponse.json({
+    return NextResponse.json({
       success: true,
-      message: 'Login successful',
-      customer: {
-        email,
-        businessName,
-        plan: 'Professional'
-      }
+      session: result.session
     })
-
-    // Set HTTP-only cookie
-    response.cookies.set('customer_session', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-      path: '/'
-    })
-
-    return response
   } catch (error) {
-    console.error('Customer login error:', error)
+    console.error('Login error:', error)
     return NextResponse.json(
-      { success: false, message: 'Internal server error' },
+      { error: 'An unexpected error occurred' },
       { status: 500 }
     )
   }

@@ -1,4 +1,4 @@
-// Twilio Voice Service for FRONTDESK AGENTS
+// Voice Service for FRONTDESK AGENTS
 // Communication Department Integration
 
 import twilio from 'twilio';
@@ -34,7 +34,7 @@ export class TwilioService {
       });
       return call.sid;
     } catch (error) {
-      console.error('Twilio makeCall error:', error);
+      console.error('Voice service makeCall error:', error);
       throw error;
     }
   }
@@ -54,7 +54,7 @@ export class TwilioService {
         endTime: call.endTime?.toISOString()
       };
     } catch (error) {
-      console.error('Twilio getCallStatus error:', error);
+      console.error('Voice service getCallStatus error:', error);
       throw error;
     }
   }
@@ -74,7 +74,7 @@ export class TwilioService {
         endTime: call.endTime?.toISOString()
       }));
     } catch (error) {
-      console.error('Twilio listCalls error:', error);
+      console.error('Voice service listCalls error:', error);
       throw error;
     }
   }
@@ -85,7 +85,7 @@ export class TwilioService {
       const recordings = await client.recordings.list({ callSid });
       return recordings;
     } catch (error) {
-      console.error('Twilio getRecordings error:', error);
+      console.error('Voice service getRecordings error:', error);
       throw error;
     }
   }
@@ -100,7 +100,7 @@ export class TwilioService {
       });
       return message.sid;
     } catch (error) {
-      console.error('Twilio sendSMS error:', error);
+      console.error('SMS service send error:', error);
       throw error;
     }
   }
@@ -116,7 +116,7 @@ export class TwilioService {
         return numbers;
       }
     } catch (error) {
-      console.error('Twilio getAvailableNumbers error:', error);
+      console.error('Phone service getAvailableNumbers error:', error);
       throw error;
     }
   }
@@ -129,7 +129,7 @@ export class TwilioService {
       });
       return purchased;
     } catch (error) {
-      console.error('Twilio purchaseNumber error:', error);
+      console.error('Phone service purchaseNumber error:', error);
       throw error;
     }
   }

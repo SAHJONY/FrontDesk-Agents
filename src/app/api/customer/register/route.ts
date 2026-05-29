@@ -1,66 +1,68 @@
+// Customer Registration API Route
+// POST /api/customer/register
+
 import { NextRequest, NextResponse } from 'next/server'
-import { customerAuthService } from '@/lib/auth/customerAuth'
+import { signUpCustomer } from '@/lib/customer-auth'
+import { authRateLimit, getClientIp } from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
+  // Rate limiting
+  const clientIp = getClientIp(request)
+  const rateLimitResult = authRateLimit(clientIp)
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again later.' },
+      { status: 429, headers: { 'Retry-After': String(rateLimitResult.retryAfter) } }
+    )
+  }
+
   try {
     const body = await request.json()
-    const { email, password, businessName, industry } = body
+    const { email, password, businessName, ownerName, industry } = body
 
-    if (!email || !password || !businessName) {
+    // Validation
+    if (!email || !password || !businessName || !ownerName) {
       return NextResponse.json(
-        { success: false, message: 'All fields are required' },
+        { error: 'Email, password, business name, and owner name are required' },
         { status: 400 }
       )
     }
 
-    // Validate email format
+    // Email validation - check for valid format
     if (!email.includes('@') || !email.includes('.')) {
       return NextResponse.json(
-        { success: false, message: 'Invalid email format' },
+        { error: 'Invalid email format' },
         { status: 400 }
       )
     }
 
-    // Validate password strength
-    if (password.length < 6) {
+    // Password strength
+    if (password.length < 8) {
       return NextResponse.json(
-        { success: false, message: 'Password must be at least 6 characters' },
+        { error: 'Password must be at least 8 characters' },
         { status: 400 }
       )
     }
 
-    // Create session for new customer
-    const token = customerAuthService.createCustomerSession({
-      email,
-      businessName,
-      industry: industry || 'General'
-    })
+    // Sign up customer
+    const result = await signUpCustomer(email, password, businessName, ownerName, industry || 'corporate')
 
-    const response = NextResponse.json({
+    if (!result.success) {
+      return NextResponse.json(
+        { error: result.error },
+        { status: 400 }
+      )
+    }
+
+    return NextResponse.json({
       success: true,
-      message: 'Registration successful',
-      customer: {
-        email,
-        businessName,
-        industry: industry || 'General',
-        plan: 'Professional'
-      }
+      session: result.session,
+      message: 'Account created successfully'
     })
-
-    // Set HTTP-only cookie
-    response.cookies.set('customer_session', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-      path: '/'
-    })
-
-    return response
   } catch (error) {
-    console.error('Customer registration error:', error)
+    console.error('Registration error:', error)
     return NextResponse.json(
-      { success: false, message: 'Internal server error' },
+      { error: 'An unexpected error occurred' },
       { status: 500 }
     )
   }

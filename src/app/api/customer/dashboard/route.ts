@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { supabaseAdmin, isSupabaseConfigured, getCustomerMetrics, getCallHistory, Customer } from '@/lib/supabase'
+export const dynamic = 'force-dynamic'
+
 
 // Customer session cookie name
 const CUSTOMER_SESSION_COOKIE = 'customer_session'

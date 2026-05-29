@@ -88,20 +88,47 @@ const takeVoicemailTool = tool(async (args: { message?: string; caller_name?: st
   description: 'Take a detailed voicemail message.'
 })
 
-const analyzeSentimentTool = tool(async (args: { text?: string } | undefined) => {
+const analyzeSentimentTool = tool(async (args: { text?: string; context?: string } | undefined) => {
   const text = args?.text || ''
-  const positiveWords = ['thank', 'great', 'excellent', 'happy', 'love', 'perfect', 'awesome']
-  const negativeWords = ['frustrated', 'angry', 'problem', 'issue', 'bad', 'terrible', 'annoyed']
-  const lower = text.toLowerCase()
-  const hasPositive = positiveWords.some(w => lower.includes(w))
-  const hasNegative = negativeWords.some(w => lower.includes(w))
-  return {
-    sentiment: hasNegative ? 'negative' : hasPositive ? 'positive' : 'neutral',
-    confidence: 0.85
+  const context = args?.context || ''
+
+  if (!text && !context) return { sentiment: 'neutral', confidence: 0.5 }
+
+  const response = await llm.invoke([
+    new SystemMessage(`You are a sentiment analysis expert. Analyze the customer's message for sentiment.
+
+Return ONLY valid JSON with exactly two fields:
+- "sentiment": one of "positive", "neutral", or "negative"
+- "confidence": a number between 0 and 1
+
+Guidelines:
+- positive: satisfied, grateful, polite, happy, complimentary, calm
+- neutral: factual, asking questions, informational, indifferent
+- negative: frustrated, angry, complaining, threatening, rude, urgent, demanding
+
+Be conservative — only mark negative if there is clear frustration, anger, or complaint.`),
+    new HumanMessage(`Customer message: ${text}
+
+Conversation context: ${context}`)
+  ])
+
+  try {
+    // Strip markdown code blocks that GLM-5.1 may wrap JSON in
+    const cleaned = (response.content as string)
+      .replace(/```json\s*/gi, '')
+      .replace(/```\s*/g, '')
+      .trim()
+    const parsed = JSON.parse(cleaned)
+    return {
+      sentiment: parsed.sentiment || 'neutral',
+      confidence: parsed.confidence || 0.85
+    }
+  } catch {
+    return { sentiment: 'neutral', confidence: 0.5 }
   }
 }, {
   name: 'analyze_sentiment',
-  description: 'Analyze the sentiment of the conversation.'
+  description: 'Analyze the sentiment of the conversation using AI.'
 })
 
 const checkAvailabilityTool = tool(async (args: { date?: string; service?: string } | undefined) => {
@@ -249,8 +276,15 @@ Steps:
     ...messages
   ])
   
-  // Analyze sentiment
-  const sentimentResult = await analyzeSentimentTool.invoke({ text: response.content as string })
+  // Analyze sentiment based on the customer's actual message
+  const customerMessage = [...messages].reverse().find(m => m._getType() === 'human')
+  const customerText = customerMessage?.content?.toString() || ''
+  const sentimentResult = await analyzeSentimentTool.invoke({
+    text: customerText,
+    context: `Agent response: ${(response.content as string).slice(0, 300)}
+Stage: ${agentType}
+Intent: ${context.caller_intent || 'unknown'}`
+  })
   
   // Determine next stage
   let nextStage = state.conversation_stage

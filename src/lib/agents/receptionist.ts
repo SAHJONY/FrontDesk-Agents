@@ -88,7 +88,8 @@ const takeVoicemailTool = tool(async (args: { message?: string; caller_name?: st
   description: 'Take a detailed voicemail message.'
 })
 
-const analyzeSentimentTool = tool(async ({ text }: { text: string }) => {
+const analyzeSentimentTool = tool(async (args: { text?: string } | undefined) => {
+  const text = args?.text || ''
   const positiveWords = ['thank', 'great', 'excellent', 'happy', 'love', 'perfect', 'awesome']
   const negativeWords = ['frustrated', 'angry', 'problem', 'issue', 'bad', 'terrible', 'annoyed']
   const lower = text.toLowerCase()

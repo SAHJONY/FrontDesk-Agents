@@ -59,11 +59,8 @@ export async function POST(req: NextRequest) {
     })
   } catch (error) {
     console.error('Agent chat error:', error)
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    const errorStack = error instanceof Error ? error.stack : ''
-    console.error('Agent chat error details:', errorMessage, errorStack)
     return NextResponse.json(
-      { success: false, error: errorMessage },
+      { success: false, error: 'Failed to process message' },
       { status: 500 }
     )
   }

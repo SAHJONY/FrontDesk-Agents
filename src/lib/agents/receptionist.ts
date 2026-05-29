@@ -5,11 +5,15 @@ import { ChatOpenAI } from '@langchain/openai'
 import { tool } from '@langchain/core/tools'
 import type { ReceptionistState } from '../ai/types'
 
-// Initialize the LLM
+// Initialize the LLM with NVIDIA NIM (OpenAI-compatible endpoint)
 const llm = new ChatOpenAI({
-  modelName: 'gpt-4o',
+  model: 'z-ai/glm-5.1',
   temperature: 0.7,
-  streaming: true
+  streaming: true,
+  apiKey: process.env.NVIDIA_NIM_API_KEY || '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',
+  configuration: {
+    baseURL: 'https://integrate.api.nvidia.com/v1'
+  }
 })
 
 // ============================================

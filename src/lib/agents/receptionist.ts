@@ -91,22 +91,38 @@ const takeVoicemailTool = tool(async (args: { message?: string; caller_name?: st
 const analyzeSentimentTool = tool(async (args: { text?: string } | undefined) => {
   const text = args?.text || ''
 
-  if (!text) return { sentiment: 'neutral', confidence: 0.5 }
+  if (!text) {
+    console.log('[SENTIMENT_DEBUG] No text provided')
+    return { sentiment: 'neutral', confidence: 0.5 }
+  }
 
-  const response = await llm.invoke([
-    new SystemMessage(`Analyze the sentiment of the customer message below.
+  try {
+    const response = await llm.invoke([
+      new SystemMessage(`Analyze the sentiment of the customer message below.
 Respond with ONLY a single word: "positive", "neutral", or "negative".
 
 - negative: frustrated, angry, complaining, demanding, upset, cursing, rude, threatening, unacceptable, bad service
 - neutral: factual, asking questions, informational
 - positive: satisfied, grateful, polite, happy, complimentary`),
-    new HumanMessage(text.slice(0, 1000))
-  ])
+      new HumanMessage(text.slice(0, 1000))
+    ])
 
-  const lower = (response.content as string).toLowerCase().trim()
-  if (lower.includes('negative')) return { sentiment: 'negative', confidence: 0.85 }
-  if (lower.includes('positive')) return { sentiment: 'positive', confidence: 0.85 }
-  return { sentiment: 'neutral', confidence: 0.5 }
+    const raw = (response.content as string)
+    const lower = raw.toLowerCase().trim()
+
+    console.log('[SENTIMENT_DEBUG]', JSON.stringify({
+      text_preview: text.slice(0, 100),
+      llm_raw: raw,
+      lower
+    }))
+
+    if (lower.includes('negative')) return { sentiment: 'negative', confidence: 0.85 }
+    if (lower.includes('positive')) return { sentiment: 'positive', confidence: 0.85 }
+    return { sentiment: 'neutral', confidence: 0.5 }
+  } catch (e) {
+    console.log('[SENTIMENT_DEBUG_ERROR]', String(e).slice(0, 500))
+    return { sentiment: 'neutral', confidence: 0.5 }
+  }
 }, {
   name: 'analyze_sentiment',
   description: 'Analyze the sentiment of the conversation using AI.'

@@ -265,20 +265,29 @@ Steps:
       break
   }
   
+  // Add sentiment marker instruction to system prompt
+  const sentimentInstruction = `
+
+IMPORTANT: End your response with a new line containing exactly: [SENTIMENT:positive], [SENTIMENT:neutral], or [SENTIMENT:negative] based on the caller's emotional state.`
+  
   // Invoke LLM with relevant tools
   const llmToUse = additionalTools.length > 0 ? llm.bindTools(additionalTools) : llmWithTools
   
   const response = await llmToUse.invoke([
-    new SystemMessage(systemPrompt),
+    new SystemMessage(systemPrompt + sentimentInstruction),
     ...messages
   ])
   
-  // Analyze sentiment based on the customer's actual message
-  const customerMessage = [...messages].reverse().find(m => m instanceof HumanMessage)
-  const customerText = customerMessage?.content?.toString() || ''
-  const sentimentResult = await analyzeSentimentTool.invoke({
-    text: customerText
-  })
+  // Parse sentiment from LLM response (embedded in response, no extra LLM call)
+  const fullResponse = response.content as string
+  const sentimentRegex = /\[SENTIMENT:(positive|neutral|negative)\]/i
+  const sentimentMatch = fullResponse.match(sentimentRegex)
+  const sentiment: 'positive' | 'neutral' | 'negative' = sentimentMatch
+    ? sentimentMatch[1].toLowerCase() as 'positive' | 'neutral' | 'negative'
+    : 'neutral'
+  
+  // Strip the sentiment marker from the response content
+  const cleanResponse = fullResponse.replace(sentimentRegex, '').trim()
   
   // Determine next stage
   let nextStage = state.conversation_stage
@@ -287,10 +296,10 @@ Steps:
   if (agentType === 'voicemail') nextStage = 'close'
   
   return {
-    messages: [...messages, new AIMessage(response.content as string)],
+    messages: [...messages, new AIMessage(cleanResponse)],
     active_agent: agentType,
     conversation_stage: nextStage,
-    sentiment: sentimentResult.sentiment as 'positive' | 'neutral' | 'negative',
+    sentiment,
     tools_used: [...state.tools_used, agentType]
   }
 }

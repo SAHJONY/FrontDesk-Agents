@@ -128,73 +128,88 @@ export class BusinessKnowledgeBase {
   
   // Store business FAQ
   async addFAQ(question: string, answer: string, category = 'general') {
-    const { data, error } = await getSupabase()
-      .from('business_faqs')
-      .insert({
-        business_id: this.businessId,
-        question,
-        answer,
-        category,
-        embedding: await embeddings.embedQuery(question)
-      })
-    
-    if (error) throw error
-    return data
+    try {
+      const { data, error } = await getSupabase()
+        .from('faqs')
+        .insert({
+          customer_id: this.businessId,
+          question,
+          answer,
+          category
+        })
+      if (error) throw error
+      return data
+    } catch (e) {
+      console.error('Failed to add FAQ:', e)
+      return null
+    }
   }
   
   // Search FAQs using semantic search (cosine similarity with embeddings)
   async searchFAQs(query: string, limit = 5) {
-    const queryEmbedding = await embeddings.embedQuery(query)
-    
-    const { data, error } = await getSupabase()
-      .from('business_faqs')
-      .select('question, answer, category, embedding')
-      .eq('business_id', this.businessId)
-    
-    if (error) throw error
-    
-    const faqs = data || []
-    // Compute cosine similarity using stored embeddings
-    const scored = faqs.map(faq => {
-      let relevance = 0
-      if (faq.embedding && Array.isArray(faq.embedding)) {
-        const dot = queryEmbedding.reduce((sum: number, v: number, i: number) => sum + v * (faq.embedding[i] || 0), 0)
-        const magQ = Math.sqrt(queryEmbedding.reduce((sum: number, v: number) => sum + v * v, 0))
-        const magF = Math.sqrt(faq.embedding.reduce((sum: number, v: number) => sum + v * v, 0))
-        relevance = magQ && magF ? dot / (magQ * magF) : 0
-      }
-      return { question: faq.question, answer: faq.answer, category: faq.category, relevance }
-    })
-    
-    return scored
-      .sort((a, b) => b.relevance - a.relevance)
-      .slice(0, limit)
+    try {
+      const { data, error } = await getSupabase()
+        .from('faqs')
+        .select('question, answer, category')
+        .eq('customer_id', this.businessId)
+        .eq('is_active', true)
+      
+      if (error) throw error
+      
+      const faqs = data || []
+      
+      // Score using word overlap (database has no embedding column yet)
+      const stopWords = new Set(['a', 'an', 'the', 'is', 'it', 'to', 'of', 'in', 'for', 'on', 'and', 'or', 'with', 'at', 'by', 'i', 'my', 'me', 'do', 'does', 'can', 'will', 'would', 'could', 'what', 'when', 'where', 'how', 'who', 'am', 'are', 'be', 'been', 'have', 'has', 'had', 'not', 'no'])
+      const queryWords = query.toLowerCase().split(/\s+/).filter(w => w.length >= 3 && !stopWords.has(w))
+      const scored = faqs.map(faq => {
+        const text = (faq.question + ' ' + faq.answer).toLowerCase()
+        const textWords = text.split(/\s+/)
+        const matches = queryWords.filter(w => textWords.some(tw => tw.includes(w)))
+        const relevance = queryWords.length > 0 ? matches.length / queryWords.length : 0
+        return { question: faq.question, answer: faq.answer, category: faq.category, relevance }
+      })
+      
+      return scored
+        .sort((a, b) => b.relevance - a.relevance)
+        .slice(0, limit)
+    } catch (e) {
+      console.error('Failed to search FAQs:', e)
+      return []
+    }
   }
-  
   // Store business services
   async addService(name: string, description: string, duration_minutes: number) {
-    const { data, error } = await getSupabase()
-      .from('business_services')
-      .insert({
-        business_id: this.businessId,
-        name,
-        description,
-        duration_minutes
-      })
-    
-    if (error) throw error
-    return data
+    try {
+      const { data, error } = await getSupabase()
+        .from('services')
+        .insert({
+          customer_id: this.businessId,
+          name,
+          description,
+          duration: duration_minutes
+        })
+      if (error) throw error
+      return data
+    } catch (e) {
+      console.error('Failed to add service:', e)
+      return null
+    }
   }
   
   // Get all services
   async getServices() {
-    const { data, error } = await getSupabase()
-      .from('business_services')
-      .select('*')
-      .eq('business_id', this.businessId)
-    
-    if (error) throw error
-    return data || []
+    try {
+      const { data, error } = await getSupabase()
+        .from('services')
+        .select('*')
+        .eq('customer_id', this.businessId)
+        .eq('is_active', true)
+      if (error) throw error
+      return data || []
+    } catch (e) {
+      console.error('Failed to get services:', e)
+      return []
+    }
   }
   
 

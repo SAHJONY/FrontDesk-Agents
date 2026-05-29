@@ -292,9 +292,24 @@ IMPORTANT: End your response with a new line containing exactly: [SENTIMENT:posi
   const fullResponse = response.content as string
   const sentimentRegex = /\[SENTIMENT:(positive|neutral|negative)\]/i
   const sentimentMatch = fullResponse.match(sentimentRegex)
-  const sentiment: 'positive' | 'neutral' | 'negative' = sentimentMatch
+  let sentiment: 'positive' | 'neutral' | 'negative' = sentimentMatch
     ? sentimentMatch[1].toLowerCase() as 'positive' | 'neutral' | 'negative'
     : 'neutral'
+  
+  // Fallback: when LLM makes tool calls instead of generating text with marker,
+  // analyze the last user message for sentiment
+  if (!sentimentMatch) {
+    const lastUserMsg = messages.filter(m => m._getType() === 'human').slice(-1)[0]
+    const userText = ((lastUserMsg?.content as string) || '').toLowerCase()
+    
+    // Negative keywords - angry, frustrated, demanding
+    const negativeWords = ['angry', 'frustrated', 'terrible', 'horrible', 'unacceptable', 'awful', 'upset', 'furious', 'bad service', 'speak to manager', 'speak to supervisor', 'complaint', 'demand', 'useless', 'worst', 'disgusting', 'irresponsible', 'incompetent', 'ridiculous', 'pathetic', 'unprofessional', 'disrespectful', 'never using', 'scam', 'refund', 'lawsuit', 'fed up', 'sick of', 'tired of']
+    
+    const hasNegative = negativeWords.some(w => userText.includes(w))
+    if (hasNegative) {
+      sentiment = 'negative'
+    }
+  }
   
   // Strip the sentiment marker from the response content
   const cleanResponse = fullResponse.replace(sentimentRegex, '').trim()

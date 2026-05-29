@@ -102,11 +102,11 @@ Return ONLY valid JSON with exactly two fields:
 - "confidence": a number between 0 and 1
 
 Guidelines:
-- positive: satisfied, grateful, polite, happy, complimentary, calm
-- neutral: factual, asking questions, informational, indifferent
-- negative: frustrated, angry, complaining, threatening, rude, urgent, demanding
+- NEGATIVE: frustrated, angry, complaining, threatening, rude, urgent, demanding, cursing, upset
+- NEUTRAL: factual, asking questions, informational, indifferent
+- POSITIVE: satisfied, grateful, polite, happy, complimentary, calm
 
-Be conservative — only mark negative if there is clear frustration, anger, or complaint.`),
+IMPORTANT: If the customer uses words like "frustrated", "angry", "unacceptable", "demand", "terrible", "bad service", or complains strongly, classify as "negative".`),
     new HumanMessage(`Customer message: ${text}
 
 Conversation context: ${context}`)
@@ -277,7 +277,7 @@ Steps:
   ])
   
   // Analyze sentiment based on the customer's actual message
-  const customerMessage = [...messages].reverse().find(m => m._getType() === 'human')
+  const customerMessage = [...messages].reverse().find(m => m instanceof HumanMessage)
   const customerText = customerMessage?.content?.toString() || ''
   const sentimentResult = await analyzeSentimentTool.invoke({
     text: customerText,

@@ -1,6 +1,6 @@
 // Multi-Agent AI Receptionist System
 // Advanced orchestration with supervisor pattern, tool use, and memory
-import { HumanMessage, AIMessage, SystemMessage } from '@langchain/core/messages'
+import { HumanMessage, AIMessage, SystemMessage, ToolMessage } from '@langchain/core/messages'
 import { ChatOpenAI } from '@langchain/openai'
 import { tool } from '@langchain/core/tools'
 import type { ReceptionistState } from '../ai/types'
@@ -283,10 +283,33 @@ IMPORTANT: End your response with a new line containing exactly: [SENTIMENT:posi
   // Invoke LLM with relevant tools
   const llmToUse = additionalTools.length > 0 ? llm.bindTools(additionalTools) : llm
   
-  const response = await llmToUse.invoke([
+  let response = await llmToUse.invoke([
     new SystemMessage(systemPrompt + sentimentInstruction),
     ...messages
   ])
+  
+  // Handle tool calls: execute tools and feed results back to LLM for text response
+  if (response.tool_calls && response.tool_calls.length > 0) {
+    const toolResults = []
+    for (const toolCall of response.tool_calls) {
+      const tool = additionalTools.find(t => t.name === toolCall.name)
+      if (tool) {
+        const result = await tool.invoke(toolCall.args)
+        toolResults.push(new ToolMessage({
+          content: JSON.stringify(result),
+          tool_call_id: toolCall.id || ""
+        }))
+      }
+    }
+    if (toolResults.length > 0) {
+      response = await llmToUse.invoke([
+        new SystemMessage(systemPrompt + sentimentInstruction),
+        ...messages,
+        response,
+        ...toolResults
+      ])
+    }
+  }
   
   // Parse sentiment from LLM response (embedded in response, no extra LLM call)
   const fullResponse = response.content as string
@@ -376,7 +399,7 @@ export async function handleReceptionistCall(
       { ...initialState, ...result } as ReceptionistState,
       'transfer'
     )
-    return { ...initialState, ...result, ...transferResult }
+    return { ...initialState, ...result, ...transferResult, requires_human: true }
   }
   
   return { ...initialState, ...result }

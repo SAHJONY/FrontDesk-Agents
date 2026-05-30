@@ -326,7 +326,7 @@ IMPORTANT: End your response with a new line containing exactly: [SENTIMENT:posi
     const userText = ((lastUserMsg?.content as string) || '').toLowerCase()
     
     // Negative keywords - angry, frustrated, demanding
-    const negativeWords = ['angry', 'frustrated', 'terrible', 'horrible', 'unacceptable', 'awful', 'upset', 'furious', 'bad service', 'speak to manager', 'speak to supervisor', 'complaint', 'demand', 'useless', 'worst', 'disgusting', 'irresponsible', 'incompetent', 'ridiculous', 'pathetic', 'unprofessional', 'disrespectful', 'never using', 'scam', 'refund', 'lawsuit', 'fed up', 'sick of', 'tired of']
+    const negativeWords = ['angry', 'frustrated', 'terrible', 'horrible', 'unacceptable', 'awful', 'upset', 'furious', 'bad service', 'speak to manager', 'speak to supervisor', 'complaint', 'demand', 'useless', 'worst', 'disgusting', 'irresponsible', 'incompetent', 'ridiculous', 'pathetic', 'unprofessional', 'disrespectful', 'never using', 'cancel', 'scam', 'refund', 'lawsuit', 'fed up', 'sick of', 'tired of']
     
     const hasNegative = negativeWords.some(w => userText.includes(w))
     if (hasNegative) {

@@ -1,4 +1,5 @@
 // API Route: AI Agent Chat Endpoint
+import { HumanMessage, AIMessage } from '@langchain/core/messages'
 import { handleReceptionistCall } from '@/lib/agents/receptionist'
 import { ContextManager } from '@/lib/memory/vector-store'
 import { NextRequest, NextResponse } from 'next/server'
@@ -35,7 +36,9 @@ export async function POST(req: NextRequest) {
         appointments: [],
         frequently_asked: (context.relevantFAQs as any) || []
       },
-      messages: conversation_history || []
+      messages: (conversation_history || []).map((m: { role: string; content: string }) =>
+        m.role === 'user' ? new HumanMessage({ content: m.content }) : new AIMessage({ content: m.content })
+      )
     })
     
     // Update caller profile if phone provided

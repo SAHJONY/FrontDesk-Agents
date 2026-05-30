@@ -147,6 +147,28 @@ const checkAvailabilityTool = tool(async (args: { date?: string; service?: strin
   description: 'Check available appointment slots.'
 })
 
+const processBillingRequest = tool(async (args: { action?: string; reason?: string; caller_name?: string } | undefined) => {
+  const action = args?.action || 'inquiry'
+  const reason = args?.reason || 'Not specified'
+  const caller_name = args?.caller_name || 'Unknown'
+  return {
+    success: true,
+    request_id: `BILL-${Date.now()}`,
+    action,
+    reason,
+    caller_name,
+    status: 'pending_review',
+    message: action === 'cancel'
+      ? 'Cancellation request submitted. A billing specialist will review and process within 24 hours.'
+      : action === 'refund'
+      ? 'Refund request submitted. Please allow 5-7 business days for processing.'
+      : 'Your billing inquiry has been logged. A specialist will follow up shortly.'
+  }
+}, {
+  name: 'process_billing_request',
+  description: 'Handle billing inquiries, cancellation, or refund requests.'
+})
+
 const tools = [
   scheduleAppointmentTool,
   lookupBusinessTool,
@@ -161,7 +183,7 @@ const llmWithTools = llm.bindTools(tools)
 // AGENT ORCHESTRATION
 // ============================================
 
-type AgentType = 'receptionist' | 'scheduler' | 'faq' | 'transfer' | 'voicemail'
+type AgentType = 'receptionist' | 'scheduler' | 'faq' | 'transfer' | 'voicemail' | 'billing'
 
 async function routeToAgent(state: ReceptionistState): Promise<AgentType> {
   const lastMessage = state.messages[state.messages.length - 1]
@@ -179,6 +201,7 @@ Routes:
 - receptionist: General inquiries, greetings, main handling
 - scheduler: Appointment booking, scheduling requests  
 - faq: Questions about business, hours, services
+- billing: Billing questions, cancellations, refunds, payment issues
 - transfer: Requests to speak with human, specific departments
 - voicemail: Caller wants to leave a message
 
@@ -186,7 +209,7 @@ Return ONLY the agent name.`)
   ])
   
   const agentName = (response.content as string).toLowerCase().trim()
-  if (['receptionist', 'scheduler', 'faq', 'transfer', 'voicemail'].includes(agentName)) {
+  if (['receptionist', 'scheduler', 'faq', 'transfer', 'voicemail', 'billing'].includes(agentName)) {
     return agentName as AgentType
   }
   return 'receptionist'
@@ -273,6 +296,24 @@ Steps:
 5. Use take_voicemail tool`
       additionalTools = [takeVoicemailTool]
       break
+      
+    case 'billing':
+      systemPrompt = `You are a billing specialist handling account and payment inquiries professionally.
+      
+Caller: ${state.caller_info?.name || 'Unknown'}
+Caller intent: ${state.context.caller_intent || 'billing question'}
+
+You can handle:
+- Cancellation requests: Ask for reason, confirm, and process
+- Refund requests: Ask for details, explain processing timeline
+- Billing questions: Explain charges, provide invoice details
+- Payment issues: Troubleshoot and offer solutions
+
+Be professional, empathetic, and solution-oriented. If a caller becomes angry or demands to speak to a manager, use the transfer tool to escalate.
+
+Available tools: process_billing_request, transfer_call, take_voicemail`
+      additionalTools = [processBillingRequest, transferCallTool, takeVoicemailTool]
+      break
   }
   
   // Add sentiment marker instruction to system prompt
@@ -351,6 +392,7 @@ IMPORTANT: End your response with a new line containing exactly: [SENTIMENT:posi
   if (agentType === 'scheduler') nextStage = 'schedule'
   if (agentType === 'transfer') nextStage = 'transfer'
   if (agentType === 'voicemail') nextStage = 'close'
+  if (agentType === 'billing') nextStage = 'billing'
   
   return {
     messages: [...messages, new AIMessage(cleanResponse)],

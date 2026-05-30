@@ -332,6 +332,15 @@ IMPORTANT: End your response with a new line containing exactly: [SENTIMENT:posi
     if (hasNegative) {
       sentiment = 'negative'
     }
+    
+    // Positive keywords - grateful, satisfied, praising
+    if (!hasNegative) {
+      const positiveWords = ['thank', 'thanks', 'great', 'appreciate', 'wonderful', 'amazing', 'excellent', 'happy', 'pleased', 'grateful', 'fantastic', 'awesome', 'helpful', 'perfect', 'love', 'best', 'kind', 'sweet', 'thoughtful', 'outstanding', 'superb', 'brilliant', 'delighted', 'satisfied', 'impressed', 'bless', "you're the best", 'very helpful', 'much appreciated']
+      const hasPositive = positiveWords.some(w => userText.includes(w))
+      if (hasPositive) {
+        sentiment = 'positive'
+      }
+    }
   }
   
   // Strip the sentiment marker from the response content

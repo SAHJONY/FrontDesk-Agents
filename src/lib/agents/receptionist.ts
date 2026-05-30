@@ -169,6 +169,28 @@ const processBillingRequest = tool(async (args: { action?: string; reason?: stri
   description: 'Handle billing inquiries, cancellation, or refund requests.'
 })
 
+const processSupportRequest = tool(async (args: { issue_type?: string; description?: string; caller_name?: string } | undefined) => {
+  const issue_type = args?.issue_type || 'general'
+  const description = args?.description || 'Not specified'
+  const caller_name = args?.caller_name || 'Unknown'
+  return {
+    success: true,
+    ticket_id: `TKT-${Date.now()}`,
+    issue_type,
+    description,
+    caller_name,
+    status: 'open',
+    message: issue_type === 'technical'
+      ? 'Technical support ticket created. A specialist will follow up within 2-4 hours.'
+      : issue_type === 'account'
+      ? 'Account support request submitted. A specialist will review within 24 hours.'
+      : 'Your support request has been logged. A specialist will follow up shortly.'
+  }
+}, {
+  name: 'process_support_request',
+  description: 'Handle general account, technical, or support inquiries.'
+})
+
 const tools = [
   scheduleAppointmentTool,
   lookupBusinessTool,
@@ -183,7 +205,7 @@ const llmWithTools = llm.bindTools(tools)
 // AGENT ORCHESTRATION
 // ============================================
 
-type AgentType = 'receptionist' | 'scheduler' | 'faq' | 'transfer' | 'voicemail' | 'billing'
+type AgentType = 'receptionist' | 'scheduler' | 'faq' | 'transfer' | 'voicemail' | 'billing' | 'support'
 
 async function routeToAgent(state: ReceptionistState): Promise<AgentType> {
   const lastMessage = state.messages[state.messages.length - 1]
@@ -202,6 +224,7 @@ Routes:
 - scheduler: Appointment booking, scheduling requests  
 - faq: Questions about business, hours, services
 - billing: Billing questions, cancellations, refunds, payment issues
+- support: Account issues, technical problems, general support questions
 - transfer: Requests to speak with human, specific departments
 - voicemail: Caller wants to leave a message
 
@@ -209,7 +232,7 @@ Return ONLY the agent name.`)
   ])
   
   const agentName = (response.content as string).toLowerCase().trim()
-  if (['receptionist', 'scheduler', 'faq', 'transfer', 'voicemail', 'billing'].includes(agentName)) {
+  if (['receptionist', 'scheduler', 'faq', 'transfer', 'voicemail', 'billing', 'support'].includes(agentName)) {
     return agentName as AgentType
   }
   return 'receptionist'
@@ -295,6 +318,24 @@ Steps:
 4. Confirm callback number
 5. Use take_voicemail tool`
       additionalTools = [takeVoicemailTool]
+      break
+      
+    case 'support':
+      systemPrompt = `You are a support specialist handling account and technical inquiries professionally.
+      
+Caller: ${state.caller_info?.name || 'Unknown'}
+Caller intent: ${state.context.caller_intent || 'support question'}
+
+You can handle:
+- Account issues: Login problems, profile updates, account access
+- Technical problems: Integration issues, bugs, errors, feature requests
+- General support: How-to questions, best practices, documentation
+- Setup assistance: Onboarding help, configuration guidance
+
+Be patient, thorough, and solution-oriented. If a caller becomes angry or demands to speak to a manager, use the transfer tool to escalate.
+
+Available tools: process_support_request, transfer_call, take_voicemail`
+      additionalTools = [processSupportRequest, transferCallTool, takeVoicemailTool]
       break
       
     case 'billing':
@@ -392,6 +433,7 @@ IMPORTANT: End your response with a new line containing exactly: [SENTIMENT:posi
   if (agentType === 'scheduler') nextStage = 'schedule'
   if (agentType === 'transfer') nextStage = 'transfer'
   if (agentType === 'voicemail') nextStage = 'close'
+  if (agentType === 'support') nextStage = 'support'
   if (agentType === 'billing') nextStage = 'billing'
   
   return {

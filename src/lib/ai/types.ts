@@ -58,6 +58,7 @@ export type ConversationStage =
   | 'schedule'
   | 'transfer'
   | 'billing'
+  | 'support'
   | 'close'
 
 export type AgentType = 
@@ -67,6 +68,7 @@ export type AgentType =
   | 'transfer'
   | 'voicemail'
   | 'billing'
+  | 'support'
   | 'supervisor'
 
 export type IntentType = 

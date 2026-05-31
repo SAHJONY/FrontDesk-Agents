@@ -1,6 +1,18 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { signInCustomer } from '@/lib/customer-auth'
+import { authRateLimit, getClientIp } from '@/lib/rate-limit'
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  // Rate limiting
+  const clientIp = getClientIp(request)
+  const rateLimitResult = authRateLimit(clientIp)
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again later.' },
+      { status: 429, headers: { 'Retry-After': String(rateLimitResult.retryAfter) } }
+    )
+  }
+
   try {
     const { email, password } = await request.json()
 
@@ -12,16 +24,22 @@ export async function POST(request: Request) {
       )
     }
 
-    // TODO: Implement actual authentication logic with database
-    // For now, return success for demo purposes
-    console.log('Login attempt:', { email })
+    const result = await signInCustomer(email, password)
+
+    if (!result.success) {
+      return NextResponse.json(
+        { success: false, message: result.error || 'Invalid email or password' },
+        { status: 401 }
+      )
+    }
 
     return NextResponse.json({
       success: true,
       message: 'Login successful',
       user: {
-        email,
-        id: 'demo-user-id',
+        email: result.session?.email,
+        id: result.session?.customerId,
+        businessName: result.session?.businessName,
       },
     })
   } catch (error) {

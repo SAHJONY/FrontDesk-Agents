@@ -13,6 +13,7 @@ export default function OwnerChatButton() {
         <button
           onClick={() => setIsOpen(true)}
           className="fixed bottom-6 right-6 z-50 p-4 bg-black text-white rounded-full shadow-lg hover:bg-gray-800 transition-all hover:scale-110"
+          aria-label="Open AI assistant"
         >
           <MessageSquare className="w-6 h-6" />
         </button>

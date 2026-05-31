@@ -1,10 +1,9 @@
 /**
- * Bland.ai Integration - AI Voice Calls
- * Documentation: https://docs.bland.ai
- * Get API Key: https://app.bland.ai/settings/api
+ * AI Voice Integration - Voice AI Service
+ * FRONTDESK AGENTS Platform
  */
 
-const BLAND_API_KEY = process.env.BLAND_API_KEY || ''
+const BLAND_API_KEY = process.env.BLANDAI_API_KEY || ''
 const BLAND_BASE_URL = 'https://api.bland.ai/v1'
 
 interface BlandCallParams {
@@ -68,7 +67,7 @@ export async function initiateCall(params: BlandCallParams): Promise<BlandCallRe
       message: `Call initiated to ${params.phone_number}`,
     }
   } catch (error: any) {
-    console.error('Bland.ai call error:', error)
+    console.error('Voice AI call error:', error)
     throw error
   }
 }
@@ -96,7 +95,7 @@ export async function getCallStatus(callId: string) {
 
     return await response.json()
   } catch (error: any) {
-    console.error('Bland.ai status error:', error)
+    console.error('Voice AI status error:', error)
     throw error
   }
 }
@@ -124,7 +123,7 @@ export async function hangupCall(callId: string) {
 
     return await response.json()
   } catch (error: any) {
-    console.error('Bland.ai hangup error:', error)
+    console.error('Voice AI hangup error:', error)
     throw error
   }
 }
@@ -154,7 +153,7 @@ export async function sendCallMessage(callId: string, message: string) {
 
     return await response.json()
   } catch (error: any) {
-    console.error('Bland.ai message error:', error)
+    console.error('Voice AI message error:', error)
     throw error
   }
 }
@@ -182,7 +181,7 @@ export async function getVoices() {
 
     return await response.json()
   } catch (error: any) {
-    console.error('Bland.ai voices error:', error)
+    console.error('Voice AI voices error:', error)
     throw error
   }
 }

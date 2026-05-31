@@ -44,6 +44,7 @@ export default function OwnerLogin() {
       <button
         onClick={() => setIsDarkMode(!isDarkMode)}
         className={`absolute top-6 right-6 p-3 rounded-full transition-all ${isDarkMode ? 'bg-white/10 hover:bg-white/20' : 'bg-gray-200 hover:bg-gray-300'}`}
+        aria-label="Toggle dark mode"
       >
         {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
       </button>
@@ -110,6 +111,7 @@ export default function OwnerLogin() {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
                     <EyeOff className={`h-5 w-5 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} />

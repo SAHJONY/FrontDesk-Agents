@@ -1,4 +1,11 @@
-# =============================================================================
+import os
+
+# ─── Paths ──────────────────────────────────────────
+canonical = r'C:\Users\juani\frontdesk-agents\frontdesk-agents'
+gitignore_path = r'C:\Users\juani\frontdesk-agents\.gitignore'
+
+# ─── .env.example content ───────────────────────────
+env_example = r"""# =============================================================================
 # FRONTDESK AGENTS — Environment Variables
 # =============================================================================
 # Copy this file to .env.local for local development:
@@ -44,8 +51,7 @@ STRIPE_SECRET_KEY=""
 # Test: sk_test_... | Live: sk_live_...
 
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=""
-# NOT YET IN USE — Reserved for future Stripe frontend integration.
-# Stripe publishable API key.
+# REQUIRED for payments. Stripe publishable API key.
 # Found in: Stripe Dashboard > Developers > API Keys
 # Test: pk_test_... | Live: pk_live_...
 
@@ -72,10 +78,8 @@ SQUARE_WEBHOOK_SIGNATURE_KEY=""
 # Used to verify webhook requests from Square.
 
 SQUARE_WEBHOOK_URL=""
-# OPTIONAL. Square webhook notification URL for receiving events.
-# Configure your Square application to send events to the URL this env var points to.
-# Set this to the publicly accessible URL where Square sends webhook notifications.
-# Also configure the matching endpoint in: Square Developer Dashboard > Applications > Webhooks
+# OPTIONAL. Square webhook notification URL.
+# This is set in Square Developer Dashboard > Webhooks, not typically an env var.
 
 # ── Twilio ─────────────────────────────────────────
 
@@ -156,15 +160,14 @@ PASSWORD_SALT="change-this-to-a-random-secret-string"
 # ── Vercel (Auto-Injected) ────────────────────────
 
 VERCEL_OIDC_TOKEN=""
-# Vercel Auto-Injected — DO NOT SET MANUALLY.
-# This token is automatically provided by Vercel during deployments for OIDC-based authentication.
+# Vercel-injected OIDC token for Vercel-specific operations.
+# Automatically set by Vercel during deployments. Do not set manually.
 
 # ── Development Only ───────────────────────────────
 
 NODE_ENV="development"
-# Next.js manages this automatically during builds and runtime.
-# Only set explicitly for testing or unusual deployment scenarios.
-# Options: development | production | test
+# Automatically set by Next.js. Options: development | production | test
+# Controls behavior such as hot reloading, error overlay, and production optimizations.
 
 # ═══════════════════════════════════════════════════════════════════════
 # DEPLOYMENT CHEATSHEET
@@ -196,3 +199,44 @@ NODE_ENV="development"
 #   - Add ALL env vars in Vercel Dashboard > Project Settings > Environment Variables
 #   - Deploy
 # ═══════════════════════════════════════════════════════════════════════
+"""
+
+# ─── Write .env.example ─────────────────────────────
+env_example_path = os.path.join(canonical, '.env.example')
+with open(env_example_path, 'w', encoding='utf-8') as f:
+    f.write(env_example)
+print(f'Created: {env_example_path} ({os.path.getsize(env_example_path)} bytes)')
+
+# ─── Fix .gitignore to track .env.example ──────────
+with open(gitignore_path, 'r', encoding='utf-8') as f:
+    gitignore_content = f.read()
+
+# Check if !.env.example is already there
+if '!.env.example' not in gitignore_content:
+    # Find the .env* line and add an exception after it
+    if '.env*' in gitignore_content:
+        gitignore_content = gitignore_content.replace('.env*', '.env*\n!.env.example')
+        with open(gitignore_path, 'w', encoding='utf-8') as f:
+            f.write(gitignore_content)
+        print(f'Updated: {gitignore_path} (added !.env.example exception)')
+    else:
+        print('WARNING: .env* pattern not found in .gitignore')
+else:
+    print('!.env.example already in .gitignore')
+
+# ─── Verify ─────────────────────────────────────────
+print(f'\n=== Verification ===')
+with open(env_example_path, 'r', encoding='utf-8') as f:
+    lines = f.readlines()
+print(f'.env.example: {len(lines)} lines')
+
+# Count env vars
+var_count = sum(1 for line in lines if '="' in line and not line.strip().startswith('#') and 'process' not in line)
+print(f'Environment variables documented: {var_count}')
+
+with open(gitignore_path, 'r', encoding='utf-8') as f:
+    content = f.read()
+has_exception = '!.env.example' in content
+print(f'.gitignore has !.env.example exception: {has_exception}')
+
+print('\nOK')

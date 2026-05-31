@@ -497,7 +497,8 @@ export default function LandingPage() {
               className='inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-aurora-cyan/10 border border-aurora-cyan/20 text-sm text-aurora-cyan/80 mb-8'
             >
               <span className='w-2 h-2 rounded-full bg-emerald-400 animate-glow' />
-              AI Receptionist — Available Now
+              <span className='hidden lg:inline'>AI Receptionist — Available Now</span>
+              <span className='lg:hidden'>AI Receptionist</span>
             </motion.div>
 
             <h1 className='text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold font-display leading-[1.05] mb-6'>

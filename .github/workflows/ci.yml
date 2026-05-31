@@ -24,7 +24,7 @@ jobs:
         run: cd frontdesk-agents && npm ci
 
       - name: Type-check test files
-        run: cd frontdesk-agents && npx tsc --noEmit -p tsconfig.test.json
+        run: cd frontdesk-agents && npx -p typescript tsc --noEmit -p tsconfig.test.json
 
       - name: Run tests
         run: cd frontdesk-agents && npx vitest run --reporter=verbose

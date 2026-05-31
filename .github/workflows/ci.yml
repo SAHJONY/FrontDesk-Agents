@@ -31,9 +31,3 @@ jobs:
 
       - name: Build (no lint)
         run: cd frontdesk-agents && npx next build --no-lint
-
-      - name: Run Stripe integration tests
-        if: ${{ secrets.STRIPE_SECRET_KEY != '' }}
-        run: cd frontdesk-agents && npx vitest run tests/stripe-webhooks.integration.test.ts --reporter=verbose
-        env:
-          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}

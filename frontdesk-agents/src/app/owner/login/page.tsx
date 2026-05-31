@@ -2,11 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@supabase/supabase-js'
 import { Mail, Lock, Eye, EyeOff, Bot, Sun, Moon } from 'lucide-react'
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://btjscudzrtarfommgegw.supabase.co'
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 
 export default function OwnerLogin() {
   const router = useRouter()
@@ -23,14 +19,19 @@ export default function OwnerLogin() {
     setLoading(true)
 
     try {
-      const supabase = createClient(supabaseUrl, supabaseAnonKey)
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password
+      const res = await fetch('/api/owner/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
       })
 
-      if (authError) throw authError
-      if (data.user) router.push('/owner/dashboard')
+      const data = await res.json()
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Invalid credentials')
+      }
+
+      router.push('/owner/dashboard')
     } catch (err: any) {
       setError(err.message || 'Failed to login')
     } finally {

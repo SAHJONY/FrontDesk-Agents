@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type-check test files
+        run: npx tsc --noEmit -p tsconfig.test.json
+
+      - name: Run tests
+        run: npx vitest run --reporter=verbose
+
+      - name: Build (no lint)
+        run: npx next build --no-lint
+
+      - name: Run Stripe integration tests
+        if: ${{ secrets.STRIPE_SECRET_KEY != '' }}
+        run: npx vitest run tests/stripe-webhooks.integration.test.ts --reporter=verbose
+        env:
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}

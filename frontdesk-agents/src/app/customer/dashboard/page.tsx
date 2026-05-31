@@ -179,7 +179,7 @@ export default function CustomerDashboard() {
         setRefreshing(false)
       }
     }
-  }, [])
+  }, [success, toastError])
 
   useEffect(() => {
     const controller = new AbortController()

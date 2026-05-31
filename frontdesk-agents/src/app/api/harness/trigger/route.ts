@@ -4,23 +4,26 @@
  */
 
 import { NextResponse } from 'next/server'
-// Import will be implemented in next iteration
-// const { harness } = await import('@/lib/harness/engine')
+import { getHarness } from '@/lib/harness/engine'
 
-export async function POST(request: Request) {
+export async function POST() {
   try {
-    // Mock trigger for now
-    const result = {
-      success: true,
-      message: 'Harness cycle triggered (mock)',
-      cycle: 1,
-      timestamp: new Date().toISOString()
-    }
+    const harness = getHarness()
+    const result = await harness.runCycle()
 
-    return NextResponse.json(result)
+    return NextResponse.json({
+      success: true,
+      message: `Harness cycle #${result.cycle} completed`,
+      cycle: result.cycle,
+      timestamp: result.timestamp,
+      durationSeconds: result.durationSeconds,
+      anomaliesDetected: result.anomaliesDetected.length,
+      deploymentsApplied: result.deployments.length,
+      learnings: result.learnings.length
+    })
   } catch (error) {
     return NextResponse.json(
-      { 
+      {
         success: false,
         error: 'Failed to trigger harness cycle',
         details: error instanceof Error ? error.message : 'Unknown error'

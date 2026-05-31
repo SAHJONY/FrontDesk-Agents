@@ -112,7 +112,7 @@ export function Testimonials() {
 
             {/* Quote */}
             <p className="text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">
-              "{testimonial.quote}"
+              &quot;{testimonial.quote}&quot;
             </p>
 
             {/* Metrics */}

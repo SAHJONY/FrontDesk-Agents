@@ -108,6 +108,7 @@ export function useAIReceptionist(config: BusinessConfig) {
       console.error('Failed to start call:', error)
       setSession(prev => ({ ...prev, status: 'disconnected' }))
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config.name])
 
   // End call
@@ -179,6 +180,7 @@ export function useAIReceptionist(config: BusinessConfig) {
     } finally {
       setIsListening(false)
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listen, addMessage, speak, session])
 
   // Process with AI (NVIDIA NIM)

@@ -274,10 +274,12 @@ export function t(key: string, lang: keyof typeof TRANSLATIONS = 'en', params?: 
   return value
 }
 
-export default {
+const i18n = {
   LANGUAGES,
   TRANSLATIONS,
   DEFAULT_LANGUAGE,
   getLanguage,
   t,
 }
+
+export default i18n

@@ -200,7 +200,7 @@ export default function OwnerDashboard() {
       setSendingState((prev) => ({ ...prev, [rec.id]: { status: "idle" } }))
       toastError("Network Error", "Please try again.")
     }
-  }, [])
+  }, [success, toastError])
 
   const navItems = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
@@ -240,7 +240,7 @@ export default function OwnerDashboard() {
     )
   }
 
-  if (!data) return null
+  if (!data || !data.metrics || !data.sales || !data.health || !data.partners || !data.projections) return null
 
   const { metrics, sales, health, partners, projections, charts } = data
 
@@ -406,7 +406,7 @@ export default function OwnerDashboard() {
                   </div>
                   <div className="flex justify-between text-sm mt-1">
                     <span className="text-gray-400">Average Lead Score</span>
-                    <span className="font-semibold">{sales.salesMetrics.averageScore.toFixed(1)}</span>
+                    <span className="font-semibold">{(sales.salesMetrics.averageScore ?? 0).toFixed(1)}</span>
                   </div>
                 </div>
               </div>
@@ -614,7 +614,7 @@ export default function OwnerDashboard() {
                 iconBg="bg-aurora-cyan/20"
                 iconColor="text-aurora-cyan"
                 label="LTV / CAC Ratio"
-                value={metrics.ltvCacRatio.toFixed(1) + 'x'}
+                value={(metrics.ltvCacRatio ?? 0).toFixed(1) + 'x'}
                 subtitle={metrics.ltvCacRatio > 3 ? 'Healthy' : 'Needs improvement'}
               />
               <MetricCard

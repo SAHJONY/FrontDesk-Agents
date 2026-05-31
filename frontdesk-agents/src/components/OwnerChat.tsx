@@ -214,7 +214,7 @@ export default function OwnerChat() {
           </button>
         </div>
         <p className="text-xs text-gray-500 mt-2 text-center">
-          Try: "Show revenue", "List customers", "System status"
+          Try: &quot;Show revenue&quot;, &quot;List customers&quot;, &quot;System status&quot;
         </p>
       </form>
     </div>

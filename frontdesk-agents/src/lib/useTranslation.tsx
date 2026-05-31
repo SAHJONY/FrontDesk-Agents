@@ -29,8 +29,8 @@ export function TranslationProvider({ children }: { children: ReactNode }): Reac
   useEffect(() => {
     const loadTranslations = async () => {
       try {
-        const module = await import('./translations.json')
-        const allTranslations = module.default as Record<string, any>
+        const translationModule = await import('./translations.json')
+        const allTranslations = translationModule.default as Record<string, any>
         const langTranslations = allTranslations[language] || allTranslations['en'] || {}
         setTranslations(langTranslations)
       } catch (error) {

@@ -8,18 +8,19 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'GlobalVoice AI - World\'s Most Advanced AI Receptionist',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://www.frontdeskagents.com'),
+  title: "FrontDesk Agents - The World's Most Advanced AI Receptionist",
   description: 'Professional AI agents that speak 200+ languages, available 24/7/365. Any industry, any language, worldwide.',
-  keywords: 'AI receptionist, voice AI, multi-language, global business, 24/7 availability',
-  authors: [{ name: 'GlobalVoice AI' }],
+  keywords: 'AI receptionist, voice AI, multi-language, global business, 24/7 availability, front desk automation',
+  authors: [{ name: 'FrontDesk Agents' }],
   openGraph: {
-    title: 'GlobalVoice AI - World\'s Most Advanced AI Receptionist',
+    title: "FrontDesk Agents - The World's Most Advanced AI Receptionist",
     description: 'Professional AI agents that speak 200+ languages, available 24/7/365.',
-    url: 'https://www.globalvoice.ai',
-    siteName: 'GlobalVoice AI',
+    url: process.env.NEXT_PUBLIC_APP_URL || 'https://www.frontdeskagents.com',
+    siteName: 'FrontDesk Agents',
     images: [
       {
-        url: '/og-image.png',
+        url: '/og-image.svg',
         width: 1200,
         height: 630,
       },

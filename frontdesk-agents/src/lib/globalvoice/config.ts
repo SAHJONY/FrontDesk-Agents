@@ -287,10 +287,12 @@ export const CURRENCIES = {
   // ... 150+ currencies
 } as const
 
-export default {
+const config = {
   INDUSTRIES,
   LANGUAGES,
   PERSONALITIES,
   COMPLIANCE,
   CURRENCIES,
 }
+
+export default config

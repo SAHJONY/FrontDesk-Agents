@@ -4,55 +4,20 @@
  */
 
 import { NextResponse } from 'next/server'
+import { getHarness } from '@/lib/harness/engine'
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    // Mock logs - in production, fetch from database
-    const logs = [
-      {
-        timestamp: new Date().toISOString(),
-        level: 'info',
-        message: '✅ Cycle #142 completed successfully',
-        details: {
-          duration: 12.5,
-          anomaliesDetected: 2,
-          deployments: 1
-        }
-      },
-      {
-        timestamp: new Date(Date.now() - 300000).toISOString(),
-        level: 'info',
-        message: '🚀 Deployed solution: hypothesis_anomaly_123',
-        details: {
-          improvement: '+18% conversion',
-          canary: true
-        }
-      },
-      {
-        timestamp: new Date(Date.now() - 600000).toISOString(),
-        level: 'warning',
-        message: '⚠️ Detected conversion drop in signup flow',
-        details: {
-          type: 'conversion_drop',
-          severity: 'medium',
-          affectedComponent: 'signup_page'
-        }
-      },
-      {
-        timestamp: new Date(Date.now() - 900000).toISOString(),
-        level: 'info',
-        message: '🧠 Stored learning: successful_deployment',
-        details: {
-          pattern: 'simplify_form_fields',
-          industry: 'legal'
-        }
-      }
-    ]
+    const { searchParams } = new URL(request.url)
+    const limit = parseInt(searchParams.get('limit') || '50', 10)
+
+    const harness = getHarness()
+    const logs = harness.getLogs(limit)
 
     return NextResponse.json({ logs })
   } catch (error) {
     return NextResponse.json(
-      { error: 'Failed to fetch logs' },
+      { error: 'Failed to fetch logs', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }

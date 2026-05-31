@@ -1,9 +1,0 @@
-{
-  "NEXT_PUBLIC_SUPABASE_URL": "https://btjscudzrtarfommgegw.supabase.co",
-  "NEXT_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpWT1QifQ.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0anNjdWR6cnRhcmZvbW1nZWd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc5NTc4NzYsImV4cCI6MjA2MzUzNzg3Nn0.YqIqLJfB8K9vK8xKxKxKxKxKxKxKxKxKxKxKxKxKxKx",
-  "BLANDAI_API_KEY": "your_blandai_api_key_here",
-  "BLANDAI_PHONE_NUMBER": "+1234567890",
-  "TWILIO_ACCOUNT_SID": "your_twilio_account_sid_here",
-  "TWILIO_AUTH_TOKEN": "your_twilio_auth_token_here",
-  "TWILIO_PHONE_NUMBER": "+1234567890"
-}

@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { TranslationProvider } from '@/lib/i18n/useTranslation'
+import { ToastProvider } from '@/components/ToastProvider'
+import { MotionConfig } from 'framer-motion'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -36,7 +38,11 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <TranslationProvider>
-          {children}
+          <MotionConfig reducedMotion="user">
+          <ToastProvider>
+            {children}
+          </ToastProvider>
+          </MotionConfig>
         </TranslationProvider>
       </body>
     </html>

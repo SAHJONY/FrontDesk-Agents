@@ -4,12 +4,12 @@
   "description": "The world's most advanced AI Agentic Receptionist - FRONTDESKAGENTS",
   "private": true,
   "scripts": {
-    "dev": "cd frontdesk-agents && npm run dev",
-    "build": "cd frontdesk-agents && npm run build",
-    "start": "cd frontdesk-agents && npm start",
-    "lint": "cd frontdesk-agents && npm run lint",
-    "test": "cd frontdesk-agents && npm test",
-    "test:run": "cd frontdesk-agents && npm run test:run"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "vitest",
+    "test:run": "vitest run"
   },
   "dependencies": {
     "@blandsdk/client": "^1.0.1",

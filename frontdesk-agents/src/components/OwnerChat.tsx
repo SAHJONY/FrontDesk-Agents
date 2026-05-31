@@ -142,10 +142,11 @@ export default function OwnerChat() {
           <button
             onClick={() => setIsExpanded(!isExpanded)}
             className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+            aria-label="Toggle chat size"
           >
             {isExpanded ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
           </button>
-          <button className="p-2 hover:bg-white/10 rounded-lg transition-colors">
+          <button className="p-2 hover:bg-white/10 rounded-lg transition-colors" aria-label="Open settings">
             <Settings className="w-5 h-5" />
           </button>
         </div>
@@ -207,6 +208,7 @@ export default function OwnerChat() {
             type="submit"
             disabled={!input.trim() || isLoading}
             className="p-2 bg-black text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            aria-label="Send message"
           >
             <Send className="w-5 h-5" />
           </button>

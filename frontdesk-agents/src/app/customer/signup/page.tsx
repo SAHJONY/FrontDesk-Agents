@@ -74,9 +74,9 @@ export default function CustomerSignup() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-br from-deep-space via-deep-space to-black flex items-center justify-center p-6">
       {/* Back Link */}
-      <a href="/" className="absolute top-6 left-6 text-white/60 hover:text-white transition-colors flex items-center gap-2">
+      <a href="/" className="absolute top-6 left-6 text-white/60 hover:text-white hover:scale-[1.05] transition-all duration-200 flex items-center gap-2">
         <ArrowRight className="w-4 h-4 rotate-180" />
         Back to Home
       </a>
@@ -88,15 +88,15 @@ export default function CustomerSignup() {
         transition={{ duration: 0.5 }}
       >
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Create Your Account</h1>
+          <h1 className="text-4xl font-bold font-display text-white mb-2">Create Your Account</h1>
           <p className="text-gray-400">Get your AI receptionist in minutes</p>
         </div>
 
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8">
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 hover:border-white/20 transition-all duration-300">
           {error && (
             <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-red-400 mt-0.5" />
-              <p className="text-sm text-red-400">{error}</p>
+              <AlertCircle className="w-5 h-5 text-cinematic-red mt-0.5" />
+              <p className="text-sm text-cinematic-red">{error}</p>
             </div>
           )}
 
@@ -145,7 +145,7 @@ export default function CustomerSignup() {
                     className={`p-3 rounded-xl border transition-all ${
                       formData.industry === ind.value
                         ? 'border-white bg-white text-gray-900'
-                        : 'border-white/10 bg-white/5 text-gray-400 hover:border-white/30'
+                        : 'border-white/10 bg-white/5 text-gray-400 hover:border-white/30 hover:scale-[1.02] transition-all duration-200'
                     }`}
                   >
                     <span className="text-2xl">{ind.icon}</span>
@@ -192,7 +192,7 @@ export default function CustomerSignup() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+              className="w-full py-3 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>

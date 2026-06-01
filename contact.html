@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:image" content="https://www.frontdeskagents.com/assets/og-image.svg">
+     10| <meta name="twitter:card" content="summary_large_image">
+     11| <meta name="twitter:title" content="Contact — Front Desk Agents">
+     12| <meta name="twitter:description" content="Get in touch with the Front Desk Agents team. We'd love to hear from you.">
+     13| <meta name="twitter:image" content="https://www.frontdeskagents.com/assets/og-image.svg">
+     10| <meta name="twitter:card" content="summary_large_image">
+     11| <meta name="twitter:title" content="Contact — Front Desk Agents">
+     12| <meta name="twitter:description" content="Get in touch with the Front Desk Agents team. We'd love to hear from you.">
+     13| <meta name="twitter:image" content="https://www.frontdeskagents.com/assets/og-image.svg">
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <nav class="navbar" id="navbar">
+        <div class="container nav-container">
+            <a href="/" class="nav-logo">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <rect width="32" height="32" rx="8" fill="#25D366"/>
+                    <path d="M16 6C10.477 6 6 10.477 6 16c0 1.89.518 3.66 1.42 5.18L6 26l4.98-1.32A9.94 9.94 0 0016 26c5.523 0 10-4.477 10-10S21.523 6 16 6z" fill="white" fill-opacity="0.15"/>
+                    <path d="M12.5 14.5l2 2 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Front Desk Agents</span>
+            </a>
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu" aria-expanded="false">
+                <span></span><span></span><span></span>
+            </button>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="/#features">Features</a></li>
+                <li><a href="/#how-it-works">How It Works</a></li>
+                <li><a href="pricing.html">Pricing</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html" class="active">Contact</a></li>
+                <li><a href="/login" class="btn btn-primary btn-sm">Sign In</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main id="main-content">
+        <section class="page-hero">
+            <div class="container">
+                <h1>Get in Touch</h1>
+                <p class="page-subtitle">Have a question? Want a demo? We'd love to hear from you.</p>
+            </div>
+        </section>
+
+        <section class="contact-section">
+            <div class="container narrow">
+                <div class="contact-grid">
+                    <div class="contact-info">
+                        <div class="contact-method">
+                            <h3>📧 Email</h3>
+                            <p>hello@frontdeskagents.com</p>
+                        </div>
+                        <div class="contact-method">
+                            <h3>💬 WhatsApp</h3>
+                            <p>Message us directly on WhatsApp for the fastest response.</p>
+                        </div>
+                        <div class="contact-method">
+                            <h3>🐦 Twitter / X</h3>
+                            <p>@frontdeskagents</p>
+                        </div>
+                    </div>
+
+                    <form class="contact-form" id="contactForm" method="POST">
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input type="text" id="name" name="name" placeholder="Your name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" placeholder="you@company.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="company">Company (optional)</label>
+                            <input type="text" id="company" name="company" placeholder="Your company">
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Message</label>
+                            <textarea id="message" name="message" rows="5" placeholder="Tell us how we can help..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Send Message</button>
+                        <p class="form-success" id="formSuccess" style="display:none;">Thanks for reaching out! We'll get back to you within 24 hours.</p>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <div class="nav-logo">
+                        <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+                            <rect width="32" height="32" rx="8" fill="#25D366"/>
+                            <path d="M16 6C10.477 6 6 10.477 6 16c0 1.89.518 3.66 1.42 5.18L6 26l4.98-1.32A9.94 9.94 0 0016 26c5.523 0 10-4.477 10-10S21.523 6 16 6z" fill="white" fill-opacity="0.15"/>
+                            <path d="M12.5 14.5l2 2 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <span>Front Desk Agents</span>
+                    </div>
+                    <p class="footer-tagline">WhatsApp CRM for modern teams.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Product</h4>
+                    <a href="/#features">Features</a>
+                    <a href="pricing.html">Pricing</a>
+                    <a href="/#how-it-works">How It Works</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Company</h4>
+                    <a href="about.html">About</a>
+                    <a href="contact.html">Contact</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Legal</h4>
+                    <a href="privacy.html">Privacy Policy</a>
+                    <a href="terms.html">Terms of Service</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Front Desk Agents. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script>
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            document.getElementById('formSuccess').style.display = 'block';
+            this.reset();
+        });
+    </script>
+</body>
+</html>

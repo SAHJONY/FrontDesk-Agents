@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#075e54"/>
+      <stop offset="100%" stop-color="#128C7E"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <!-- WhatsApp-style logo -->
+  <g transform="translate(540, 200)">
+    <rect width="120" height="120" rx="30" fill="#25D366"/>
+    <path d="M60 20c-35.346 0-63.97 28.624-63.97 63.97 0 12.08 3.31 23.38 9.05 33.06L0 145l31.84-8.45c8.89 5.05 19.14 7.93 30.13 7.93 35.34 0 63.97-28.62 63.97-63.96 0-35.35-28.63-63.97-63.97-63.97z" fill="white" fill-opacity="0.15"/>
+    <path d="M38 56l12.8 12.8 31.96-31.96" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="600" y="390" text-anchor="middle" font-family="Inter, sans-serif" font-weight="800" font-size="64" fill="white" letter-spacing="-1">Front Desk Agents</text>
+  <text x="600" y="450" text-anchor="middle" font-family="Inter, sans-serif" font-weight="500" font-size="32" fill="rgba(255,255,255,0.85)">WhatsApp CRM for Modern Teams</text>
+  <text x="600" y="520" text-anchor="middle" font-family="Inter, sans-serif" font-weight="400" font-size="20" fill="rgba(255,255,255,0.6)">Shared Inbox · Smart Automations · Self-Hosted</text>
+</svg>

@@ -250,7 +250,7 @@ export default function OwnerDashboard() {
       <aside className={`fixed md:relative z-40 h-full bg-black/95 border-r border-white/10 transition-all duration-300 flex flex-col ${sidebarOpen ? 'w-64' : 'w-0 md:w-20'}`}>
         <div className="p-6 border-b border-white/10 animate-gradient-shift bg-[length:200%_auto]">
           <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-aurora-cyan bg-clip-text text-transparent">
-            GlobalVoice
+            FrontDesk Agents
           </h1>
         </div>
 

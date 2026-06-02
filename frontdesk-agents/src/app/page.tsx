@@ -50,9 +50,9 @@ const PRICING_PLANS = [
 ]
 
 const TESTIMONIALS = [
-  { name: 'Dr. Sarah Chen', role: 'Dental Practice Owner', text: 'GlobalVoice handles 200+ patient calls daily. Our front desk can finally focus on patient care instead of the phone.', rating: 5, company: 'BrightSmile Dental' },
+  { name: 'Dr. Sarah Chen', role: 'Dental Practice Owner', text: 'FrontDesk Agents handles 200+ patient calls daily. Our front desk can finally focus on patient care instead of the phone.', rating: 5, company: 'BrightSmile Dental' },
   { name: 'Mike Rodriguez', role: 'Law Firm Partner', text: 'We never miss a potential client call. The AI qualifies leads with uncanny accuracy before they even reach us.', rating: 5, company: 'Rodriguez & Associates' },
-  { name: 'James Wilson', role: 'HVAC Company Owner', text: 'Emergency calls get routed instantly to our on-call team. Revenue increased 40% since we deployed GlobalVoice.', rating: 5, company: 'Wilson HVAC Services' },
+  { name: 'James Wilson', role: 'HVAC Company Owner', text: 'Emergency calls get routed instantly to our on-call team. Revenue increased 40% since we deployed FrontDesk Agents.', rating: 5, company: 'Wilson HVAC Services' },
   { name: 'Lisa Park', role: 'Real Estate Broker', text: 'Property inquiries are handled 24/7. We book 3x more showings now — even while we sleep.', rating: 5, company: 'Park Realty Group' },
   { name: 'Dr. Amir Patel', role: 'Medical Practice Owner', text: 'Patient satisfaction scores jumped 25 points. The AI handles scheduling, refills, and FAQs flawlessly.', rating: 5, company: 'Patel Medical Clinic' },
   { name: 'Tom Harrison', role: 'Insurance Agency Owner', text: 'Claims intake is fully automated. Our agents only take calls that need a human touch. Game changer.', rating: 5, company: 'Harrison Insurance' },
@@ -408,14 +408,15 @@ export default function LandingPage() {
             <div className='w-8 h-8 rounded-lg bg-gradient-to-br from-aurora-cyan to-midnight-blue flex items-center justify-center'>
               <Bot />
             </div>
-            <span className='font-bold text-lg hidden sm:inline'>GlobalVoice AI</span>
+            <span className='font-bold text-lg hidden sm:inline'>FrontDesk Agents</span>
           </div>
 
           {/* Desktop nav */}
           <div className='hidden md:flex items-center gap-8'>
-            <a href='#industries' className='text-sm text-gray-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-aurora-cyan after:transition-all hover:after:w-full'>Industries</a>
-            <a href='#features' className='text-sm text-gray-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-aurora-cyan after:transition-all hover:after:w-full'>Features</a>
-            <a href='#pricing' className='text-sm text-gray-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-aurora-cyan after:transition-all hover:after:w-full'>Pricing</a>
+            <a href='/pricing' className='text-sm text-gray-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-aurora-cyan after:transition-all hover:after:w-full'>Pricing</a>
+            <a href='/ai-receptionist' className='text-sm text-gray-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-aurora-cyan after:transition-all hover:after:w-full'>Legal AI</a>
+            <a href='/partners' className='text-sm text-gray-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-aurora-cyan after:transition-all hover:after:w-full'>Partners</a>
+            <a href='/blog' className='text-sm text-gray-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-aurora-cyan after:transition-all hover:after:w-full'>Blog</a>
             <a href='/demo' className='text-sm text-gray-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-aurora-cyan after:transition-all hover:after:w-full'>Demo</a>
             <a href='/services' className='text-sm text-gray-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-aurora-cyan after:transition-all hover:after:w-full'>Services</a>
             <a href='/contact' className='text-sm text-gray-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-aurora-cyan after:transition-all hover:after:w-full'>Contact</a>
@@ -459,9 +460,10 @@ export default function LandingPage() {
                 <button onClick={() => setShowMobileMenu(false)} className='absolute top-6 right-6 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/70 hover:text-white' aria-label='Close menu'>
                   <X />
                 </button>
-                <a href='#industries' onClick={() => setShowMobileMenu(false)} className='text-xl text-gray-300 hover:text-white transition-colors'>Industries</a>
-                <a href='#features' onClick={() => setShowMobileMenu(false)} className='text-xl text-gray-300 hover:text-white transition-colors'>Features</a>
-                <a href='#pricing' onClick={() => setShowMobileMenu(false)} className='text-xl text-gray-300 hover:text-white transition-colors'>Pricing</a>
+                <a href='/pricing' onClick={() => setShowMobileMenu(false)} className='text-xl text-gray-300 hover:text-white transition-colors'>Pricing</a>
+                <a href='/ai-receptionist' onClick={() => setShowMobileMenu(false)} className='text-xl text-gray-300 hover:text-white transition-colors'>Legal AI</a>
+                <a href='/partners' onClick={() => setShowMobileMenu(false)} className='text-xl text-gray-300 hover:text-white transition-colors'>Partners</a>
+                <a href='/blog' onClick={() => setShowMobileMenu(false)} className='text-xl text-gray-300 hover:text-white transition-colors'>Blog</a>
                 <a href='/demo' onClick={() => setShowMobileMenu(false)} className='text-xl text-gray-300 hover:text-white transition-colors'>Demo</a>
                 <a href='/services' onClick={() => setShowMobileMenu(false)} className='text-xl text-gray-300 hover:text-white transition-colors'>Services</a>
                 <a href='/contact' onClick={() => setShowMobileMenu(false)} className='text-xl text-gray-300 hover:text-white transition-colors'>Contact</a>
@@ -515,7 +517,7 @@ export default function LandingPage() {
               transition={{ delay: 0.3, duration: 0.6 }}
               className='text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed'
             >
-              GlobalVoice AI answers every call 24/7 in 200+ languages, routes intelligently,
+              FrontDesk Agents answers every call 24/7 in 200+ languages, routes intelligently,
               and books appointments automatically. Your business never sleeps.
             </motion.p>
 
@@ -605,7 +607,7 @@ export default function LandingPage() {
       {/* ─── FEATURES ─── */}
       <section id='features' className='py-20 md:py-28 px-4 bg-white/[0.02]'>
         <div className='max-w-7xl mx-auto'>
-          <SectionHeading title='Why GlobalVoice AI?' subtitle='Enterprise-grade AI receptionist technology that rivals human operators.' />
+          <SectionHeading title='Why FrontDesk Agents?' subtitle='Enterprise-grade AI receptionist technology that rivals human operators.' />
 
           <motion.div
             initial='hidden'
@@ -720,7 +722,7 @@ export default function LandingPage() {
             Ready to Never Miss a Call Again?
           </motion.h2>
           <motion.p variants={fadeUp} className='text-gray-400 mb-10 text-lg'>
-            Join 10,000+ businesses using GlobalVoice AI. Start your 14-day free trial today.
+            Join 10,000+ businesses using FrontDesk Agents. Start your 14-day free trial today.
           </motion.p>
           <motion.div variants={fadeUp}>
             <button
@@ -742,7 +744,7 @@ export default function LandingPage() {
                 <div className='w-8 h-8 rounded-lg bg-gradient-to-br from-aurora-cyan to-midnight-blue flex items-center justify-center'>
                   <Bot />
                 </div>
-                <span className='font-bold'>GlobalVoice AI</span>
+                <span className='font-bold'>FrontDesk Agents</span>
               </div>
               <p className='text-sm text-gray-500 max-w-xs'>The world&apos;s most advanced AI receptionist platform. Available 24/7 in 200+ languages.</p>
             </div>
@@ -759,7 +761,7 @@ export default function LandingPage() {
               <h4 className='font-semibold mb-3 text-sm'>Company</h4>
               <ul className='space-y-2 text-sm text-gray-500'>
                 <li className='hover:text-gray-300 transition-colors cursor-pointer'>About</li>
-                <li className='hover:text-gray-300 transition-colors cursor-pointer'>Blog</li>
+                <li><a href="/blog" className="hover:text-gray-300 transition-colors cursor-pointer">Blog</a></li>
                 <li className='hover:text-gray-300 transition-colors cursor-pointer'>Careers</li>
                 <li className='hover:text-gray-300 transition-colors cursor-pointer'>Contact</li>
               </ul>
@@ -774,7 +776,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className='pt-8 border-t border-white/5 text-center text-sm text-gray-600'>
-            &copy; {new Date().getFullYear()} GlobalVoice AI. All rights reserved.
+            &copy; {new Date().getFullYear()} FrontDesk Agents. All rights reserved.
           </div>
         </div>
       </footer>
@@ -868,7 +870,7 @@ export default function LandingPage() {
               onClick={e => e.stopPropagation()}
             >
               <div className='flex justify-between items-center mb-4'>
-                <h3 className='text-lg font-bold'>How GlobalVoice AI Works</h3>
+                <h3 className='text-lg font-bold'>How FrontDesk Agents Works</h3>
                 <button onClick={() => setShowDemo(false)} className='text-gray-500 hover:text-white transition-colors' aria-label='Close demo modal'><X /></button>
               </div>
               <div className='aspect-video rounded-xl bg-gradient-to-br from-aurora-cyan/20 to-aurora-cyan/10 flex items-center justify-center border border-white/10'>

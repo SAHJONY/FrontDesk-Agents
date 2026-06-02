@@ -1,5 +1,5 @@
 /**
- * GlobalVoice AI - Internationalization (i18n) System
+ * FrontDesk Agents - Internationalization (i18n) System
  * Supports 200+ languages with automatic detection
  */
 
@@ -103,7 +103,7 @@ export const TRANSLATIONS = {
       demo: 'Watch Demo',
     },
     features: {
-      title: 'Why GlobalVoice AI?',
+      title: 'Why FrontDesk Agents?',
       subtitle: 'Built for businesses worldwide',
       multiLanguage: {
         title: '200+ Languages',
@@ -147,7 +147,7 @@ export const TRANSLATIONS = {
       company: 'Company',
       support: 'Support',
       legal: 'Legal',
-      copyright: '© 2026 GlobalVoice AI. All rights reserved.',
+      copyright: '© 2026 FrontDesk Agents. All rights reserved.',
     },
     // Owner Dashboard
     dashboard: {
@@ -177,7 +177,7 @@ export const TRANSLATIONS = {
       demo: 'Ver Demostración',
     },
     features: {
-      title: '¿Por qué GlobalVoice AI?',
+      title: '¿Por qué FrontDesk Agents?',
       subtitle: 'Construido para empresas de todo el mundo',
       multiLanguage: {
         title: 'Más de 200 idiomas',

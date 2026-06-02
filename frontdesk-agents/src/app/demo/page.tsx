@@ -105,7 +105,7 @@ interface ScenarioConfig {
 // ─── SCENARIOS ──────────────────────────────────────────────────────────────
 
 const SCENARIOS: ScenarioConfig[] = [
-  { id: 'general', label: 'General', icon: '🤖', greeting: 'Hi! I\'m GlobalVoice AI. Try asking me about my features, pricing, or how I can help your business. I respond just like a real phone call — naturally and conversationally.', description: 'Explore all features and capabilities' },
+  { id: 'general', label: 'General', icon: '🤖', greeting: 'Hi! I\'m FrontDesk Agents. Try asking me about my features, pricing, or how I can help your business. I respond just like a real phone call — naturally and conversationally.', description: 'Explore all features and capabilities' },
   { id: 'healthcare', label: 'Healthcare', icon: '🏥', greeting: 'Thank you for calling Northside Medical Center. I\'m your AI receptionist. How can I help you today? You can schedule an appointment, request a prescription refill, or get connected to a specific department.', description: 'Patient scheduling & triage simulation' },
   { id: 'dental', label: 'Dental', icon: '🦷', greeting: 'Welcome to BrightSmile Dental. This is your AI receptionist speaking. Are you calling about a new patient appointment, an existing booking, or are you experiencing a dental emergency?', description: 'Dental office call handling' },
   { id: 'realestate', label: 'Real Estate', icon: '🏠', greeting: 'You\'ve reached Park Realty Group. I\'m your AI assistant. Are you looking to buy, sell, or inquire about a specific property? I can schedule viewings and connect you with an agent.', description: 'Property inquiry & showing scheduling' },
@@ -117,8 +117,8 @@ const SCENARIOS: ScenarioConfig[] = [
 
 const SCENARIO_RESPONSES: Record<ScenarioId, Record<string, string>> = {
   general: {
-    hello: 'Hello! Welcome to GlobalVoice AI. I\'m your AI receptionist. How can I help you today? You can ask me about appointment scheduling, pricing, features, or how we handle calls for your industry.',
-    hi: 'Hi there! I\'m GlobalVoice AI, your intelligent receptionist. I answer calls, book appointments, qualify leads, and speak 200+ languages with a natural human-like voice. What would you like to explore?',
+    hello: 'Hello! Welcome to FrontDesk Agents. I\'m your AI receptionist. How can I help you today? You can ask me about appointment scheduling, pricing, features, or how we handle calls for your industry.',
+    hi: 'Hi there! I\'m FrontDesk Agents, your intelligent receptionist. I answer calls, book appointments, qualify leads, and speak 200+ languages with a natural human-like voice. What would you like to explore?',
     appointment: 'Absolutely! I integrate with Google Calendar, Outlook, and Calendly to handle booking, rescheduling, and cancellations automatically. I check availability, send confirmations via SMS, and send reminder calls. Want to try booking a demo?',
     schedule: 'Scheduling is my specialty! I handle complex multi-provider calendars, recurring appointments, same-day bookings, and waitlist management. I sync two-way with your calendar and never double-book. Would you like me to schedule a call with your team?',
     price: 'Great question! Plans are transparent: Starter at $99/month (500 calls), Growth at $149/month (2,000 calls — most popular), and Enterprise with custom pricing. No hidden fees, no revenue share.',
@@ -129,7 +129,7 @@ const SCENARIO_RESPONSES: Record<ScenarioId, Record<string, string>> = {
     voice: 'My voice uses advanced neural text-to-speech with natural prosody, emotion, and pacing. Customers often can\'t tell they\'re talking to AI. I can match your brand\'s tone — professional, friendly, warm, or formal.',
     trial: 'The free trial gives you 14 days of full access. No credit card needed. We help you set up your AI receptionist, train it on your business info, and go live. Cancel anytime if it\'s not perfect.',
     call: 'I handle multiple calls simultaneously with no hold music or voicemail. I answer naturally, qualify leads in real-time, route to human staff with full context, and work 24/7/365.',
-    business: 'GlobalVoice AI is perfect for healthcare, legal, dental, real estate, HVAC, medical spas, automotive, insurance, and more. I\'m pre-trained on industry-specific terminology and compliance.',
+    business: 'FrontDesk Agents is perfect for healthcare, legal, dental, real estate, HVAC, medical spas, automotive, insurance, and more. I\'m pre-trained on industry-specific terminology and compliance.',
     integration: 'I integrate with Google Calendar, Outlook, Calendly, HubSpot, Salesforce, Twilio, Slack, Zapier, Stripe, Square, and many more. If a tool has an API, I can connect to it.',
     security: 'Enterprise-grade security: end-to-end encryption, SOC 2 compliance, HIPAA-ready infrastructure. You own all your data — call recordings, transcripts, and customer information. No lock-in contracts.',
     transfer: 'Of course! I\'ll transfer you to a human agent right away. Just one moment while I connect you with the right person and share the context of our conversation so you don\'t have to repeat yourself.',
@@ -866,10 +866,12 @@ export default function DemoPage() {
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-aurora-cyan to-midnight-blue flex items-center justify-center">
               <BotIcon />
             </div>
-            <span className="font-bold text-lg hidden sm:inline">GlobalVoice AI</span>
+            <span className="font-bold text-lg hidden sm:inline">FrontDesk Agents</span>
           </Link>
           <div className="hidden md:flex items-center gap-8">
             <a href="/services" className="text-sm text-gray-300 hover:text-white transition-colors">Services</a>
+            <a href="/ai-receptionist" className="text-sm text-gray-300 hover:text-white transition-colors">Legal AI</a>
+            <a href="/partners" className="text-sm text-gray-300 hover:text-white transition-colors">Partners</a>
             <a href="/pricing" className="text-sm text-gray-300 hover:text-white transition-colors">Pricing</a>
             <a href="/contact" className="text-sm text-gray-300 hover:text-white transition-colors">Contact</a>
             <Link href="/pricing" className="px-4 py-2 rounded-full bg-gradient-to-r from-aurora-cyan to-aurora-cyan/80 text-white text-sm font-medium hover:shadow-lg hover:shadow-aurora-cyan/25 transition-all">
@@ -893,7 +895,7 @@ export default function DemoPage() {
               Try the AI Receptionist
             </h1>
             <p className="text-base sm:text-lg text-gray-400 max-w-2xl mx-auto mb-5">
-              Choose a scenario to see how GlobalVoice AI handles real calls for your industry.
+              Choose a scenario to see how FrontDesk Agents handles real calls for your industry.
               Try typing naturally — the AI responds just like a real receptionist would.
             </p>
           </motion.div>
@@ -1006,7 +1008,7 @@ export default function DemoPage() {
                         </div>
                         <div>
                           <div className="font-semibold font-display">
-                            {scenario === 'general' ? 'GlobalVoice AI Receptionist' : currentScenario.label}
+                            {scenario === 'general' ? 'FrontDesk Agents Receptionist' : currentScenario.label}
                           </div>
                           <div className="flex items-center gap-2 text-xs">
                             <CallIndicator state={callState === 'idle' && conversation.length > 1 ? 'connected' : callState} />
@@ -1145,7 +1147,7 @@ export default function DemoPage() {
           <div className="text-center mb-10">
             <h2 className="text-3xl sm:text-4xl font-bold font-display mb-4">What You Just Experienced</h2>
             <p className="text-gray-400 max-w-2xl mx-auto">
-              Every interaction with GlobalVoice AI is powered by enterprise-grade AI — this demo shows just a fraction of what our platform can do.
+              Every interaction with FrontDesk Agents is powered by enterprise-grade AI — this demo shows just a fraction of what our platform can do.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1231,7 +1233,7 @@ export default function DemoPage() {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-aurora-cyan to-midnight-blue flex items-center justify-center"><BotIcon /></div>
-              <span className="font-bold">GlobalVoice AI</span>
+              <span className="font-bold">FrontDesk Agents</span>
             </div>
             <p className="text-sm text-gray-500">The world&apos;s most advanced AI receptionist platform.</p>
           </div>
@@ -1248,6 +1250,8 @@ export default function DemoPage() {
             <h4 className="font-semibold mb-3 text-sm">Company</h4>
             <ul className="space-y-2 text-sm text-gray-500">
               <li><a href="/demo" className="hover:text-white transition-colors">Demo</a></li>
+              <li><a href="/ai-receptionist" className="hover:text-white transition-colors">Legal AI</a></li>
+              <li><a href="/partners" className="hover:text-white transition-colors">Partners</a></li>
               <li><a href="/pricing" className="hover:text-white transition-colors">Pricing</a></li>
               <li><a href="/contact" className="hover:text-white transition-colors">Contact</a></li>
             </ul>
@@ -1261,7 +1265,7 @@ export default function DemoPage() {
           </div>
         </div>
         <div className="max-w-7xl mx-auto mt-8 pt-8 border-t border-white/5 text-center text-sm text-gray-600">
-          &copy; {new Date().getFullYear()} GlobalVoice AI. All rights reserved.
+          &copy; {new Date().getFullYear()} FrontDesk Agents. All rights reserved.
         </div>
       </footer>
     </div>

@@ -104,14 +104,14 @@ const CONTACT_METHODS = [
   {
     icon: PhoneIcon,
     title: 'Phone',
-    value: '+1 (888) 555-GLOBAL',
+    value: '+1 (888) 555-AGENTS',
     subtitle: 'Available 24/7',
     gradient: 'from-aurora-cyan to-blue-500',
   },
   {
     icon: MailIcon,
     title: 'Email',
-    value: 'hello@globalvoice.ai',
+    value: 'hello@frontdeskagents.com',
     subtitle: 'We respond within 2 hours',
     gradient: 'from-purple-500 to-pink-500',
   },
@@ -133,7 +133,7 @@ const CONTACT_METHODS = [
 
 const FAQ_ITEMS = [
   {
-    question: 'How quickly can I get started with GlobalVoice AI?',
+    question: 'How quickly can I get started with FrontDesk Agents?',
     answer: 'Most businesses are up and running within 24 hours. Our onboarding team guides you through setup, customization, and testing. You can try a free demo before committing.',
   },
   {
@@ -149,7 +149,7 @@ const FAQ_ITEMS = [
     answer: 'Our agents support over 50 languages including English, Spanish, French, German, Mandarin, Japanese, Arabic, and Portuguese. The AI can detect and switch languages mid-conversation.',
   },
   {
-    question: 'Is my data secure with GlobalVoice AI?',
+    question: 'Is my data secure with FrontDesk Agents?',
     answer: 'Absolutely. We employ enterprise-grade encryption (AES-256), SOC 2 compliance practices, and strict data handling policies. Your call data is never used to train public models.',
   },
   {
@@ -191,7 +191,7 @@ const COMPANY_SIZE_OPTIONS = [
 ]
 
 const TESTIMONIALS = [
-  { name: 'Dr. Sarah Chen', role: 'Medical Practice Owner', company: 'Chen Family Medicine', text: 'GlobalVoice AI handles over 200 patient calls daily. Appointment booking is seamless and our patients love the instant responses.', rating: 5 },
+  { name: 'Dr. Sarah Chen', role: 'Medical Practice Owner', company: 'Chen Family Medicine', text: 'FrontDesk Agents handles over 200 patient calls daily. Appointment booking is seamless and our patients love the instant responses.', rating: 5 },
   { name: 'Michael Torres', role: 'Broker/Owner', company: 'Torres Realty Group', text: 'Our AI agent qualifies leads 24/7. We\'ve seen a 40% increase in qualified appointments since switching from a human receptionist.', rating: 5 },
   { name: 'James Wilson', role: 'Managing Partner', company: 'Wilson & Associates Law', text: 'The AI handles intake calls with precision and sensitivity. It\'s like having a full-time paralegal answering phones around the clock.', rating: 5 },
   { name: 'Lisa Park', role: 'CEO', company: 'Park Dental Care', text: 'Setup was incredibly easy — we were live in under 24 hours. The AI handles scheduling, reminders, and even handles insurance questions.', rating: 5 },
@@ -410,7 +410,7 @@ function LiveChatPreview() {
   const [step, setStep] = useState(0)
 
   const CHAT_MSGS = useMemo(() => [
-    { role: 'bot', text: 'Hi there! 👋 Welcome to GlobalVoice AI.' },
+    { role: 'bot', text: 'Hi there! 👋 Welcome to FrontDesk Agents.' },
     { role: 'bot', text: 'Have questions about our AI phone agents?' },
     { role: 'bot', text: 'We can help you choose the perfect plan and get started in under 24 hours!' },
   ], [])
@@ -480,9 +480,11 @@ function LiveChatPreview() {
           >
             <div className="bg-gradient-to-r from-aurora-cyan/20 to-blue-600/20 border-b border-white/[0.06] px-4 py-3.5 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-aurora-cyan to-blue-600 flex items-center justify-center text-white text-xs font-bold">G</div>
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-aurora-cyan to-blue-600 flex items-center justify-center">
+                  <BotIcon />
+                </div>
                 <div>
-                  <p className="text-sm font-semibold text-white">GlobalVoice AI</p>
+                  <p className="text-sm font-semibold text-white">FrontDesk Agents</p>
                   <div className="flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                     <span className="text-[11px] text-emerald-400">Online</span>
@@ -595,11 +597,15 @@ export default function ContactPage() {
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-aurora-cyan to-blue-600 flex items-center justify-center text-white font-bold text-sm">G</div>
-            <span className="font-display text-lg font-bold text-white hidden sm:inline">GlobalVoice<span className="text-aurora-cyan"> AI</span></span>
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-aurora-cyan to-midnight-blue flex items-center justify-center">
+              <BotIcon />
+            </div>
+            <span className="font-display text-lg font-bold text-white hidden sm:inline">FrontDesk Agents</span>
           </Link>
           <div className="hidden md:flex items-center gap-6">
             <a href="/services" className="text-sm text-gray-300 hover:text-white transition-colors">Services</a>
+            <a href="/ai-receptionist" className="text-sm text-gray-300 hover:text-white transition-colors">Legal AI</a>
+            <a href="/partners" className="text-sm text-gray-300 hover:text-white transition-colors">Partners</a>
             <a href="/demo" className="text-sm text-gray-300 hover:text-white transition-colors">Demo</a>
             <a href="/pricing" className="text-sm text-gray-300 hover:text-white transition-colors">Pricing</a>
             <a href="/contact" className="text-sm text-aurora-cyan hover:text-white transition-colors">Contact</a>
@@ -622,6 +628,8 @@ export default function ContactPage() {
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.3 }} className="md:hidden overflow-hidden border-t border-white/[0.06] bg-deep-space/95 backdrop-blur-xl">
               <div className="px-4 py-4 space-y-1">
                 <a href="/services" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-3 rounded-xl text-sm text-gray-300 hover:text-white hover:bg-white/[0.05] transition-all">Services</a>
+                <a href="/ai-receptionist" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-3 rounded-xl text-sm text-gray-300 hover:text-white hover:bg-white/[0.05] transition-all">Legal AI</a>
+                <a href="/partners" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-3 rounded-xl text-sm text-gray-300 hover:text-white hover:bg-white/[0.05] transition-all">Partners</a>
                 <a href="/demo" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-3 rounded-xl text-sm text-gray-300 hover:text-white hover:bg-white/[0.05] transition-all">Demo</a>
                 <a href="/pricing" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-3 rounded-xl text-sm text-gray-300 hover:text-white hover:bg-white/[0.05] transition-all">Pricing</a>
                 <a href="/contact" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-3 rounded-xl text-sm text-aurora-cyan hover:text-white hover:bg-white/[0.05] transition-all">Contact</a>
@@ -931,7 +939,7 @@ export default function ContactPage() {
 
               {/* Why Choose Us */}
               <div className="p-6 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.06]">
-                <h3 className="text-xl font-semibold mb-4 flex items-center gap-2"><BotIcon /> Why Choose GlobalVoice AI?</h3>
+                <h3 className="text-xl font-semibold mb-4 flex items-center gap-2"><BotIcon /> Why Choose FrontDesk Agents?</h3>
                 <ul className="space-y-3">
                   {[
                     'Enterprise-grade AI voice technology',
@@ -952,7 +960,7 @@ export default function ContactPage() {
               <div className="p-6 rounded-2xl bg-gradient-to-br from-aurora-cyan/5 via-transparent to-purple-600/5 border border-aurora-cyan/10">
                 <h3 className="text-xl font-semibold mb-2">Prefer to call?</h3>
                 <p className="text-gray-400 text-sm mb-4">Speak directly with our sales team. We&apos;re available Monday through Friday, 9 AM to 6 PM PST.</p>
-                <a href="tel:+1888555GLOBAL" className="text-2xl font-bold bg-gradient-to-r from-aurora-cyan to-blue-400 bg-clip-text text-transparent">+1 (888) 555-GLOBAL</a>
+                <a href="tel:+1888555AGENTS" className="text-2xl font-bold bg-gradient-to-r from-aurora-cyan to-blue-400 bg-clip-text text-transparent">+1 (888) 555-AGENTS</a>
               </div>
             </motion.div>
           </div>
@@ -964,7 +972,7 @@ export default function ContactPage() {
         <div className="max-w-6xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} viewport={{ once: true }} className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-display font-bold mb-4">Trusted by Thousands</h2>
-            <p className="text-gray-400 max-w-2xl mx-auto">Join the growing community of businesses that trust GlobalVoice AI to handle their calls.</p>
+            <p className="text-gray-400 max-w-2xl mx-auto">Join the growing community of businesses that trust FrontDesk Agents to handle their calls.</p>
           </motion.div>
 
           {/* Stats counters */}
@@ -1069,7 +1077,10 @@ export default function ContactPage() {
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-aurora-cyan/20 rounded-full blur-[100px]" />
             <div className="relative z-10">
               <h2 className="text-3xl sm:text-4xl font-display font-bold mb-4">Ready to Transform Your Business Communications?</h2>
-              <p className="text-gray-400 text-lg mb-8 max-w-2xl mx-auto">Join thousands of businesses using GlobalVoice AI to handle calls, book appointments, and qualify leads — automatically.</p>
+            <p className="text-gray-400 text-lg mb-8 max-w-2xl mx-auto">
+              Join thousands of businesses using FrontDesk Agents to handle calls, book appointments, and qualify leads — automatically.{' '}
+              <Link href="/partners#referral" className="text-aurora-cyan underline hover:text-white transition-colors">Refer a firm → $1,000.</Link>
+            </p>
               <div className="flex flex-wrap justify-center gap-4">
                 <Link href="/pricing" className="px-8 py-3 rounded-full bg-gradient-to-r from-aurora-cyan to-blue-600 text-white font-medium hover:shadow-lg hover:shadow-aurora-cyan/25 transition-all">View Plans & Pricing</Link>
                 <Link href="/demo" className="px-8 py-3 rounded-full border border-white/[0.12] text-gray-300 font-medium hover:bg-white/[0.05] hover:text-white transition-all">Book a Demo</Link>
@@ -1085,8 +1096,10 @@ export default function ContactPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
             <div>
               <Link href="/" className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-aurora-cyan to-blue-600 flex items-center justify-center text-white font-bold text-sm">G</div>
-                <span className="font-display text-lg font-bold text-white">GlobalVoice<span className="text-aurora-cyan"> AI</span></span>
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-aurora-cyan to-midnight-blue flex items-center justify-center">
+                  <BotIcon />
+                </div>
+                <span className="font-display text-lg font-bold text-white">FrontDesk Agents</span>
               </Link>
               <p className="text-gray-500 text-sm leading-relaxed">AI phone agents that handle calls, book appointments, and qualify leads — automatically.</p>
             </div>
@@ -1094,6 +1107,8 @@ export default function ContactPage() {
               <h4 className="text-white font-semibold mb-4">Product</h4>
               <ul className="space-y-2 text-sm text-gray-500">
                 <li><Link href="/services" className="hover:text-white transition-colors">Services</Link></li>
+                <li><Link href="/ai-receptionist" className="hover:text-white transition-colors">Legal AI</Link></li>
+                <li><Link href="/partners" className="hover:text-white transition-colors">Partners</Link></li>
                 <li><Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
                 <li><Link href="/demo" className="hover:text-white transition-colors">Demo</Link></li>
                 <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
@@ -1118,7 +1133,7 @@ export default function ContactPage() {
             </div>
           </div>
           <div className="border-t border-white/[0.06] pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-600">
-            <p>&copy; {new Date().getFullYear()} GlobalVoice AI. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} FrontDesk Agents. All rights reserved.</p>
             <div className="flex items-center gap-6">
               <span className="hover:text-white transition-colors cursor-default">Twitter</span>
               <span className="hover:text-white transition-colors cursor-default">LinkedIn</span>

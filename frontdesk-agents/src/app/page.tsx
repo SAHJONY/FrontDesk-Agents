@@ -416,6 +416,7 @@ export default function LandingPage() {
             <a href='/pricing' className='text-sm text-gray-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-aurora-cyan after:transition-all hover:after:w-full'>Pricing</a>
             <a href='/ai-receptionist' className='text-sm text-gray-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-aurora-cyan after:transition-all hover:after:w-full'>Legal AI</a>
             <a href='/partners' className='text-sm text-gray-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-aurora-cyan after:transition-all hover:after:w-full'>Partners</a>
+            <a href='/industries' className='text-sm text-gray-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-aurora-cyan after:transition-all hover:after:w-full'>Industries</a>
             <a href='/blog' className='text-sm text-gray-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-aurora-cyan after:transition-all hover:after:w-full'>Blog</a>
             <a href='/demo' className='text-sm text-gray-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-aurora-cyan after:transition-all hover:after:w-full'>Demo</a>
             <a href='/services' className='text-sm text-gray-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-aurora-cyan after:transition-all hover:after:w-full'>Services</a>
@@ -463,6 +464,7 @@ export default function LandingPage() {
                 <a href='/pricing' onClick={() => setShowMobileMenu(false)} className='text-xl text-gray-300 hover:text-white transition-colors'>Pricing</a>
                 <a href='/ai-receptionist' onClick={() => setShowMobileMenu(false)} className='text-xl text-gray-300 hover:text-white transition-colors'>Legal AI</a>
                 <a href='/partners' onClick={() => setShowMobileMenu(false)} className='text-xl text-gray-300 hover:text-white transition-colors'>Partners</a>
+                <a href='/industries' onClick={() => setShowMobileMenu(false)} className='text-xl text-gray-300 hover:text-white transition-colors'>Industries</a>
                 <a href='/blog' onClick={() => setShowMobileMenu(false)} className='text-xl text-gray-300 hover:text-white transition-colors'>Blog</a>
                 <a href='/demo' onClick={() => setShowMobileMenu(false)} className='text-xl text-gray-300 hover:text-white transition-colors'>Demo</a>
                 <a href='/services' onClick={() => setShowMobileMenu(false)} className='text-xl text-gray-300 hover:text-white transition-colors'>Services</a>
@@ -751,10 +753,10 @@ export default function LandingPage() {
             <div>
               <h4 className='font-semibold mb-3 text-sm'>Product</h4>
               <ul className='space-y-2 text-sm text-gray-500'>
-                <li className='hover:text-gray-300 transition-colors cursor-pointer'>Features</li>
-                <li className='hover:text-gray-300 transition-colors cursor-pointer'>Industries</li>
-                <li className='hover:text-gray-300 transition-colors cursor-pointer'>Pricing</li>
-                <li className='hover:text-gray-300 transition-colors cursor-pointer'>Demo</li>
+                <li><a href="/services" className="hover:text-gray-300 transition-colors">Features</a></li>
+                <li><a href="/industries" className="hover:text-gray-300 transition-colors">Industries</a></li>
+                <li><a href="/pricing" className="hover:text-gray-300 transition-colors">Pricing</a></li>
+                <li><a href="/demo" className="hover:text-gray-300 transition-colors">Demo</a></li>
               </ul>
             </div>
             <div>
@@ -763,14 +765,14 @@ export default function LandingPage() {
                 <li className='hover:text-gray-300 transition-colors cursor-pointer'>About</li>
                 <li><a href="/blog" className="hover:text-gray-300 transition-colors cursor-pointer">Blog</a></li>
                 <li className='hover:text-gray-300 transition-colors cursor-pointer'>Careers</li>
-                <li className='hover:text-gray-300 transition-colors cursor-pointer'>Contact</li>
+                <li><a href="/contact" className="hover:text-gray-300 transition-colors">Contact</a></li>
               </ul>
             </div>
             <div>
               <h4 className='font-semibold mb-3 text-sm'>Legal</h4>
               <ul className='space-y-2 text-sm text-gray-500'>
-                <li className='hover:text-gray-300 transition-colors cursor-pointer'>Privacy</li>
-                <li className='hover:text-gray-300 transition-colors cursor-pointer'>Terms</li>
+                <li><a href="/privacy-policy" className="hover:text-gray-300 transition-colors">Privacy</a></li>
+                <li><a href="/terms-of-service" className="hover:text-gray-300 transition-colors">Terms</a></li>
                 <li className='hover:text-gray-300 transition-colors cursor-pointer'>Security</li>
               </ul>
             </div>

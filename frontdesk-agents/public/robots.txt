@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://frontdesk-agents.vercel.app/sitemap.xml
+Sitemap: https://frontdesk-agents-ai.vercel.app/sitemap.xml

@@ -7,7 +7,6 @@ import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
 
-// Auto-deploy verification: Git integration test
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://frontdeskagents-684hwn3e1-juan-gonzalezs-projects-94b6dfe9.vercel.app'),
   title: "FrontDesk Agents AI - The World's Most Advanced AI Receptionist",

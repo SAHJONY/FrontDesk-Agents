@@ -606,6 +606,7 @@ export default function ContactPage() {
             <a href="/services" className="text-sm text-gray-300 hover:text-white transition-colors">Services</a>
             <a href="/ai-receptionist" className="text-sm text-gray-300 hover:text-white transition-colors">Legal AI</a>
             <a href="/partners" className="text-sm text-gray-300 hover:text-white transition-colors">Partners</a>
+            <a href="/industries" className="text-sm text-gray-300 hover:text-white transition-colors">Industries</a>
             <a href="/demo" className="text-sm text-gray-300 hover:text-white transition-colors">Demo</a>
             <a href="/pricing" className="text-sm text-gray-300 hover:text-white transition-colors">Pricing</a>
             <a href="/contact" className="text-sm text-aurora-cyan hover:text-white transition-colors">Contact</a>
@@ -630,6 +631,7 @@ export default function ContactPage() {
                 <a href="/services" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-3 rounded-xl text-sm text-gray-300 hover:text-white hover:bg-white/[0.05] transition-all">Services</a>
                 <a href="/ai-receptionist" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-3 rounded-xl text-sm text-gray-300 hover:text-white hover:bg-white/[0.05] transition-all">Legal AI</a>
                 <a href="/partners" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-3 rounded-xl text-sm text-gray-300 hover:text-white hover:bg-white/[0.05] transition-all">Partners</a>
+                <a href="/industries" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-3 rounded-xl text-sm text-gray-300 hover:text-white hover:bg-white/[0.05] transition-all">Industries</a>
                 <a href="/demo" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-3 rounded-xl text-sm text-gray-300 hover:text-white hover:bg-white/[0.05] transition-all">Demo</a>
                 <a href="/pricing" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-3 rounded-xl text-sm text-gray-300 hover:text-white hover:bg-white/[0.05] transition-all">Pricing</a>
                 <a href="/contact" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-3 rounded-xl text-sm text-aurora-cyan hover:text-white hover:bg-white/[0.05] transition-all">Contact</a>
@@ -1109,6 +1111,7 @@ export default function ContactPage() {
                 <li><Link href="/services" className="hover:text-white transition-colors">Services</Link></li>
                 <li><Link href="/ai-receptionist" className="hover:text-white transition-colors">Legal AI</Link></li>
                 <li><Link href="/partners" className="hover:text-white transition-colors">Partners</Link></li>
+                <li><Link href="/industries" className="hover:text-white transition-colors">Industries</Link></li>
                 <li><Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
                 <li><Link href="/demo" className="hover:text-white transition-colors">Demo</Link></li>
                 <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>

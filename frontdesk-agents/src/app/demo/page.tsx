@@ -872,6 +872,7 @@ export default function DemoPage() {
             <a href="/services" className="text-sm text-gray-300 hover:text-white transition-colors">Services</a>
             <a href="/ai-receptionist" className="text-sm text-gray-300 hover:text-white transition-colors">Legal AI</a>
             <a href="/partners" className="text-sm text-gray-300 hover:text-white transition-colors">Partners</a>
+            <a href="/industries" className="text-sm text-gray-300 hover:text-white transition-colors">Industries</a>
             <a href="/pricing" className="text-sm text-gray-300 hover:text-white transition-colors">Pricing</a>
             <a href="/contact" className="text-sm text-gray-300 hover:text-white transition-colors">Contact</a>
             <Link href="/pricing" className="px-4 py-2 rounded-full bg-gradient-to-r from-aurora-cyan to-aurora-cyan/80 text-white text-sm font-medium hover:shadow-lg hover:shadow-aurora-cyan/25 transition-all">
@@ -1252,6 +1253,7 @@ export default function DemoPage() {
               <li><a href="/demo" className="hover:text-white transition-colors">Demo</a></li>
               <li><a href="/ai-receptionist" className="hover:text-white transition-colors">Legal AI</a></li>
               <li><a href="/partners" className="hover:text-white transition-colors">Partners</a></li>
+              <li><a href="/industries" className="hover:text-white transition-colors">Industries</a></li>
               <li><a href="/pricing" className="hover:text-white transition-colors">Pricing</a></li>
               <li><a href="/contact" className="hover:text-white transition-colors">Contact</a></li>
             </ul>

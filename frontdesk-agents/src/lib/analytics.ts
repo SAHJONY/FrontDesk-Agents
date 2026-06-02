@@ -1,4 +1,4 @@
-// Analytics tracking for FrontDesk Agents
+// Analytics tracking for FrontDesk Agents AI
 // Supports multiple analytics providers
 
 export interface AnalyticsEvent {

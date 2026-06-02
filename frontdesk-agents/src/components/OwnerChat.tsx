@@ -28,7 +28,7 @@ export default function OwnerChat() {
     {
       id: 'welcome',
       role: 'assistant',
-      content: "Hello Juan! I'm your AI Assistant for FrontDesk Agents. I have full access to your platform and can help you:\n\n• **Monitor** real-time metrics (revenue, calls, customers)\n• **Manage** customers and AI agents\n• **Control** system settings\n• **Execute** platform commands\n• **Answer** questions about your business\n\nTry asking:\n- \"Show me today's revenue\"\n- \"How many active customers do I have?\"\n- \"List all AI agents\"\n- \"Create a new customer\"\n- \"Show system status\"",
+      content: "Hello Juan! I'm your AI Assistant for FrontDesk Agents AI. I have full access to your platform and can help you:\n\n• **Monitor** real-time metrics (revenue, calls, customers)\n• **Manage** customers and AI agents\n• **Control** system settings\n• **Execute** platform commands\n• **Answer** questions about your business\n\nTry asking:\n- \"Show me today's revenue\"\n- \"How many active customers do I have?\"\n- \"List all AI agents\"\n- \"Create a new customer\"\n- \"Show system status\"",
       timestamp: Date.now()
     }
   ])

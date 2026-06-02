@@ -272,7 +272,7 @@ Last known metrics:
 }
 
 function buildSystemPrompt(m: any, hRunning: boolean) {
-  return `You are Hermes, the autonomous AI assistant for FrontDesk Agents platform, powered by NVIDIA NIM.
+  return `You are Hermes, the autonomous AI assistant for FrontDesk Agents AI platform, powered by NVIDIA NIM.
 
 ## Current Platform State (LIVE DATA):
 - **Users:** ${m?.totalUsers || 0} total, ${m?.activeUsers || 0} active

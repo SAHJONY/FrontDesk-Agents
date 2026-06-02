@@ -8,7 +8,7 @@ export function Testimonials() {
       role: 'Owner, MedSpa Elite',
       industry: 'Healthcare',
       image: '👩‍⚕️',
-      quote: "FrontDesk Agents transformed our reception. We're handling 3x more calls with 99.7% accuracy. The ROI was immediate - $12,000/month in recovered revenue.",
+      quote: "FrontDesk Agents AI transformed our reception. We're handling 3x more calls with 99.7% accuracy. The ROI was immediate - $12,000/month in recovered revenue.",
       metrics: {
         calls: '+287%',
         revenue: '+$12K/mo',
@@ -68,7 +68,7 @@ export function Testimonials() {
       role: 'Owner, Auto Care Pro',
       industry: 'Automotive',
       image: '🔧',
-      quote: "Missed calls were costing us $8K/month. FrontDesk Agents captures every inquiry, books appointments, and follows up. Revenue up 156%.",
+      quote: "Missed calls were costing us $8K/month. FrontDesk Agents AI captures every inquiry, books appointments, and follows up. Revenue up 156%.",
       metrics: {
         calls: '+312%',
         revenue: '+$22K/mo',
@@ -84,7 +84,7 @@ export function Testimonials() {
           Trusted by Industry Leaders
         </h2>
         <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-          Real results from businesses using FrontDesk Agents to transform their customer experience
+          Real results from businesses using FrontDesk Agents AI to transform their customer experience
         </p>
       </div>
 

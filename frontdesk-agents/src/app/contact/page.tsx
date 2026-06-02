@@ -133,7 +133,7 @@ const CONTACT_METHODS = [
 
 const FAQ_ITEMS = [
   {
-    question: 'How quickly can I get started with FrontDesk Agents?',
+    question: 'How quickly can I get started with FrontDesk Agents AI?',
     answer: 'Most businesses are up and running within 24 hours. Our onboarding team guides you through setup, customization, and testing. You can try a free demo before committing.',
   },
   {
@@ -149,7 +149,7 @@ const FAQ_ITEMS = [
     answer: 'Our agents support over 50 languages including English, Spanish, French, German, Mandarin, Japanese, Arabic, and Portuguese. The AI can detect and switch languages mid-conversation.',
   },
   {
-    question: 'Is my data secure with FrontDesk Agents?',
+    question: 'Is my data secure with FrontDesk Agents AI?',
     answer: 'Absolutely. We employ enterprise-grade encryption (AES-256), SOC 2 compliance practices, and strict data handling policies. Your call data is never used to train public models.',
   },
   {
@@ -191,7 +191,7 @@ const COMPANY_SIZE_OPTIONS = [
 ]
 
 const TESTIMONIALS = [
-  { name: 'Dr. Sarah Chen', role: 'Medical Practice Owner', company: 'Chen Family Medicine', text: 'FrontDesk Agents handles over 200 patient calls daily. Appointment booking is seamless and our patients love the instant responses.', rating: 5 },
+  { name: 'Dr. Sarah Chen', role: 'Medical Practice Owner', company: 'Chen Family Medicine', text: 'FrontDesk Agents AI handles over 200 patient calls daily. Appointment booking is seamless and our patients love the instant responses.', rating: 5 },
   { name: 'Michael Torres', role: 'Broker/Owner', company: 'Torres Realty Group', text: 'Our AI agent qualifies leads 24/7. We\'ve seen a 40% increase in qualified appointments since switching from a human receptionist.', rating: 5 },
   { name: 'James Wilson', role: 'Managing Partner', company: 'Wilson & Associates Law', text: 'The AI handles intake calls with precision and sensitivity. It\'s like having a full-time paralegal answering phones around the clock.', rating: 5 },
   { name: 'Lisa Park', role: 'CEO', company: 'Park Dental Care', text: 'Setup was incredibly easy — we were live in under 24 hours. The AI handles scheduling, reminders, and even handles insurance questions.', rating: 5 },
@@ -410,7 +410,7 @@ function LiveChatPreview() {
   const [step, setStep] = useState(0)
 
   const CHAT_MSGS = useMemo(() => [
-    { role: 'bot', text: 'Hi there! 👋 Welcome to FrontDesk Agents.' },
+    { role: 'bot', text: 'Hi there! 👋 Welcome to FrontDesk Agents AI.' },
     { role: 'bot', text: 'Have questions about our AI phone agents?' },
     { role: 'bot', text: 'We can help you choose the perfect plan and get started in under 24 hours!' },
   ], [])
@@ -484,7 +484,7 @@ function LiveChatPreview() {
                   <BotIcon />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-white">FrontDesk Agents</p>
+                  <p className="text-sm font-semibold text-white">FrontDesk Agents AI</p>
                   <div className="flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                     <span className="text-[11px] text-emerald-400">Online</span>
@@ -600,7 +600,7 @@ export default function ContactPage() {
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-aurora-cyan to-midnight-blue flex items-center justify-center">
               <BotIcon />
             </div>
-            <span className="font-display text-lg font-bold text-white hidden sm:inline">FrontDesk Agents</span>
+            <span className="font-display text-lg font-bold text-white hidden sm:inline">FrontDesk Agents AI</span>
           </Link>
           <div className="hidden md:flex items-center gap-6">
             <a href="/services" className="text-sm text-gray-300 hover:text-white transition-colors">Services</a>
@@ -941,7 +941,7 @@ export default function ContactPage() {
 
               {/* Why Choose Us */}
               <div className="p-6 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.06]">
-                <h3 className="text-xl font-semibold mb-4 flex items-center gap-2"><BotIcon /> Why Choose FrontDesk Agents?</h3>
+                <h3 className="text-xl font-semibold mb-4 flex items-center gap-2"><BotIcon /> Why Choose FrontDesk Agents AI?</h3>
                 <ul className="space-y-3">
                   {[
                     'Enterprise-grade AI voice technology',
@@ -974,7 +974,7 @@ export default function ContactPage() {
         <div className="max-w-6xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} viewport={{ once: true }} className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-display font-bold mb-4">Trusted by Thousands</h2>
-            <p className="text-gray-400 max-w-2xl mx-auto">Join the growing community of businesses that trust FrontDesk Agents to handle their calls.</p>
+            <p className="text-gray-400 max-w-2xl mx-auto">Join the growing community of businesses that trust FrontDesk Agents AI to handle their calls.</p>
           </motion.div>
 
           {/* Stats counters */}
@@ -1080,7 +1080,7 @@ export default function ContactPage() {
             <div className="relative z-10">
               <h2 className="text-3xl sm:text-4xl font-display font-bold mb-4">Ready to Transform Your Business Communications?</h2>
             <p className="text-gray-400 text-lg mb-8 max-w-2xl mx-auto">
-              Join thousands of businesses using FrontDesk Agents to handle calls, book appointments, and qualify leads — automatically.{' '}
+              Join thousands of businesses using FrontDesk Agents AI to handle calls, book appointments, and qualify leads — automatically.{' '}
               <Link href="/partners#referral" className="text-aurora-cyan underline hover:text-white transition-colors">Refer a firm → $1,000.</Link>
             </p>
               <div className="flex flex-wrap justify-center gap-4">
@@ -1101,7 +1101,7 @@ export default function ContactPage() {
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-aurora-cyan to-midnight-blue flex items-center justify-center">
                   <BotIcon />
                 </div>
-                <span className="font-display text-lg font-bold text-white">FrontDesk Agents</span>
+                <span className="font-display text-lg font-bold text-white">FrontDesk Agents AI</span>
               </Link>
               <p className="text-gray-500 text-sm leading-relaxed">AI phone agents that handle calls, book appointments, and qualify leads — automatically.</p>
             </div>
@@ -1136,7 +1136,7 @@ export default function ContactPage() {
             </div>
           </div>
           <div className="border-t border-white/[0.06] pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-600">
-            <p>&copy; {new Date().getFullYear()} FrontDesk Agents. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} FrontDesk Agents AI. All rights reserved.</p>
             <div className="flex items-center gap-6">
               <span className="hover:text-white transition-colors cursor-default">Twitter</span>
               <span className="hover:text-white transition-colors cursor-default">LinkedIn</span>

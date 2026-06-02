@@ -9,18 +9,18 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://frontdesk-agents.vercel.app'),
-  title: "FrontDesk Agents - The World's Most Advanced AI Receptionist",
+  title: "FrontDesk Agents AI - The World's Most Advanced AI Receptionist",
   description: 'Professional AI agents that speak 200+ languages, available 24/7/365. Any industry, any language, worldwide.',
   keywords: 'AI receptionist, voice AI, multi-language, global business, 24/7 availability, front desk automation',
-  authors: [{ name: 'FrontDesk Agents' }],
+  authors: [{ name: 'FrontDesk Agents AI' }],
   icons: {
     icon: '/favicon.svg',
   },
   openGraph: {
-    title: "FrontDesk Agents - The World's Most Advanced AI Receptionist",
+    title: "FrontDesk Agents AI - The World's Most Advanced AI Receptionist",
     description: 'Professional AI agents that speak 200+ languages, available 24/7/365.',
     url: process.env.NEXT_PUBLIC_APP_URL || 'https://frontdesk-agents.vercel.app',
-    siteName: 'FrontDesk Agents',
+    siteName: 'FrontDesk Agents AI',
     images: [
       {
         url: '/assets/og-image.svg',

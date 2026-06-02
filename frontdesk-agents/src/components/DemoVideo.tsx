@@ -20,7 +20,7 @@ export function DemoVideo() {
                 <Play className="w-8 h-8 text-white ml-1" />
               </div>
               <h3 className="text-2xl font-bold text-white mb-2">
-                See FrontDesk Agents in Action
+                See FrontDesk Agents AI in Action
               </h3>
               <p className="text-gray-400">
                 Watch how our AI handles real customer conversations

@@ -5,7 +5,7 @@ import { ToastProvider } from '@/components/ToastProvider'
 import { MotionConfig } from 'framer-motion'
 import './globals.css'
 
-const inter = Inter({ subsets: ['latin'] }) // auto-deploy: dashboard settings fixed
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://frontdeskagents-684hwn3e1-juan-gonzalezs-projects-94b6dfe9.vercel.app'),

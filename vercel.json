@@ -1,6 +1,8 @@
 {
-  "buildCommand": "cd frontdesk-agents && npm run build",
-  "outputDirectory": "frontdesk-agents/.next",
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "installCommand": "npm install",
+  "rootDirectory": "frontdesk-agents",
   "framework": "nextjs",
   "regions": ["iad1"]
 }

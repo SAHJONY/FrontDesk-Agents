@@ -49,8 +49,8 @@ next-env.d.ts
 Thumbs.db
 
 # Root-level redundant dirs (app lives in frontdesk-agents/)
-src/
-tests/
+/src/
+/tests/
 .next/
 coverage-out/
 test-results/

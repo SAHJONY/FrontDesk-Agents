@@ -8,7 +8,7 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://frontdesk-agents-ai.vercel.app'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://frontdeskagents-684hwn3e1-juan-gonzalezs-projects-94b6dfe9.vercel.app'),
   title: "FrontDesk Agents AI - The World's Most Advanced AI Receptionist",
   description: 'Professional AI agents that speak 200+ languages, available 24/7/365. Any industry, any language, worldwide.',
   keywords: 'AI receptionist, voice AI, multi-language, global business, 24/7 availability, front desk automation',
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "FrontDesk Agents AI - The World's Most Advanced AI Receptionist",
     description: 'Professional AI agents that speak 200+ languages, available 24/7/365.',
-    url: process.env.NEXT_PUBLIC_APP_URL || 'https://frontdesk-agents-ai.vercel.app',
+    url: process.env.NEXT_PUBLIC_APP_URL || 'https://frontdeskagents-684hwn3e1-juan-gonzalezs-projects-94b6dfe9.vercel.app',
     siteName: 'FrontDesk Agents AI',
     images: [
       {

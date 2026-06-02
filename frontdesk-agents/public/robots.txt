@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://frontdesk-agents-ai.vercel.app/sitemap.xml
+Sitemap: https://frontdeskagents-684hwn3e1-juan-gonzalezs-projects-94b6dfe9.vercel.app/sitemap.xml

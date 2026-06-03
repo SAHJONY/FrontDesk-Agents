@@ -1095,7 +1095,7 @@ export default function OwnerDashboard() {
               initial={{ opacity: 0, x: 40 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.4, ease: 'easeOut' }}
-              className="fixed right-0 top-0 h-full w-[420px] z-30"
+              className="fixed right-0 top-0 h-full w-[420px] z-30 hidden xl:block"
             >
               <HermesChat
                 metrics={{

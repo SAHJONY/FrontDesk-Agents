@@ -257,7 +257,7 @@ function OwnerBillingPageInner() {
   return (
     <div className="min-h-screen bg-deep-space">
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Header */}
+        {/* Header - only show when NOT embedded in dashboard iframe */}
         {!embedded && (
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-4">
@@ -268,7 +268,6 @@ function OwnerBillingPageInner() {
                 <ArrowLeft className="w-4 h-4" />
                 Back to Dashboard
               </Link>
-              <div>
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-gradient-to-br from-aurora-cyan/20 to-aurora-cyan/5 border border-aurora-cyan/20">
                   <Receipt className="w-6 h-6 text-aurora-cyan" />
@@ -279,25 +278,24 @@ function OwnerBillingPageInner() {
                 </div>
               </div>
             </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => fetchBillingHistory(1)}
+                className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-700/50 hover:scale-105 active:scale-95 rounded-lg transition-all duration-200"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Refresh
+              </button>
+              <button
+                onClick={exportCSV}
+                disabled={filteredRecords.length === 0}
+                className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-700/50 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <Download className="w-4 h-4" />
+                Export CSV
+              </button>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => fetchBillingHistory(1)}
-              className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-700/50 hover:scale-105 active:scale-95 rounded-lg transition-all duration-200"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Refresh
-            </button>
-            <button
-              onClick={exportCSV}
-              disabled={filteredRecords.length === 0}
-              className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-700/50 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              <Download className="w-4 h-4" />
-              Export CSV
-            </button>
-          </div>
-        </div>
         )}
 
         {/* Stat Cards */}

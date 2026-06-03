@@ -383,6 +383,18 @@ export default function LandingPage() {
       if (f === '500 calls/month') return t('500 calls/month')
       if (f === '2,000 calls/month') return t('2,000 calls/month')
       if (f === 'Unlimited calls') return t('Unlimited calls')
+      if (f === '1 phone number') return t('1 phone number')
+      if (f === 'Basic analytics') return t('Basic analytics')
+      if (f === 'Email support') return t('Email support')
+      if (f === '3 phone numbers') return t('3 phone numbers')
+      if (f === 'Advanced analytics') return t('Advanced analytics')
+      if (f === 'Priority support') return t('Priority support')
+      if (f === 'Custom voice') return t('Custom voice')
+      if (f === '10 phone numbers') return t('10 phone numbers')
+      if (f === 'Real-time dashboard') return t('Real-time dashboard')
+      if (f === 'API access') return t('API access')
+      if (f === 'Dedicated support') return t('Dedicated support')
+      if (f === 'Multi-language') return t('Multi-language')
       return f
     }),
     cta: t('Start Free Trial'),

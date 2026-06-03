@@ -1069,7 +1069,9 @@
     "Close": "Fermer",
     "How FrontDesk Agents AI Works": "Comment Fonctionne FrontDesk Agents AI",
     "Demo video showcasing AI receptionist capabilities": "Vidéo démo montrant les capacités du réceptionniste IA",
-    "Menu": "Menu"
+    "Menu": "Menu",
+    "Insurance": "Assurance",
+    "Partners": "Partenaires"
   },
   "de": {
     "Dashboard": "Armaturenbrett",
@@ -1337,7 +1339,9 @@
     "Close": "Schließen",
     "How FrontDesk Agents AI Works": "Wie FrontDesk Agents AI Funktioniert",
     "Demo video showcasing AI receptionist capabilities": "Demo-Video zeigt KI-Empfangs-Fähigkeiten",
-    "Menu": "Menü"
+    "Menu": "Menü",
+    "Insurance": "Versicherung",
+    "Partners": "Partner"
   },
   "ja": {
     "Dashboard": "ダッシュボード",
@@ -1605,6 +1609,8 @@
     "Close": "閉じる",
     "How FrontDesk Agents AI Works": "FrontDesk Agents AIの動作原理",
     "Demo video showcasing AI receptionist capabilities": "AI受付の能力を説明するデモ動画",
-    "Menu": "メニュー"
+    "Menu": "メニュー",
+    "Insurance": "保険",
+    "Partners": "パートナー"
   }
 }

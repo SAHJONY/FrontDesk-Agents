@@ -145,6 +145,48 @@ export default function OwnerDashboard() {
   const [confirmSendId, setConfirmSendId] = useState<string | null>(null)
   const [authChecking, setAuthChecking] = useState(true)
   const [harnessRunning, setHarnessRunning] = useState(false)
+  const [harnessStatus, setHarnessStatus] = useState<{
+    running: boolean
+    totalCycles: number
+    successfulDeployments: number
+    learningsStored: number
+    lastCycle: string | null
+    currentMetrics: {
+      errorRate: number
+      avgLatencyMs: number
+      requestsPerSecond: number
+      conversionRate: number
+      churnRate: number
+      customerSatisfaction: number
+      activeCustomers: number
+      totalCalls: number
+      callSuccessRate: number
+      mrr: number
+      arr: number
+      timestamp: string
+    } | null
+  } | null>(null)
+
+  // Fetch harness status and wire it into HermesChat
+  const fetchHarnessStatus = useCallback(async () => {
+    try {
+      const res = await fetch('/api/harness/status')
+      if (res.ok) {
+        const json = await res.json()
+        setHarnessRunning(json.running ?? false)
+        setHarnessStatus({
+          running: json.running ?? false,
+          totalCycles: json.totalCycles ?? 0,
+          successfulDeployments: json.successfulDeployments ?? 0,
+          learningsStored: json.learningsStored ?? 0,
+          lastCycle: json.lastCycle ?? null,
+          currentMetrics: json.currentMetrics ?? null,
+        })
+      }
+    } catch {
+      // harness status is non-critical — leave current state intact
+    }
+  }, [])
 
   // Auth guard - check session on mount
   useEffect(() => {
@@ -157,6 +199,7 @@ export default function OwnerDashboard() {
         } else {
           setAuthChecking(false)
           fetchDashboard()
+          fetchHarnessStatus()
         }
       } catch {
         router.push('/owner/login')
@@ -165,6 +208,12 @@ export default function OwnerDashboard() {
     checkAuth()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Poll harness status every 30s so HermesChat reflects live data
+  useEffect(() => {
+    const interval = setInterval(fetchHarnessStatus, 30000)
+    return () => clearInterval(interval)
+  }, [fetchHarnessStatus])
 
   const fetchDashboard = useCallback(async () => {
     setLoading(true)
@@ -1054,10 +1103,17 @@ export default function OwnerDashboard() {
                   activeUsers: health.healthyCount,
                   revenue: metrics.mrr,
                   callsToday: metrics.evaluations.length,
-                  successRate: Math.round((1 - metrics.churnRate) * 100),
-                  uptime: 99.5,
-                  harnessCycles: 0,
-                  autonomousDeployments: 0,
+                  successRate: harnessStatus?.currentMetrics?.callSuccessRate != null
+                    ? Math.round(harnessStatus.currentMetrics.callSuccessRate * 100)
+                    : Math.round((1 - metrics.churnRate) * 100),
+                  uptime: harnessStatus?.currentMetrics
+                    ? (() => {
+                        const er = harnessStatus.currentMetrics!.errorRate
+                        return er != null && er >= 0 ? Math.max(0, Math.min(100, (1 - er) * 100)) : 99.5
+                      })()
+                    : 99.5,
+                  harnessCycles: harnessStatus?.totalCycles ?? 0,
+                  autonomousDeployments: harnessStatus?.successfulDeployments ?? 0,
                 }}
                 harnessRunning={harnessRunning}
               />

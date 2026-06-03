@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   const accessToken = process.env.SQUARE_ACCESS_TOKEN;
   const environment = process.env.SQUARE_ENVIRONMENT || 'sandbox'; // 'sandbox' or 'production'

@@ -4,6 +4,8 @@
 import { NextResponse } from 'next/server'
 import { getSquareStatus } from '@/lib/square'
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const status = await getSquareStatus()

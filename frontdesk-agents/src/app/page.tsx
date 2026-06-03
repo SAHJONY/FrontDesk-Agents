@@ -16,12 +16,8 @@ const PhoneIcon = () => <svg xmlns='http://www.w3.org/2000/svg' width='24' heigh
 const QuoteIcon = () => <svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='currentColor' opacity='0.15'><path d='M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10H14.017zM0 21v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151C7.563 6.068 6 8.789 6 11h4v10H0z'/></svg>
 
 // ─── Data ───────────────────────────────────────────────────────────────────
-const FEATURES = [
-  { icon: Globe, title: '200+ Languages', desc: 'Native-level understanding in every major language worldwide' },
-  { icon: Clock, title: '24/7/365 Availability', desc: 'Never miss a call — holidays, weekends, midnight — we are always on' },
-  { icon: Headphones, title: 'Human-like Voice', desc: 'Advanced neural voices customers cannot distinguish from humans' },
-  { icon: Bot, title: 'Smart Escalation', desc: 'Instantly transfers to your team when a human touch is needed' },
-]
+// Note: FEATURES, INDUSTRIES, PRICING_PLANS, METRICS are defined inside the
+// LandingPage component so they have access to the t() translation function.
 
 const HealthIcon = () => <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'><path d='M22 12h-4l-3 9L9 3l-3 9H2'/></svg>
 const LegalIcon = () => <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/></svg>
@@ -32,7 +28,7 @@ const SpaIcon = () => <svg xmlns='http://www.w3.org/2000/svg' width='24' height=
 const AutoIcon = () => <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'><path d='M5 17h14M5 17a2 2 0 01-2-2V9a1 1 0 01.55-.9l4-2A1 1 0 018 6h8a1 1 0 01.45.1l4 2A1 1 0 0121 9v6a2 2 0 01-2 2'/><circle cx='7' cy='13' r='2'/><circle cx='17' cy='13' r='2'/><line x1='9' y1='6' x2='10' y2='10.5'/><line x1='15' y1='6' x2='14' y2='10.5'/></svg>
 const InsuranceIcon = () => <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'><path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'/><path d='M9 12l2 2 4-4'/></svg>
 
-const INDUSTRIES = [
+const INDUSTRIES_DATA = [
   { name: 'Healthcare', icon: HealthIcon, desc: 'Patient scheduling, prescription refills, insurance verification' },
   { name: 'Legal', icon: LegalIcon, desc: 'Client intake, case status updates, consultation booking' },
   { name: 'Dental', icon: DentalIcon, desc: 'Appointment management, insurance checks, emergency triage' },
@@ -43,10 +39,10 @@ const INDUSTRIES = [
   { name: 'Insurance', icon: InsuranceIcon, desc: 'Claims intake, policy inquiries, agent connection' },
 ]
 
-const PRICING_PLANS = [
-  { name: 'Starter', price: '$99', desc: 'Perfect for small businesses', features: ['500 calls/month', '1 phone number', 'Basic analytics', 'Email support'], cta: 'Start Free Trial', popular: false },
-  { name: 'Growth', price: '$149', desc: 'For growing businesses', features: ['2,000 calls/month', '3 phone numbers', 'Advanced analytics', 'Priority support', 'Custom voice'], cta: 'Start Free Trial', popular: true },
-  { name: 'Pro', price: '$299', desc: 'For high-volume businesses', features: ['Unlimited calls', '10 phone numbers', 'Real-time dashboard', 'API access', 'Dedicated support', 'Multi-language'], cta: 'Start Free Trial', popular: false },
+const PRICING_PLANS_DATA = [
+  { name: 'Starter', price: '$99', features: ['500 calls/month', '1 phone number', 'Basic analytics', 'Email support'], popular: false },
+  { name: 'Growth', price: '$149', features: ['2,000 calls/month', '3 phone numbers', 'Advanced analytics', 'Priority support', 'Custom voice'], popular: true },
+  { name: 'Pro', price: '$299', features: ['Unlimited calls', '10 phone numbers', 'Real-time dashboard', 'API access', 'Dedicated support', 'Multi-language'], popular: false },
 ]
 
 const TESTIMONIALS = [
@@ -58,11 +54,11 @@ const TESTIMONIALS = [
   { name: 'Tom Harrison', role: 'Insurance Agency Owner', text: 'Claims intake is fully automated. Our agents only take calls that need a human touch. Game changer.', rating: 5, company: 'Harrison Insurance' },
 ]
 
-const METRICS = [
-  { value: '25M+', suffix: '', label: 'Calls Handled', decimals: 0 },
-  { value: '10K+', suffix: '', label: 'Active Businesses', decimals: 0 },
-  { value: '200+', suffix: '', label: 'Languages Supported', decimals: 0 },
-  { value: '4.9', suffix: '/5', label: 'Average Rating', decimals: 1 },
+const METRICS_DATA = [
+  { value: '25M+', decimals: 0 },
+  { value: '10K+', decimals: 0 },
+  { value: '200+', decimals: 0 },
+  { value: '4.9', suffix: '/5', decimals: 1 },
 ]
 
 const TRUST_CLIENTS = [
@@ -270,12 +266,21 @@ function TestimonialCarousel() {
 }
 
 function MetricsSection() {
+  const { t } = useTranslation()
   const ref = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ['start end', 'end start'],
   })
   const bgY = useTransform(scrollYProgress, [0, 1], ['0%', '30%'])
+
+  const metrics = METRICS_DATA.map(m => ({
+    ...m,
+    label: m.value === '25M+' ? t('Calls Handled')
+      : m.value === '10K+' ? t('Active Businesses')
+      : m.value === '200+' ? t('Languages Supported')
+      : t('Average Rating'),
+  }))
 
   return (
     <section ref={ref} className='relative py-20 md:py-28 px-4 overflow-hidden'>
@@ -287,7 +292,7 @@ function MetricsSection() {
       </motion.div>
 
       <div className='max-w-6xl mx-auto relative'>
-        <SectionHeading title='Trusted by Thousands' subtitle='Real results from businesses around the world' />
+        <SectionHeading title={t('Trusted by Thousands')} subtitle={t('Trusted Subtitle')} />
 
         <motion.div
           initial='hidden'
@@ -296,7 +301,7 @@ function MetricsSection() {
           variants={staggerContainer}
           className='grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8'
         >
-          {METRICS.map((m, i) => (
+          {metrics.map((m: typeof metrics[number], i: number) => (
             <motion.div
               key={i}
               variants={{
@@ -350,7 +355,46 @@ export default function LandingPage() {
   const [leadSubmitted, setLeadSubmitted] = useState(false)
   const [leadScore, setLeadScore] = useState<number | null>(null)
   const [scrolled, setScrolled] = useState(false)
-  const { language, setLanguage, languages } = useTranslation()
+  const { language, setLanguage, languages, t } = useTranslation()
+
+  // Translation-wrapped data arrays (must be inside component to access t())
+  const FEATURES = [
+    { icon: Globe, title: t('200+ Languages'), desc: t('200+ Languages Desc') },
+    { icon: Clock, title: t('24/7/365 Availability'), desc: t('24/7 Desc') },
+    { icon: Headphones, title: t('Human-like Voice'), desc: t('Human-like Voice Desc') },
+    { icon: Bot, title: t('Smart Escalation'), desc: t('Smart Escalation Desc') },
+  ]
+
+  const INDUSTRIES = INDUSTRIES_DATA.map(ind => ({
+    ...ind,
+    name: ind.name === 'Healthcare' ? t('Healthcare')
+      : ind.name === 'Legal' ? t('Legal Industry')
+      : ind.name === 'Automotive' ? t('Automotive')
+      : ind.name === 'Insurance' ? t('Insurance')
+      : ind.name,
+  }))
+
+  const PRICING_PLANS = PRICING_PLANS_DATA.map(plan => ({
+    ...plan,
+    desc: plan.name === 'Starter' ? t('Perfect for small businesses')
+      : plan.name === 'Growth' ? t('For growing businesses')
+      : t('For high-volume businesses'),
+    features: plan.features.map(f => {
+      if (f === '500 calls/month') return t('500 calls/month')
+      if (f === '2,000 calls/month') return t('2,000 calls/month')
+      if (f === 'Unlimited calls') return t('Unlimited calls')
+      return f
+    }),
+    cta: t('Start Free Trial'),
+  }))
+
+  const METRICS = METRICS_DATA.map(m => ({
+    ...m,
+    label: m.value === '25M+' ? t('Calls Handled')
+      : m.value === '10K+' ? t('Active Businesses')
+      : m.value === '200+' ? t('Languages Supported')
+      : t('Average Rating'),
+  }))
 
   const heroRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({
@@ -413,16 +457,16 @@ export default function LandingPage() {
 
           {/* Desktop nav */}
           <div className='hidden md:flex items-center gap-8'>
-            <a href='/pricing' className='text-sm text-gray-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-aurora-cyan after:transition-all hover:after:w-full'>Pricing</a>
-            <a href='/ai-receptionist' className='text-sm text-gray-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-aurora-cyan after:transition-all hover:after:w-full'>Legal AI</a>
-            <a href='/partners' className='text-sm text-gray-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-aurora-cyan after:transition-all hover:after:w-full'>Partners</a>
-            <a href='/industries' className='text-sm text-gray-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-aurora-cyan after:transition-all hover:after:w-full'>Industries</a>
-            <a href='/blog' className='text-sm text-gray-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-aurora-cyan after:transition-all hover:after:w-full'>Blog</a>
-            <a href='/demo' className='text-sm text-gray-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-aurora-cyan after:transition-all hover:after:w-full'>Demo</a>
-            <a href='/services' className='text-sm text-gray-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-aurora-cyan after:transition-all hover:after:w-full'>Services</a>
-            <a href='/contact' className='text-sm text-gray-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-aurora-cyan after:transition-all hover:after:w-full'>Contact</a>
+            <a href='/pricing' className='text-sm text-gray-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-aurora-cyan after:transition-all hover:after:w-full'>{t('Pricing')}</a>
+            <a href='/ai-receptionist' className='text-sm text-gray-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-aurora-cyan after:transition-all hover:after:w-full'>{t('Legal')}</a>
+            <a href='/partners' className='text-sm text-gray-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-aurora-cyan after:transition-all hover:after:w-full'>{t('Partners')}</a>
+            <a href='/industries' className='text-sm text-gray-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-aurora-cyan after:transition-all hover:after:w-full'>{t('Industries')}</a>
+            <a href='/blog' className='text-sm text-gray-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-aurora-cyan after:transition-all hover:after:w-full'>{t('Blog')}</a>
+            <a href='/demo' className='text-sm text-gray-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-aurora-cyan after:transition-all hover:after:w-full'>{t('Demo')}</a>
+            <a href='/services' className='text-sm text-gray-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-aurora-cyan after:transition-all hover:after:w-full'>{t('Features')}</a>
+            <a href='/contact' className='text-sm text-gray-300 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-aurora-cyan after:transition-all hover:after:w-full'>{t('Contact')}</a>
             <a href='/pricing' className='px-5 py-2.5 rounded-full bg-gradient-to-r from-aurora-cyan to-aurora-cyan/80 text-white text-sm font-medium hover:shadow-lg hover:shadow-aurora-cyan/25 transition-all hover:scale-105'>
-              Get Started
+              {t('Get Started Free')}
             </a>
           </div>
 
@@ -461,16 +505,16 @@ export default function LandingPage() {
                 <button onClick={() => setShowMobileMenu(false)} className='absolute top-6 right-6 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/70 hover:text-white' aria-label='Close menu'>
                   <X />
                 </button>
-                <a href='/pricing' onClick={() => setShowMobileMenu(false)} className='text-xl text-gray-300 hover:text-white transition-colors'>Pricing</a>
-                <a href='/ai-receptionist' onClick={() => setShowMobileMenu(false)} className='text-xl text-gray-300 hover:text-white transition-colors'>Legal AI</a>
-                <a href='/partners' onClick={() => setShowMobileMenu(false)} className='text-xl text-gray-300 hover:text-white transition-colors'>Partners</a>
-                <a href='/industries' onClick={() => setShowMobileMenu(false)} className='text-xl text-gray-300 hover:text-white transition-colors'>Industries</a>
-                <a href='/blog' onClick={() => setShowMobileMenu(false)} className='text-xl text-gray-300 hover:text-white transition-colors'>Blog</a>
-                <a href='/demo' onClick={() => setShowMobileMenu(false)} className='text-xl text-gray-300 hover:text-white transition-colors'>Demo</a>
-                <a href='/services' onClick={() => setShowMobileMenu(false)} className='text-xl text-gray-300 hover:text-white transition-colors'>Services</a>
-                <a href='/contact' onClick={() => setShowMobileMenu(false)} className='text-xl text-gray-300 hover:text-white transition-colors'>Contact</a>
+                <a href='/pricing' onClick={() => setShowMobileMenu(false)} className='text-xl text-gray-300 hover:text-white transition-colors'>{t('Pricing')}</a>
+                <a href='/ai-receptionist' onClick={() => setShowMobileMenu(false)} className='text-xl text-gray-300 hover:text-white transition-colors'>{t('Legal')}</a>
+                <a href='/partners' onClick={() => setShowMobileMenu(false)} className='text-xl text-gray-300 hover:text-white transition-colors'>{t('Partners')}</a>
+                <a href='/industries' onClick={() => setShowMobileMenu(false)} className='text-xl text-gray-300 hover:text-white transition-colors'>{t('Industries')}</a>
+                <a href='/blog' onClick={() => setShowMobileMenu(false)} className='text-xl text-gray-300 hover:text-white transition-colors'>{t('Blog')}</a>
+                <a href='/demo' onClick={() => setShowMobileMenu(false)} className='text-xl text-gray-300 hover:text-white transition-colors'>{t('Demo')}</a>
+                <a href='/services' onClick={() => setShowMobileMenu(false)} className='text-xl text-gray-300 hover:text-white transition-colors'>{t('Features')}</a>
+                <a href='/contact' onClick={() => setShowMobileMenu(false)} className='text-xl text-gray-300 hover:text-white transition-colors'>{t('Contact')}</a>
                 <a href='/pricing' onClick={() => setShowMobileMenu(false)} className='px-8 py-3 rounded-full bg-gradient-to-r from-aurora-cyan to-aurora-cyan/80 text-white font-semibold'>
-                  Get Started
+                  {t('Get Started Free')}
                 </a>
               </motion.div>
             </motion.div>
@@ -501,15 +545,15 @@ export default function LandingPage() {
               className='inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-aurora-cyan/10 border border-aurora-cyan/20 text-sm text-aurora-cyan/80 mb-8'
             >
               <span className='w-2 h-2 rounded-full bg-emerald-400 animate-glow' />
-              AI Receptionist — Available Now
+              {t('AI Receptionist Available Now')}
             </motion.div>
 
             <h1 className='text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold font-display leading-[1.05] mb-6'>
-              Never Miss Another{' '}
+              {t('Never Miss Another Call')}{' '}
               <span className='bg-gradient-to-r from-aurora-cyan via-aurora-cyan/70 to-aurora-cyan/40 bg-clip-text text-transparent'>Call</span>
               <br />
               <span className='text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-gray-400 font-normal'>
-                With Your AI Receptionist
+                {t('With Your AI Receptionist')}
               </span>
             </h1>
 
@@ -519,8 +563,7 @@ export default function LandingPage() {
               transition={{ delay: 0.3, duration: 0.6 }}
               className='text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed'
             >
-              FrontDesk Agents AI answers every call 24/7 in 200+ languages, routes intelligently,
-              and books appointments automatically. Your business never sleeps.
+              {t('Hero Subtitle')}
             </motion.p>
 
             <motion.div
@@ -535,7 +578,7 @@ export default function LandingPage() {
               >
                 <span className='absolute inset-0 bg-gradient-to-r from-aurora-cyan to-aurora-cyan/80 transition-transform group-hover:scale-105' />
                 <span className='absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-r from-aurora-cyan via-cyan-400 to-aurora-cyan/80 animate-gradient-shift' />
-                <span className='relative z-10'>Get Started Free</span>
+                <span className='relative z-10'>{t('Get Started Free')}</span>
               </button>
               <button
                 onClick={() => setShowDemo(true)}
@@ -544,7 +587,7 @@ export default function LandingPage() {
                 <span className='w-8 h-8 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-aurora-cyan/20 transition-colors'>
                   <svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='currentColor'><polygon points='5 3 19 12 5 21 5 3' /></svg>
                 </span>
-                Watch Demo
+                {t('Watch Demo')}
               </button>
             </motion.div>
           </motion.div>
@@ -557,7 +600,7 @@ export default function LandingPage() {
           transition={{ delay: 1.2 }}
           className='absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2'
         >
-          <span className='text-xs text-gray-600 tracking-widest uppercase'>Scroll</span>
+          <span className='text-xs text-gray-600 tracking-widest uppercase'>{t('Scroll')}</span>
           <div className='w-5 h-8 rounded-full border border-white/10 flex justify-center pt-1.5'>
             <motion.div
               animate={{ y: [0, 8, 0] }}
@@ -577,7 +620,7 @@ export default function LandingPage() {
       {/* ─── INDUSTRIES ─── */}
       <section id='industries' className='py-20 md:py-28 px-4'>
         <div className='max-w-7xl mx-auto'>
-          <SectionHeading title='Built for Every Industry' subtitle='Industry-specific AI agents trained on your terminology, workflows, and compliance requirements.' />
+          <SectionHeading title={t('Built for Every Industry')} subtitle={t('Industries Subtitle')} />
 
           <motion.div
             initial='hidden'
@@ -609,7 +652,7 @@ export default function LandingPage() {
       {/* ─── FEATURES ─── */}
       <section id='features' className='py-20 md:py-28 px-4 bg-white/[0.02]'>
         <div className='max-w-7xl mx-auto'>
-          <SectionHeading title='Why FrontDesk Agents AI?' subtitle='Enterprise-grade AI receptionist technology that rivals human operators.' />
+          <SectionHeading title={t('Why FrontDesk Agents?')} subtitle={t('Features Subtitle')} />
 
           <motion.div
             initial='hidden'
@@ -644,7 +687,7 @@ export default function LandingPage() {
       {/* ─── PRICING ─── */}
       <section id='pricing' className='py-20 md:py-28 px-4'>
         <div className='max-w-7xl mx-auto'>
-          <SectionHeading title='Simple, Transparent Pricing' subtitle='Start with a 14-day free trial. No credit card required. Cancel anytime.' />
+          <SectionHeading title={t('Simple, Transparent Pricing')} subtitle={t('Pricing Subtitle')} />
 
           <motion.div
             initial='hidden'
@@ -672,7 +715,7 @@ export default function LandingPage() {
                     whileInView={{ opacity: 1, y: 0 }}
                     className='absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-aurora-cyan to-aurora-cyan/80 text-xs font-semibold shadow-lg shadow-aurora-cyan/20'
                   >
-                    Most Popular
+                    {t('Most Popular')}
                   </motion.div>
                 )}
                 <h3 className='text-xl font-bold mb-1'>{plan.name}</h3>
@@ -704,7 +747,7 @@ export default function LandingPage() {
       {/* ─── TESTIMONIALS ─── */}
       <section className='py-20 md:py-28 px-4 bg-white/[0.02]'>
         <div className='max-w-5xl mx-auto text-center'>
-          <SectionHeading title='Loved by Business Owners' subtitle='Hear from businesses that transformed their phone operations.' />
+          <SectionHeading title={t('Loved by Business Owners')} subtitle={t('Testimonials Subtitle')} />
           <TestimonialCarousel />
         </div>
       </section>
@@ -721,17 +764,17 @@ export default function LandingPage() {
           className='max-w-3xl mx-auto text-center relative'
         >
           <motion.h2 variants={fadeUp} className='text-3xl sm:text-4xl md:text-5xl font-bold font-display mb-6'>
-            Ready to Never Miss a Call Again?
+            {t('Ready to Never Miss a Call Again?')}
           </motion.h2>
           <motion.p variants={fadeUp} className='text-gray-400 mb-10 text-lg'>
-            Join 10,000+ businesses using FrontDesk Agents AI. Start your 14-day free trial today.
+            {t('Join Thousands')}
           </motion.p>
           <motion.div variants={fadeUp}>
             <button
               onClick={() => setShowLeadForm(true)}
               className='px-10 py-4 rounded-full bg-gradient-to-r from-aurora-cyan to-aurora-cyan/80 text-white font-semibold text-lg hover:shadow-xl hover:shadow-aurora-cyan/25 transition-all transform hover:scale-105'
             >
-              Start Free Trial
+              {t('Start Free Trial')}
             </button>
           </motion.div>
         </motion.div>
@@ -751,29 +794,29 @@ export default function LandingPage() {
               <p className='text-sm text-gray-500 max-w-xs'>The world&apos;s most advanced AI receptionist platform. Available 24/7 in 200+ languages.</p>
             </div>
             <div>
-              <h4 className='font-semibold mb-3 text-sm'>Product</h4>
+              <h4 className='font-semibold mb-3 text-sm'>{t('Product')}</h4>
               <ul className='space-y-2 text-sm text-gray-500'>
-                <li><a href="/services" className="hover:text-gray-300 transition-colors">Features</a></li>
-                <li><a href="/industries" className="hover:text-gray-300 transition-colors">Industries</a></li>
-                <li><a href="/pricing" className="hover:text-gray-300 transition-colors">Pricing</a></li>
-                <li><a href="/demo" className="hover:text-gray-300 transition-colors">Demo</a></li>
+                <li><a href="/services" className="hover:text-gray-300 transition-colors">{t('Features')}</a></li>
+                <li><a href="/industries" className="hover:text-gray-300 transition-colors">{t('Industries')}</a></li>
+                <li><a href="/pricing" className="hover:text-gray-300 transition-colors">{t('Pricing')}</a></li>
+                <li><a href="/demo" className="hover:text-gray-300 transition-colors">{t('Demo')}</a></li>
               </ul>
             </div>
             <div>
-              <h4 className='font-semibold mb-3 text-sm'>Company</h4>
+              <h4 className='font-semibold mb-3 text-sm'>{t('Company')}</h4>
               <ul className='space-y-2 text-sm text-gray-500'>
-                <li className='hover:text-gray-300 transition-colors cursor-pointer'>About</li>
-                <li><a href="/blog" className="hover:text-gray-300 transition-colors cursor-pointer">Blog</a></li>
-                <li className='hover:text-gray-300 transition-colors cursor-pointer'>Careers</li>
-                <li><a href="/contact" className="hover:text-gray-300 transition-colors">Contact</a></li>
+                <li className='hover:text-gray-300 transition-colors cursor-pointer'>{t('About')}</li>
+                <li><a href="/blog" className="hover:text-gray-300 transition-colors cursor-pointer">{t('Blog')}</a></li>
+                <li className='hover:text-gray-300 transition-colors cursor-pointer'>{t('Careers')}</li>
+                <li><a href="/contact" className="hover:text-gray-300 transition-colors">{t('Contact')}</a></li>
               </ul>
             </div>
             <div>
-              <h4 className='font-semibold mb-3 text-sm'>Legal</h4>
+              <h4 className='font-semibold mb-3 text-sm'>{t('Legal')}</h4>
               <ul className='space-y-2 text-sm text-gray-500'>
-                <li><a href="/privacy-policy" className="hover:text-gray-300 transition-colors">Privacy</a></li>
-                <li><a href="/terms-of-service" className="hover:text-gray-300 transition-colors">Terms</a></li>
-                <li className='hover:text-gray-300 transition-colors cursor-pointer'>Security</li>
+                <li><a href="/privacy-policy" className="hover:text-gray-300 transition-colors">{t('Privacy')}</a></li>
+                <li><a href="/terms-of-service" className="hover:text-gray-300 transition-colors">{t('Terms')}</a></li>
+                <li className='hover:text-gray-300 transition-colors cursor-pointer'>{t('Security')}</li>
               </ul>
             </div>
           </div>
@@ -802,7 +845,7 @@ export default function LandingPage() {
               onClick={e => e.stopPropagation()}
             >
               <div className='flex justify-between items-center mb-6'>
-                <h3 className='text-xl font-bold'>{leadSubmitted ? 'Thank You!' : 'Get Started Free'}</h3>
+                <h3 className='text-xl font-bold'>{leadSubmitted ? t('Thank You Title') : t('Get Started Free Title')}</h3>
                 <button onClick={() => { setShowLeadForm(false); setLeadSubmitted(false); setLeadScore(null) }} className='text-gray-500 hover:text-white transition-colors' aria-label='Close lead form'><X /></button>
               </div>
               {leadSubmitted ? (
@@ -815,36 +858,36 @@ export default function LandingPage() {
                   >
                     🎉
                   </motion.div>
-                  <p className='text-gray-300 mb-4'>We received your information! Our team will reach out shortly.</p>
+                  <p className='text-gray-300 mb-4'>{t('We received your information! Our team will reach out shortly.')}</p>
                   {leadScore !== null && (
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       className='inline-flex items-center gap-2 px-4 py-2 rounded-full bg-aurora-cyan/10 border border-aurora-cyan/20 text-sm'
                     >
-                      Lead Score: <span className='font-bold text-aurora-cyan'>{leadScore}/100</span>
-                      <span className='text-xs text-gray-500'>({leadScore >= 70 ? 'Hot!' : leadScore >= 40 ? 'Warm' : 'Nurture'})</span>
+                      {t('Lead Score')}: <span className='font-bold text-aurora-cyan'>{leadScore}/100</span>
+                      <span className='text-xs text-gray-500'>({leadScore >= 70 ? t('Hot') : leadScore >= 40 ? t('Warm') : t('Nurture')})</span>
                     </motion.div>
                   )}
                 </div>
               ) : (
                 <form onSubmit={handleLeadSubmit} className='space-y-4'>
-                  <input placeholder='Business Name *' required className='w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-aurora-cyan transition-colors' value={leadFormData.business} onChange={e => setLeadFormData(p => ({ ...p, business: e.target.value }))} />
-                  <input placeholder='Email *' type='email' required className='w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-aurora-cyan transition-colors' value={leadFormData.email} onChange={e => setLeadFormData(p => ({ ...p, email: e.target.value }))} />
-                  <input placeholder='Phone Number' className='w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-aurora-cyan transition-colors' value={leadFormData.phone} onChange={e => setLeadFormData(p => ({ ...p, phone: e.target.value }))} />
+                  <input placeholder={t('Business Name')} required className='w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-aurora-cyan transition-colors' value={leadFormData.business} onChange={e => setLeadFormData(p => ({ ...p, business: e.target.value }))} />
+                  <input placeholder={t('Email')} type='email' required className='w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-aurora-cyan transition-colors' value={leadFormData.email} onChange={e => setLeadFormData(p => ({ ...p, email: e.target.value }))} />
+                  <input placeholder={t('Phone Number')} className='w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-aurora-cyan transition-colors' value={leadFormData.phone} onChange={e => setLeadFormData(p => ({ ...p, phone: e.target.value }))} />
                   <select className='w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-aurora-cyan transition-colors' value={leadFormData.industry} onChange={e => setLeadFormData(p => ({ ...p, industry: e.target.value }))}>
-                    <option value='' className='bg-deep-space'>Select Industry</option>
-                    <option value='healthcare' className='bg-deep-space'>Healthcare</option>
-                    <option value='legal' className='bg-deep-space'>Legal</option>
-                    <option value='dental' className='bg-deep-space'>Dental</option>
-                    <option value='real_estate' className='bg-deep-space'>Real Estate</option>
-                    <option value='hvac' className='bg-deep-space'>HVAC / Home Services</option>
-                    <option value='automotive' className='bg-deep-space'>Automotive</option>
-                    <option value='other' className='bg-deep-space'>Other</option>
+                    <option value='' className='bg-deep-space'>{t('Select Industry')}</option>
+                    <option value='healthcare' className='bg-deep-space'>{t('Healthcare')}</option>
+                    <option value='legal' className='bg-deep-space'>{t('Legal Industry')}</option>
+                    <option value='dental' className='bg-deep-space'>{t('Dental')}</option>
+                    <option value='real_estate' className='bg-deep-space'>{t('Real Estate')}</option>
+                    <option value='hvac' className='bg-deep-space'>{t('HVAC / Home Services')}</option>
+                    <option value='automotive' className='bg-deep-space'>{t('Automotive')}</option>
+                    <option value='other' className='bg-deep-space'>{t('Other')}</option>
                   </select>
-                  <input placeholder='Number of Employees' type='number' className='w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-aurora-cyan transition-colors' value={leadFormData.employees} onChange={e => setLeadFormData(p => ({ ...p, employees: e.target.value }))} />
+                  <input placeholder={t('Number of Employees')} type='number' className='w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-aurora-cyan transition-colors' value={leadFormData.employees} onChange={e => setLeadFormData(p => ({ ...p, employees: e.target.value }))} />
                   <button type='submit' className='w-full py-3 rounded-xl bg-gradient-to-r from-aurora-cyan to-aurora-cyan/80 text-white font-semibold hover:shadow-lg hover:shadow-aurora-cyan/25 transition-all'>
-                    Submit
+                    {t('Submit')}
                   </button>
                 </form>
               )}
@@ -872,13 +915,13 @@ export default function LandingPage() {
               onClick={e => e.stopPropagation()}
             >
               <div className='flex justify-between items-center mb-4'>
-                <h3 className='text-lg font-bold'>How FrontDesk Agents AI Works</h3>
+                <h3 className='text-lg font-bold'>{t('How FrontDesk Agents AI Works')}</h3>
                 <button onClick={() => setShowDemo(false)} className='text-gray-500 hover:text-white transition-colors' aria-label='Close demo modal'><X /></button>
               </div>
               <div className='aspect-video rounded-xl bg-gradient-to-br from-aurora-cyan/20 to-aurora-cyan/10 flex items-center justify-center border border-white/10'>
                 <div className='text-center'>
                   <div className='text-5xl mb-4'>🎥</div>
-                  <p className='text-gray-400 text-sm'>Demo video showcasing AI receptionist capabilities</p>
+                  <p className='text-gray-400 text-sm'>{t('Demo video showcasing AI receptionist capabilities')}</p>
                 </div>
               </div>
             </motion.div>

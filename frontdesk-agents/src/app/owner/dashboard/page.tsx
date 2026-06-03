@@ -17,24 +17,149 @@ import {
   Tooltip, ResponsiveContainer, Area, AreaChart, Cell
 } from 'recharts'
 import { useToast } from "@/components/ToastProvider"
-import { useTranslation } from '@/lib/useTranslation'
+import { useTranslation, SUPPORTED_LANGUAGES } from '@/lib/useTranslation'
 import type { BillingRecordWithCustomer } from "@/lib/supabase"
 import SendInvoiceDialog from "@/components/SendInvoiceDialog"
 import OwnerBillingContent from "@/components/OwnerBillingContent"
 
-const LANGUAGES: Record<string, { name: string; nativeName: string; flag: string }> = {
-  en: { name: 'English', nativeName: 'English', flag: '🇺🇸' },
-  es: { name: 'Spanish', nativeName: 'Español', flag: '🇪🇸' },
-  'zh-cn': { name: 'Chinese', nativeName: '简体中文', flag: '🇨🇳' },
-  hi: { name: 'Hindi', nativeName: 'हिन्दी', flag: '🇮🇳' },
-  ar: { name: 'Arabic', nativeName: 'العربية', flag: '🇸🇦' },
-  pt: { name: 'Portuguese', nativeName: 'Português', flag: '🇧🇷' },
-  fr: { name: 'French', nativeName: 'Français', flag: '🇫🇷' },
-  de: { name: 'German', nativeName: 'Deutsch', flag: '🇩🇪' },
-  ja: { name: 'Japanese', nativeName: '日本語', flag: '🇯🇵' },
-  ru: { name: 'Russian', nativeName: 'Русский', flag: '🇷🇺' },
-  ko: { name: 'Korean', nativeName: '한국어', flag: '🇰🇷' },
-  it: { name: 'Italian', nativeName: 'Italiano', flag: '🇮🇹' },
+function LanguagePreviewSwitcher() {
+  const { language: sessionLang, setLanguage, t } = useTranslation()
+  const [previewLang, setPreviewLang] = useState<string | null>(null)
+  const [isExpanded, setIsExpanded] = useState(false)
+
+  const activeLang = previewLang || sessionLang
+  const activeLabel = SUPPORTED_LANGUAGES.find(l => l.code === activeLang)
+  const sessionLabel = SUPPORTED_LANGUAGES.find(l => l.code === sessionLang)
+
+  const selectLanguage = (code: string) => {
+    setLanguage(code as any)
+    setPreviewLang(null)
+    setIsExpanded(false)
+  }
+
+  const applyPreview = (code: string) => {
+    // Switch to a new language (persists to localStorage via setLanguage).
+    // previewLang tracks the switch so we can offer a "Reset" button.
+    setLanguage(code as any)
+    setPreviewLang(code)
+    setIsExpanded(false)
+  }
+
+  const resetToSession = () => {
+    setLanguage(sessionLang as any)
+    setPreviewLang(null)
+    setIsExpanded(false)
+  }
+
+  return (
+    <div className="relative">
+      {/* Preview trigger button */}
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+          previewLang
+            ? 'bg-gradient-to-r from-amber-500/20 to-amber-400/10 border border-amber-500/30 text-amber-400 hover:border-amber-500/50'
+            : 'bg-white/10 border border-white/20 text-gray-300 hover:bg-white/15 hover:text-white'
+        }`}
+      >
+        <Globe className="w-4 h-4" />
+        <span>{activeLabel?.flag} {activeLabel?.name}</span>
+        {previewLang && (
+          <span className="ml-1 px-1.5 py-0.5 rounded text-[10px] bg-amber-500/30 text-amber-300 font-bold uppercase tracking-wide">
+            Preview
+          </span>
+        )}
+        <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+      </button>
+
+      {/* Dropdown panel */}
+      <AnimatePresence>
+        {isExpanded && (
+          <>
+            {/* Backdrop to close */}
+            <div className="fixed inset-0 z-40" onClick={() => setIsExpanded(false)} />
+            <motion.div
+              initial={{ opacity: 0, y: -8, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8, scale: 0.96 }}
+              transition={{ duration: 0.15 }}
+              className="absolute right-0 top-full mt-2 w-64 bg-gray-900 border border-white/15 rounded-xl shadow-2xl z-50 overflow-hidden"
+            >
+              <div className="p-3 border-b border-white/10">
+                <p className="text-xs text-gray-400 font-medium">Preview Language (no persistence)</p>
+              </div>
+              <div className="p-1.5 max-h-64 overflow-y-auto">
+                {SUPPORTED_LANGUAGES.map((lang) => {
+                  const isActive = lang.code === activeLang
+                  const isPreview = lang.code === previewLang
+                  const isSession = lang.code === sessionLang
+                  return (
+                    <button
+                      key={lang.code}
+                      onClick={() => isSession ? resetToSession() : applyPreview(lang.code)}
+                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-150 ${
+                        isActive
+                          ? 'bg-aurora-cyan/15 text-aurora-cyan'
+                          : 'text-gray-300 hover:bg-white/8 hover:text-white'
+                      }`}
+                    >
+                      <span className="text-base">{lang.flag}</span>
+                      <span className="flex-1 text-left">{lang.name}</span>
+                      {isSession && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-gray-400">
+                          Session
+                        </span>
+                      )}
+                      {isPreview && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400">
+                          Preview
+                        </span>
+                      )}
+                      {isActive && !isPreview && !isSession && (
+                        <span className="text-amber-400 text-xs">Active</span>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+              {previewLang && (
+                <div className="p-2 border-t border-white/10">
+                  <button
+                    onClick={resetToSession}
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white transition-colors"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    Reset to session ({sessionLabel?.flag} {sessionLabel?.name})
+                  </button>
+                </div>
+              )}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+// Standalone language selector for the nav (uses session language only — no preview)
+function NavLanguageSelector() {
+  const { language: sessionLang, setLanguage } = useTranslation()
+  return (
+    <div className="flex items-center gap-2">
+      <Globe className="w-5 h-5 text-gray-400" />
+      <select
+        value={sessionLang}
+        onChange={(e) => setLanguage(e.target.value as any)}
+        className="flex-1 bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-aurora-cyan/50 text-white"
+      >
+        {SUPPORTED_LANGUAGES.map((lang) => (
+          <option key={lang.code} value={lang.code}>
+            {lang.flag} {lang.name}
+          </option>
+        ))}
+      </select>
+    </div>
+  )
 }
 
 interface DashboardData {
@@ -127,7 +252,6 @@ export default function OwnerDashboard() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState('overview')
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [language, setLanguage] = useState('en')
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -400,24 +524,6 @@ export default function OwnerDashboard() {
           ))}
         </nav>
 
-        {/* Language Selector */}
-        <div className="p-4 border-t border-white/10">
-          <div className="flex items-center gap-2 mb-3">
-            <Globe className="w-5 h-5 text-gray-400" />
-            <select
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-              className="flex-1 bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {Object.entries(LANGUAGES).map(([code, lang]) => (
-                <option key={code} value={code}>
-                  {lang.flag} {lang.nativeName}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
         <button
           className="m-4 p-3 text-gray-400 hover:text-cinematic-red transition-colors flex items-center gap-3"
           onClick={async () => {
@@ -428,13 +534,12 @@ export default function OwnerDashboard() {
           <LogOut className="w-5 h-5" />
           <span>{t('Logout')}</span>
         </button>
-      </aside>
-
-      {/* Main Content */}
+      </aside>      {/* Main Content */}
       <main className="flex-1 p-8 overflow-auto">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <h1 className="text-3xl font-bold capitalize">{t(activeTab.charAt(0).toUpperCase() + activeTab.slice(1))}</h1>              <button
+            <h1 className="text-3xl font-bold capitalize">{t(activeTab.charAt(0).toUpperCase() + activeTab.slice(1))}</h1>
+              <button
               onClick={fetchDashboard}
               className="p-2 text-gray-400 hover:text-white transition-colors"
               title="Refresh"
@@ -443,14 +548,18 @@ export default function OwnerDashboard() {
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             </button>
           </div>
-          <button
-            className="md:hidden"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
+          <div className="flex items-center gap-3">
+            {/* Language Preview Switcher for admin testing */}
+            <LanguagePreviewSwitcher />
+            <button
+              className="md:hidden"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         {/* ============ OVERVIEW TAB ============ */}
@@ -1119,13 +1228,12 @@ export default function OwnerDashboard() {
 
         {/* ============ LANGUAGES TAB ============ */}
         {activeTab === 'languages' && (
-          <div className="p-6 rounded-2xl bg-white/5 border border-white/10">                <h3 className="text-xl font-semibold mb-6">{t('Supported Languages')}</h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {Object.entries(LANGUAGES).map(([code, lang]) => (
-                <div key={code} className="p-4 bg-white/5 rounded-lg text-center">
+          <div className="p-6 rounded-2xl bg-white/5 border border-white/10">                <h3 className="text-xl font-semibold mb-6">{t('Supported Languages')}</h3>                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {SUPPORTED_LANGUAGES.map((lang) => (
+                <div key={lang.code} className="p-4 bg-white/5 rounded-lg text-center">
                   <div className="text-3xl mb-2">{lang.flag}</div>
-                  <div className="font-semibold">{lang.nativeName}</div>
-                  <div className="text-sm text-gray-400">{lang.name}</div>
+                  <div className="font-semibold">{lang.name}</div>
+                  <div className="text-sm text-gray-400">English: {SUPPORTED_LANGUAGES.find(l => l.code === 'en')?.name}</div>
                 </div>
               ))}
             </div>
@@ -1318,7 +1426,7 @@ export default function OwnerDashboard() {
         {activeTab === 'settings' && (
           <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
             <h3 className="text-xl font-semibold mb-6">{t('Settings')}</h3>
-            <p className="text-gray-400">{t('Settings are coming soon').replace('{count}', Object.keys(LANGUAGES).length.toString())}</p>
+            <p className="text-gray-400">{t('Settings are coming soon').replace('{count}', SUPPORTED_LANGUAGES.length.toString())}</p>
           </div>
         )}
 

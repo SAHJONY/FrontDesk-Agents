@@ -8,7 +8,7 @@ export default function OwnerLogin() {
   const router = useRouter()
   const [isDarkMode, setIsDarkMode] = useState(true)
   const [email, setEmail] = useState('sahjonycapitalllc@outlook.com')
-  const [password, setPassword] = useState('')
+  const [password, setPassword] = useState('OwnerAdmin123!')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)

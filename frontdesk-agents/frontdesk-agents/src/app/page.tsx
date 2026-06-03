@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 import { useTranslation } from '@/lib/i18n/useTranslation'
+import LegalServicesModal from '@/components/LegalServicesModal'
 
 // ─── Icons ─────────────────────────────────────────────────────────────────
 const Bot = () => <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'><rect width='16' height='16' x='4' y='4' rx='2'/><path d='M9 1v3M15 1v3M9 13l3 3 3-3M12 16V8'/></svg>
@@ -25,6 +26,7 @@ const FEATURES = [
 
 const HealthIcon = () => <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'><path d='M22 12h-4l-3 9L9 3l-3 9H2'/></svg>
 const LegalIcon = () => <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/></svg>
+const ScaleIcon = () => <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'><path d='m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z'/><path d='m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z'/><path d='M7 21h10'/><path d='M12 3v18'/><path d='M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2'/></svg>
 const DentalIcon = () => <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'><circle cx='12' cy='12' r='10'/><path d='M8 14s1.5 2 4 2 4-2 4-2'/><line x1='9' y1='9' x2='9.01' y2='9'/><line x1='15' y1='9' x2='15.01' y2='9'/></svg>
 const RealEstateIcon = () => <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'><path d='M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z'/><polyline points='9 22 9 12 15 12 15 22'/></svg>
 const HVACIcon = () => <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'><path d='M12 2v20M2 12h20'/><circle cx='12' cy='12' r='4'/><circle cx='12' cy='12' r='8'/></svg>
@@ -34,7 +36,7 @@ const InsuranceIcon = () => <svg xmlns='http://www.w3.org/2000/svg' width='24' h
 
 const INDUSTRIES = [
   { name: 'Healthcare', icon: HealthIcon, desc: 'Patient scheduling, prescription refills, insurance verification' },
-  { name: 'Legal', icon: LegalIcon, desc: 'Client intake, case status updates, consultation booking' },
+  { name: 'Legal', icon: LegalIcon, desc: 'Client intake, case status updates, consultation booking', specialDoor: true },
   { name: 'Dental', icon: DentalIcon, desc: 'Appointment management, insurance checks, emergency triage' },
   { name: 'Real Estate', icon: RealEstateIcon, desc: 'Property inquiries, showing scheduling, agent routing' },
   { name: 'HVAC', icon: HVACIcon, desc: 'Emergency dispatch, service scheduling, estimate requests' },
@@ -350,6 +352,7 @@ export default function LandingPage() {
   const [leadSubmitted, setLeadSubmitted] = useState(false)
   const [leadScore, setLeadScore] = useState<number | null>(null)
   const [scrolled, setScrolled] = useState(false)
+  const [legalModalOpen, setLegalModalOpen] = useState(false)
   const { language, setLanguage, languages } = useTranslation()
 
   const heroRef = useRef<HTMLDivElement>(null)
@@ -590,15 +593,78 @@ export default function LandingPage() {
                   hidden: { opacity: 0, y: 30, scale: 0.95 },
                   visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] } },
                 }}
-                className='group p-6 rounded-2xl border border-white/[0.06] hover:border-aurora-cyan/30 bg-white/[0.03] backdrop-blur-xl hover:bg-white/[0.05] hover:scale-[1.02] hover:shadow-lg hover:shadow-aurora-cyan/5 transition-all duration-300 cursor-pointer'
+                className={`group p-6 rounded-2xl border border-white/[0.06] hover:border-aurora-cyan/30 bg-white/[0.03] backdrop-blur-xl hover:bg-white/[0.05] hover:scale-[1.02] hover:shadow-lg hover:shadow-aurora-cyan/5 transition-all duration-300 cursor-pointer ${
+                  ind.specialDoor ? 'border-legal-gold/20 hover:border-legal-gold/40' : ''
+                }`}
+                onClick={() => ind.specialDoor ? setLegalModalOpen(true) : undefined}
               >
-                <div className='w-10 h-10 rounded-xl bg-gradient-to-br from-aurora-cyan/20 to-aurora-cyan/10 flex items-center justify-center mb-3 text-aurora-cyan group-hover:scale-110 transition-transform duration-300'>
+                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br from-aurora-cyan/20 to-aurora-cyan/10 flex items-center justify-center mb-3 text-aurora-cyan group-hover:scale-110 transition-transform duration-300 ${
+                  ind.specialDoor ? 'bg-gradient-to-br from-legal-gold/20 to-legal-gold/10 text-legal-gold' : ''
+                }`}>
                   <ind.icon />
                 </div>
                 <h3 className='font-semibold mb-1'>{ind.name}</h3>
                 <p className='text-sm text-gray-500 group-hover:text-gray-400 transition-colors'>{ind.desc}</p>
+                {ind.specialDoor && (
+                  <div className='mt-3 flex items-center gap-1 text-legal-gold text-xs font-medium'>
+                    <ScaleIcon />
+                    <span>Specialized AI</span>
+                  </div>
+                )}
               </motion.div>
             ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ─── LEGAL SPECIAL DOOR ─── */}
+      <section className='py-12 px-4'>
+        <div className='max-w-7xl mx-auto'>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className='relative p-8 md:p-10 rounded-3xl overflow-hidden border border-legal-gold/20 bg-gradient-to-br from-legal-gold/5 via-deep-space to-deep-space'
+          >
+            {/* Background decorations */}
+            <div className='absolute top-0 right-0 w-64 h-64 bg-legal-gold/5 rounded-full blur-3xl' />
+            <div className='absolute bottom-0 left-0 w-48 h-48 bg-legal-gold/3 rounded-full blur-2xl' />
+            
+            <div className='relative flex flex-col md:flex-row items-center gap-8'>
+              <div className='flex-shrink-0 w-16 h-16 rounded-2xl bg-gradient-to-br from-legal-gold/20 to-legal-gold/10 flex items-center justify-center text-legal-gold'>
+                <ScaleIcon />
+              </div>
+              <div className='text-center md:text-left flex-1'>
+                <h3 className='text-2xl md:text-3xl font-bold font-display mb-2'>
+                  AI for Legal Services
+                </h3>
+                <p className='text-gray-400 mb-4 max-w-xl'>
+                  Universal AI receptionist designed for any law firm, legal practice, or attorney office. 
+                  HIPAA-aware client intake, case management integration, and consultation booking — all automated.
+                </p>
+                <div className='flex flex-wrap gap-3 justify-center md:justify-start'>
+                  <span className='px-3 py-1 rounded-full bg-legal-gold/10 border border-legal-gold/20 text-xs text-legal-gold'>⚖️ Multi-Practice Areas</span>
+                  <span className='px-3 py-1 rounded-full bg-legal-gold/10 border border-legal-gold/20 text-xs text-legal-gold'>🔒 Confidentiality Focused</span>
+                  <span className='px-3 py-1 rounded-full bg-legal-gold/10 border border-legal-gold/20 text-xs text-legal-gold'>📋 Case Status Updates</span>
+                </div>
+              </div>
+              <div className='flex-shrink-0 flex flex-col gap-3'>
+                <button
+                  onClick={() => setLegalModalOpen(true)}
+                  className='px-6 py-3 rounded-xl bg-gradient-to-r from-legal-gold to-legal-gold/80 text-deep-space font-semibold hover:shadow-lg hover:shadow-legal-gold/20 transition-all hover:scale-105 flex items-center gap-2'
+                >
+                  <span>Open Legal AI</span>
+                  <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'><path d='M5 12h14M12 5l7 7-7 7'/></svg>
+                </button>
+                <a
+                  href='/legal'
+                  className='px-6 py-3 rounded-xl border border-legal-gold/30 text-legal-gold font-medium hover:bg-legal-gold/10 transition-all text-center text-sm'
+                >
+                  View Full Page
+                </a>
+              </div>
+            </div>
           </motion.div>
         </div>
       </section>
@@ -733,6 +799,13 @@ export default function LandingPage() {
           </motion.div>
         </motion.div>
       </section>
+
+      {/* ─── LEGAL MODAL ─── */}
+      <LegalServicesModal
+        isOpen={legalModalOpen}
+        onClose={() => setLegalModalOpen(false)}
+        source='homepage'
+      />
 
       {/* ─── FOOTER ─── */}
       <footer className='py-14 px-4 border-t border-white/10'>

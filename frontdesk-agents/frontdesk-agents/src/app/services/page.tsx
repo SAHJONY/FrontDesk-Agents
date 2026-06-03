@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
+import LegalServicesModal from '@/components/LegalServicesModal'
 
 // ─── SVG Icons ──────────────────────────────────────────
 
@@ -461,6 +462,42 @@ function CountUp({ target, suffix = '' }: { target: string; suffix?: string }) {
   )
 }
 
+// ─── Legal Services Special Door ─────────────────────────────────────────────
+
+function LegalSpecialDoor({ onOpen }: { onOpen: () => void }) {
+  return (
+    <button
+      onClick={onOpen}
+      className="relative w-full p-6 rounded-2xl bg-gradient-to-br from-purple-600/20 via-purple-600/10 to-violet-600/10 border border-purple-500/30 hover:border-purple-500/50 hover:scale-[1.02] transition-all duration-300 overflow-hidden group"
+    >
+      {/* Background glow effect */}
+      <div className="absolute -top-20 -right-20 w-40 h-40 bg-purple-500/20 rounded-full blur-3xl group-hover:bg-purple-500/30 transition-all duration-500" />
+      
+      <div className="relative flex items-center gap-4">
+        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center shadow-lg shadow-purple-500/20 shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <div className="text-left">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-purple-400 text-sm font-medium">⚖️ Special Door</span>
+          </div>
+          <h3 className="text-xl font-bold text-white mb-1">Legal Services AI</h3>
+          <p className="text-sm text-gray-400">The comprehensive AI receptionist for law firms — open for any industry</p>
+        </div>
+        <div className="ml-auto shrink-0">
+          <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center group-hover:bg-purple-500/30 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-400">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </button>
+  )
+}
+
 function FaqSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
   const faqs = [
@@ -507,6 +544,7 @@ export default function ServicesPage() {
   const [scrolled, setScrolled] = useState(false)
   const [activeCategory, setActiveCategory] = useState('call-handling')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [legalModalOpen, setLegalModalOpen] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50)
@@ -760,6 +798,11 @@ export default function ServicesPage() {
               </motion.div>
             ))}
           </div>
+
+          {/* Legal Services Special Door */}
+          <div className="mt-8">
+            <LegalSpecialDoor onOpen={() => setLegalModalOpen(true)} />
+          </div>
         </div>
       </section>
 
@@ -994,6 +1037,7 @@ export default function ServicesPage() {
               <ul className="space-y-2 text-sm text-gray-500">
                 <li><a href="/privacy-policy" className="hover:text-white transition-colors">Privacy</a></li>
                 <li><a href="/terms-of-service" className="hover:text-white transition-colors">Terms</a></li>
+                <li><a href="/legal" className="hover:text-white transition-colors">Legal Services</a></li>
               </ul>
             </div>
           </div>
@@ -1002,6 +1046,9 @@ export default function ServicesPage() {
           </div>
         </div>
       </footer>
+
+      {/* Legal Services Modal */}
+      <LegalServicesModal isOpen={legalModalOpen} onClose={() => setLegalModalOpen(false)} source="Services Page" />
     </div>
   )
 }

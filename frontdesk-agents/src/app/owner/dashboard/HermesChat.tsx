@@ -32,7 +32,7 @@ export default function HermesChat({ metrics, harnessRunning }: HermesChatProps)
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([
     {
       role: 'assistant',
-      content: `Hello Juan! I'm your Hermes Agent integrated into the Owner Dashboard. I have full access to your platform metrics, enterprise modules, and autonomous harness.\n\nCurrent Status:\n• Users: ${metrics.totalUsers.toLocaleString()} (Active: ${metrics.activeUsers})\n• Revenue: $${metrics.revenue.toLocaleString()} MTD\n• Harness: ${harnessRunning ? '✅ Running' : '⏸️ Paused'}\n\nHow can I assist you today?`,
+      content: `Hello! I'm your Hermes Agent integrated into the Owner Dashboard. I have full access to your platform metrics, enterprise modules, and autonomous harness.\n\nCurrent Status:\n• Users: ${(metrics.totalUsers ?? 0).toLocaleString()} (Active: ${metrics.activeUsers ?? 0})\n• Revenue: $${(metrics.revenue ?? 0).toLocaleString()} MTD\n• Harness: ${harnessRunning ? '✅ Running' : '⏸️ Paused'}\n\nHow can I assist you today?`,
       timestamp: new Date()
     }
   ])

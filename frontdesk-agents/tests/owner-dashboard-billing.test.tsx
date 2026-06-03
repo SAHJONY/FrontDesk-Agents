@@ -41,7 +41,7 @@ vi.mock('next/navigation', () => ({
 
 function makeDashData() {
   return {
-    metrics: { mrr: 15000, arr: 180000, activeCustomers: 10 },
+    metrics: { mrr: 15000, arr: 180000, activeCustomers: 10, totalCustomers: 10, evaluations: [], churnRate: 0.05 },
     sales: {
       pipeline: [],
       salesMetrics: { totalLeads: 15, conversionRate: 0.25, averageScore: 72 },
@@ -56,7 +56,7 @@ function makeDashData() {
 }
 
 function makeEmptyDash() {
-  return { metrics: { mrr: 0, arr: 0, activeCustomers: 0 }, sales: { pipeline: [], salesMetrics: { totalLeads: 0, conversionRate: 0, averageScore: 0 }, leadsByTier: { hot: 0, warm: 0, cold: 0 }, leads: [] }, health: { healthyCount: 0, atRiskCount: 0, totalCustomers: 0, customers: [], upsellOpportunities: [], reviewCandidates: [], healthChecks: [] },    partners: { totalPartners: 0, activePartners: 0, totalReferrals: 0, convertedReferrals: 0, conversionRate: 0, totalCommission: 0, totalRevenueGenerated: 0 }, projections: {}, charts: { revenueTrend: [], churnHistory: [] } }
+  return { metrics: { mrr: 0, arr: 0, activeCustomers: 0, totalCustomers: 0, evaluations: [], churnRate: 0 }, sales: { pipeline: [], salesMetrics: { totalLeads: 0, conversionRate: 0, averageScore: 0 }, leadsByTier: { hot: 0, warm: 0, cold: 0 }, leads: [] }, health: { healthyCount: 0, atRiskCount: 0, totalCustomers: 0, customers: [], upsellOpportunities: [], reviewCandidates: [], healthChecks: [] },    partners: { totalPartners: 0, activePartners: 0, totalReferrals: 0, convertedReferrals: 0, conversionRate: 0, totalCommission: 0, totalRevenueGenerated: 0 }, projections: {}, charts: { revenueTrend: [], churnHistory: [] } }
 }
 
 function makeRec(ov: Record<string, unknown>) {
@@ -66,7 +66,9 @@ function makeRec(ov: Record<string, unknown>) {
 async function renderDash(recs?: Record<string, unknown>[]) {
   mockFetch.mockImplementation((url: string) => {
     if (url === '/api/dashboard') return Promise.resolve({ ok: true, json: () => Promise.resolve(makeDashData()) })
-    if (url === '/api/owner/billing?page=1&limit=5') return Promise.resolve({ ok: true, json: () => Promise.resolve({ records: recs || [makeRec({ id: 'bill_001', invoice_id: 'INV-001', amount: 2999 }), makeRec({ id: 'bill_002', invoice_id: 'INV-002', amount: 4999, status: 'pending' })] }) })
+    if (url === '/api/owner/session') return Promise.resolve({ ok: true, json: () => Promise.resolve({ authenticated: true }) })
+    if (url.startsWith('/api/harness')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ running: false, totalCycles: 0, successfulDeployments: 0, learningsStored: 0, lastCycle: null, currentMetrics: null }) })
+    if (url === '/api/owner/billing?page=1&limit=5') return Promise.resolve({ ok: true, json: () => Promise.resolve({ data: recs || [makeRec({ id: 'bill_001', invoice_id: 'INV-001', amount: 2999 }), makeRec({ id: 'bill_002', invoice_id: 'INV-002', amount: 4999, status: 'pending' })] }) })
     if (url === '/api/billing/send-invoice') return Promise.resolve({ ok: true, json: () => Promise.resolve({ success: true, message: 'Invoice sent!' }) })
     return Promise.resolve({ ok: true, json: () => Promise.resolve({}) })
   })
@@ -93,6 +95,8 @@ describe('OwnerDashboard - Recent Invoices', () => {
   it('shows a loading spinner while fetching', async () => {
     mockFetch.mockImplementation((url: string) => {
       if (url === '/api/dashboard') return Promise.resolve({ ok: true, json: () => Promise.resolve(makeDashData()) })
+      if (url === '/api/owner/session') return Promise.resolve({ ok: true, json: () => Promise.resolve({ authenticated: true }) })
+      if (url.startsWith('/api/harness')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ running: false, totalCycles: 0, successfulDeployments: 0, learningsStored: 0, lastCycle: null, currentMetrics: null }) })
       if (url === '/api/owner/billing?page=1&limit=5') return new Promise(() => {})
       return Promise.resolve({ ok: true, json: () => Promise.resolve({}) })
     })
@@ -105,7 +109,9 @@ describe('OwnerDashboard - Recent Invoices', () => {
   it('shows empty state when no invoices', async () => {
     mockFetch.mockImplementation((url: string) => {
       if (url === '/api/dashboard') return Promise.resolve({ ok: true, json: () => Promise.resolve(makeEmptyDash()) })
-      if (url === '/api/owner/billing?page=1&limit=5') return Promise.resolve({ ok: true, json: () => Promise.resolve({ records: [] }) })
+      if (url === '/api/owner/session') return Promise.resolve({ ok: true, json: () => Promise.resolve({ authenticated: true }) })
+      if (url.startsWith('/api/harness')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ running: false, totalCycles: 0, successfulDeployments: 0, learningsStored: 0, lastCycle: null, currentMetrics: null }) })
+      if (url === '/api/owner/billing?page=1&limit=5') return Promise.resolve({ ok: true, json: () => Promise.resolve({ data: [] }) })
       return Promise.resolve({ ok: true, json: () => Promise.resolve({}) })
     })
     const { default: OwnerDashboard } = await import('@/app/owner/dashboard/page')
@@ -152,7 +158,9 @@ describe('OwnerDashboard - Recent Invoices', () => {
     let resolveSend: () => void = () => {}
     mockFetch.mockImplementation((url: string) => {
       if (url === '/api/dashboard') return Promise.resolve({ ok: true, json: () => Promise.resolve(makeDashData()) })
-      if (url === '/api/owner/billing?page=1&limit=5') return Promise.resolve({ ok: true, json: () => Promise.resolve({ records: [makeRec({ id: 'bill_001', invoice_id: 'INV-001', amount: 2999 })] }) })
+      if (url === '/api/owner/session') return Promise.resolve({ ok: true, json: () => Promise.resolve({ authenticated: true }) })
+      if (url.startsWith('/api/harness')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ running: false, totalCycles: 0, successfulDeployments: 0, learningsStored: 0, lastCycle: null, currentMetrics: null }) })
+      if (url === '/api/owner/billing?page=1&limit=5') return Promise.resolve({ ok: true, json: () => Promise.resolve({ data: [makeRec({ id: 'bill_001', invoice_id: 'INV-001', amount: 2999 })] }) })
       if (url === '/api/billing/send-invoice') return new Promise((resolve) => { resolveSend = () => resolve({ ok: true, json: () => Promise.resolve({ success: true, message: 'Invoice sent!' }) }) })
       return Promise.resolve({ ok: true, json: () => Promise.resolve({}) })
     })
@@ -171,7 +179,9 @@ describe('OwnerDashboard - Recent Invoices', () => {
   it('shows error toast on API error', async () => {
     mockFetch.mockImplementation((url: string) => {
       if (url === '/api/dashboard') return Promise.resolve({ ok: true, json: () => Promise.resolve(makeDashData()) })
-      if (url === '/api/owner/billing?page=1&limit=5') return Promise.resolve({ ok: true, json: () => Promise.resolve({ records: [makeRec({ id: 'bill_001', invoice_id: 'INV-001', amount: 2999 })] }) })
+      if (url === '/api/owner/session') return Promise.resolve({ ok: true, json: () => Promise.resolve({ authenticated: true }) })
+      if (url.startsWith('/api/harness')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ running: false, totalCycles: 0, successfulDeployments: 0, learningsStored: 0, lastCycle: null, currentMetrics: null }) })
+      if (url === '/api/owner/billing?page=1&limit=5') return Promise.resolve({ ok: true, json: () => Promise.resolve({ data: [makeRec({ id: 'bill_001', invoice_id: 'INV-001', amount: 2999 })] }) })
       if (url === '/api/billing/send-invoice') return Promise.resolve({ ok: true, json: () => Promise.resolve({ success: false, error: 'Invoice already sent' }) })
       return Promise.resolve({ ok: true, json: () => Promise.resolve({}) })
     })
@@ -188,7 +198,9 @@ describe('OwnerDashboard - Recent Invoices', () => {
   it('shows error toast on network failure', async () => {
     mockFetch.mockImplementation((url: string) => {
       if (url === '/api/dashboard') return Promise.resolve({ ok: true, json: () => Promise.resolve(makeDashData()) })
-      if (url === '/api/owner/billing?page=1&limit=5') return Promise.resolve({ ok: true, json: () => Promise.resolve({ records: [makeRec({ id: 'bill_001', invoice_id: 'INV-001', amount: 2999 })] }) })
+      if (url === '/api/owner/session') return Promise.resolve({ ok: true, json: () => Promise.resolve({ authenticated: true }) })
+      if (url.startsWith('/api/harness')) return Promise.resolve({ ok: true, json: () => Promise.resolve({ running: false, totalCycles: 0, successfulDeployments: 0, learningsStored: 0, lastCycle: null, currentMetrics: null }) })
+      if (url === '/api/owner/billing?page=1&limit=5') return Promise.resolve({ ok: true, json: () => Promise.resolve({ data: [makeRec({ id: 'bill_001', invoice_id: 'INV-001', amount: 2999 })] }) })
       if (url === '/api/billing/send-invoice') return Promise.reject(new Error('Network error'))
       return Promise.resolve({ ok: true, json: () => Promise.resolve({}) })
     })

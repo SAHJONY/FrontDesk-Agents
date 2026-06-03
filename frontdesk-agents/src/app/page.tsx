@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
-import { useTranslation } from '@/lib/i18n/useTranslation'
+import { useTranslation } from '@/lib/useTranslation'
 
 // ─── Icons ─────────────────────────────────────────────────────────────────
 const Bot = () => <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'><rect width='16' height='16' x='4' y='4' rx='2'/><path d='M9 1v3M15 1v3M9 13l3 3 3-3M12 16V8'/></svg>

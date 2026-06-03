@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
-import { TranslationProvider } from '@/lib/i18n/useTranslation'
+import { TranslationProvider } from '@/lib/useTranslation'
 import { ToastProvider } from '@/components/ToastProvider'
 import { MotionConfig } from 'framer-motion'
 import './globals.css'

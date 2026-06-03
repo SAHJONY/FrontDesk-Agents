@@ -4,11 +4,21 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 
 type Language = 'en' | 'es' | 'zh' | 'fr' | 'de' | 'ja' | string
 
-interface TranslationContextType {
+export const SUPPORTED_LANGUAGES = [
+  { code: 'en', name: 'English', flag: '🇺🇸' },
+  { code: 'es', name: 'Español', flag: '🇪🇸' },
+  { code: 'zh', name: '中文', flag: '🇨🇳' },
+  { code: 'fr', name: 'Français', flag: '🇫🇷' },
+  { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
+  { code: 'ja', name: '日本語', flag: '🇯🇵' },
+] as const
+
+export interface TranslationContextType {
   language: Language
   setLanguage: (lang: Language) => void
   t: (key: string) => string
   translations: Record<string, string>
+  languages: typeof SUPPORTED_LANGUAGES
 }
 
 const TranslationContext = createContext<TranslationContextType | undefined>(undefined)
@@ -52,7 +62,7 @@ export function TranslationProvider({ children }: { children: ReactNode }): Reac
   }
 
   return (
-    <TranslationContext.Provider value={{ language, setLanguage, t, translations }}>
+    <TranslationContext.Provider value={{ language, setLanguage, t, translations, languages: SUPPORTED_LANGUAGES }}>
       {children}
     </TranslationContext.Provider>
   )

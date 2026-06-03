@@ -90,7 +90,7 @@ export async function chat(
       frequency_penalty: options.frequencyPenalty,
       presence_penalty: options.presencePenalty,
       stop: options.stop,
-      response_format: options.response_format,
+      ...(options.response_format && { response_format: options.response_format }),
     }),
   })
 

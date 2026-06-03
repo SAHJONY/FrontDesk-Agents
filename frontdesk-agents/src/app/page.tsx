@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 import { useTranslation } from '@/lib/useTranslation'
 
@@ -358,23 +358,23 @@ export default function LandingPage() {
   const { language, setLanguage, languages, t } = useTranslation()
 
   // Translation-wrapped data arrays (must be inside component to access t())
-  const FEATURES = [
+  const FEATURES = useMemo(() => [
     { icon: Globe, title: t('200+ Languages'), desc: t('200+ Languages Desc') },
     { icon: Clock, title: t('24/7/365 Availability'), desc: t('24/7 Desc') },
     { icon: Headphones, title: t('Human-like Voice'), desc: t('Human-like Voice Desc') },
     { icon: Bot, title: t('Smart Escalation'), desc: t('Smart Escalation Desc') },
-  ]
+  ], [language, t])
 
-  const INDUSTRIES = INDUSTRIES_DATA.map(ind => ({
+  const INDUSTRIES = useMemo(() => INDUSTRIES_DATA.map(ind => ({
     ...ind,
     name: ind.name === 'Healthcare' ? t('Healthcare')
       : ind.name === 'Legal' ? t('Legal Industry')
       : ind.name === 'Automotive' ? t('Automotive')
       : ind.name === 'Insurance' ? t('Insurance')
       : ind.name,
-  }))
+  })), [language, t])
 
-  const PRICING_PLANS = PRICING_PLANS_DATA.map(plan => ({
+  const PRICING_PLANS = useMemo(() => PRICING_PLANS_DATA.map(plan => ({
     ...plan,
     desc: plan.name === 'Starter' ? t('Perfect for small businesses')
       : plan.name === 'Growth' ? t('For growing businesses')
@@ -398,7 +398,7 @@ export default function LandingPage() {
       return f
     }),
     cta: t('Start Free Trial'),
-  }))
+  })), [language, t])
 
   const METRICS = METRICS_DATA.map(m => ({
     ...m,

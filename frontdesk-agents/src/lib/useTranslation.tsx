@@ -1,6 +1,7 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
+import allTranslations from './translations.json'
 
 type Language = 'en' | 'es' | 'zh' | 'fr' | 'de' | 'ja' | string
 
@@ -19,50 +20,42 @@ export interface TranslationContextType {
   t: (key: string) => string
   translations: Record<string, string>
   languages: typeof SUPPORTED_LANGUAGES
+  isLoaded: boolean
 }
 
 const TranslationContext = createContext<TranslationContextType | undefined>(undefined)
 
+function getLangTranslations(lang: string): Record<string, string> {
+  return (allTranslations as Record<string, Record<string, string>>)[lang] || allTranslations['en'] || {}
+}
+
 export function TranslationProvider({ children }: { children: ReactNode }): ReactNode {
   const [language, setLanguageState] = useState<Language>('en')
-  const [translations, setTranslations] = useState<Record<string, string>>({})
+  const [translations, setTranslations] = useState<Record<string, string>>(() => getLangTranslations('en'))
+  const [isLoaded, setIsLoaded] = useState(false)
 
+  // Load saved language AFTER hydration to prevent server/client mismatch
   useEffect(() => {
-    if (typeof navigator !== 'undefined') {
-      const browserLang = navigator.language
-      const shortLang = browserLang.split('-')[0]
-      const savedLang = typeof localStorage !== 'undefined' ? localStorage.getItem('preferred-language') : null
-      setLanguageState((savedLang || shortLang) as Language)
-    }
+    const savedLang = localStorage.getItem('preferred-language')
+    const browserLang = navigator.language.split('-')[0]
+    const initialLang = (savedLang || browserLang) as Language
+    setLanguageState(initialLang)
+    setTranslations(getLangTranslations(initialLang))
+    setIsLoaded(true)
   }, [])
 
-  useEffect(() => {
-    const loadTranslations = async () => {
-      try {
-        const translationModule = await import('./translations.json')
-        const allTranslations = translationModule.default as Record<string, any>
-        const langTranslations = allTranslations[language] || allTranslations['en'] || {}
-        setTranslations(langTranslations)
-      } catch (error) {
-        console.error('Failed to load translations:', error)
-      }
-    }
-    loadTranslations()
-  }, [language])
-
-  const setLanguage = (lang: Language) => {
+  const setLanguage = useCallback((lang: Language) => {
     setLanguageState(lang)
-    if (typeof localStorage !== 'undefined') {
-      localStorage.setItem('preferred-language', lang)
-    }
-  }
+    setTranslations(getLangTranslations(lang))
+    localStorage.setItem('preferred-language', lang)
+  }, [])
 
-  const t = (key: string): string => {
+  const t = useCallback((key: string): string => {
     return translations[key] || key
-  }
+  }, [translations])
 
   return (
-    <TranslationContext.Provider value={{ language, setLanguage, t, translations, languages: SUPPORTED_LANGUAGES }}>
+    <TranslationContext.Provider value={{ language, setLanguage, t, translations, languages: SUPPORTED_LANGUAGES, isLoaded }}>
       {children}
     </TranslationContext.Provider>
   )

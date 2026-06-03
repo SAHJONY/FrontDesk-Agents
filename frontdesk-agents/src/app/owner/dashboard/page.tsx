@@ -896,17 +896,17 @@ export default function OwnerDashboard() {
                     <div className="text-2xl font-bold">${metrics.mrr.toLocaleString()}</div>
                   </div>
                   <div className="p-4 bg-white/[0.03] rounded-xl">
-                    <div className="text-sm text-gray-400 mb-1">Next Month</div>
+                    <div className="text-sm text-gray-400 mb-1">{t('Next Month')}</div>
                     <div className="text-2xl font-bold text-emerald-400">${projections.nextMonth.toLocaleString()}</div>
                     <div className="text-xs text-emerald-500">+{((projections.nextMonth / metrics.mrr - 1) * 100).toFixed(1)}%</div>
                   </div>
                   <div className="p-4 bg-white/[0.03] rounded-xl">
-                    <div className="text-sm text-gray-400 mb-1">Next Quarter</div>
+                    <div className="text-sm text-gray-400 mb-1">{t('Next Quarter')}</div>
                     <div className="text-2xl font-bold text-aurora-cyan">${projections.nextQuarter.toLocaleString()}</div>
                     <div className="text-xs text-aurora-cyan">+{((projections.nextQuarter / metrics.mrr - 1) * 100).toFixed(1)}%</div>
                   </div>
                   <div className="p-4 bg-white/[0.03] rounded-xl">
-                    <div className="text-sm text-gray-400 mb-1">Next Year</div>
+                    <div className="text-sm text-gray-400 mb-1">{t('Next Year')}</div>
                     <div className="text-2xl font-bold text-aurora-cyan">${projections.nextYear.toLocaleString()}</div>
                     <div className="text-xs text-aurora-cyan">+{((projections.nextYear / metrics.mrr - 1) * 100).toFixed(1)}%</div>
                   </div>
@@ -1465,7 +1465,7 @@ function CustomerDetailModal({ customer, onClose, t }: {
           {/* Engagement Metrics Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="p-4 bg-white/[0.03] rounded-xl">
-              <div className="text-sm text-gray-400 mb-1">Health Score</div>
+              <div className="text-sm text-gray-400 mb-1">{t('Health Score')}</div>
               <div className={`text-2xl font-bold ${
                 customer.healthScore >= 70 ? 'text-emerald-400' :
                 customer.healthScore >= 40 ? 'text-amber-400' :
@@ -1483,21 +1483,21 @@ function CustomerDetailModal({ customer, onClose, t }: {
               </div>
             </div>
             <div className="p-4 bg-white/[0.03] rounded-xl">
-              <div className="text-sm text-gray-400 mb-1">Satisfaction</div>
+              <div className="text-sm text-gray-400 mb-1">{t('Satisfaction')}</div>
               <div className="text-2xl font-bold text-aurora-cyan">{customer.satisfactionScore}%</div>
               <div className="mt-1 text-xs text-gray-500">
                 {customer.satisfactionScore >= 80 ? 'High' : customer.satisfactionScore >= 60 ? 'Average' : 'Low'}
               </div>
             </div>
             <div className="p-4 bg-white/[0.03] rounded-xl">
-              <div className="text-sm text-gray-400 mb-1">Support Tickets</div>
+              <div className="text-sm text-gray-400 mb-1">{t('Support Tickets')}</div>
               <div className={`text-2xl font-bold ${customer.supportTicketsOpen > 2 ? 'text-cinematic-red' : 'text-emerald-400'}`}>{customer.supportTicketsOpen}</div>
               <div className="mt-1 text-xs text-gray-500">Open tickets</div>
             </div>
             <div className="p-4 bg-white/[0.03] rounded-xl">
-              <div className="text-sm text-gray-400 mb-1">Last Call</div>
+              <div className="text-sm text-gray-400 mb-1">{t('Last Call')}</div>
               <div className={`text-2xl font-bold ${customer.daysSinceLastCall > 14 ? 'text-amber-400' : 'text-emerald-400'}`}>{customer.daysSinceLastCall}d</div>
-              <div className="mt-1 text-xs text-gray-500">Days ago</div>
+              <div className="mt-1 text-xs text-gray-500">{t('Days ago')}</div>
             </div>
           </div>
 
@@ -1506,10 +1506,10 @@ function CustomerDetailModal({ customer, onClose, t }: {
             <div className="flex items-center justify-between mb-3">
               <h4 className="font-semibold flex items-center gap-2">
                 <Phone className="w-4 h-4 text-aurora-cyan" />
-                Call Volume Trend
+                {t('Call Volume Trend')}
               </h4>
               <div className="flex items-center gap-2 text-sm">
-                <span className="text-gray-400">Trend:</span>
+                <span className="text-gray-400">{t('Trend')}:</span>
                 <span className={`flex items-center gap-1 font-medium ${
                   customer.callVolumeTrend === 'growing' ? 'text-emerald-400' :
                   customer.callVolumeTrend === 'declining' ? 'text-cinematic-red' :
@@ -1543,12 +1543,12 @@ function CustomerDetailModal({ customer, onClose, t }: {
                 })
               ) : (
                 <div className="text-center py-4 text-gray-500 text-sm">
-                  No call data available
+                  {t('No call data available')}
                 </div>
               )}
             </div>
             <div className="mt-3 pt-3 border-t border-white/10 flex justify-between text-sm">
-              <span className="text-gray-400">Total ({weeklyCalls.length} weeks)</span>
+              <span className="text-gray-400">{t('Total')} ({weeklyCalls.length} {t('weeks')})</span>
               <span className="font-semibold">{totalCalls} calls</span>
             </div>
           </div>
@@ -1559,11 +1559,11 @@ function CustomerDetailModal({ customer, onClose, t }: {
             <div className={`p-4 rounded-xl border ${customer.onboardingCompleted ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-amber-500/5 border-amber-500/20'}`}>
               <h4 className="font-semibold mb-2 flex items-center gap-2">
                 <CheckCircle className={`w-4 h-4 ${customer.onboardingCompleted ? 'text-emerald-400' : 'text-amber-400'}`} />
-                Onboarding
+                {t('Onboarding')}
               </h4>
               <div className="flex items-center gap-2">
                 <span className={`text-sm font-medium ${customer.onboardingCompleted ? 'text-emerald-400' : 'text-amber-400'}`}>
-                  {customer.onboardingCompleted ? 'Completed' : 'Not completed'}
+                  {customer.onboardingCompleted ? t('Completed') : t('Not completed')}
                 </span>
               </div>
               <div className="text-xs text-gray-500 mt-1">
@@ -1597,7 +1597,7 @@ function CustomerDetailModal({ customer, onClose, t }: {
             <div className="p-4 bg-white/[0.03] rounded-xl">
               <h4 className="font-semibold mb-3 flex items-center gap-2">
                 <Zap className="w-4 h-4 text-amber-400" />
-                Recommended Actions
+                {t('Recommended Actions')}
               </h4>
               <div className="space-y-2">
                 {customer.recommendedActions.map((action, i) => (

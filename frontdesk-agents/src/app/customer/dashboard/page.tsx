@@ -396,10 +396,9 @@ export default function CustomerDashboard() {
                 />
               </div>
               <div className="flex items-center justify-between">
-                <p className="text-sm text-gray-400">{t('Health Score')}</p>
-                <span className={`text-xs px-2 py-0.5 rounded-full border ${getStatusColor(health.status)}`}>
-                  {health.status.replace('_', ' ')}
-                </span>
+                <p className="text-sm text-gray-400">{t('Health Score')}</p>                  <span className={`text-xs px-2 py-0.5 rounded-full border ${getStatusColor(health.status)}`}>
+                    {t(health.status)}
+                  </span>
               </div>
             </motion.div>
 
@@ -466,8 +465,7 @@ export default function CustomerDashboard() {
                 <span className={`text-lg font-bold ${
                   health.upsellPotential === 'high' ? 'text-emerald-400' :
                   health.upsellPotential === 'medium' ? 'text-aurora-cyan' : 'text-gray-400'
-                }`}>
-                  {health.upsellPotential.charAt(0).toUpperCase() + health.upsellPotential.slice(1)}
+                }`}>                    {t(health.upsellPotential)}
                 </span>
               </div>
               <div className="flex items-center justify-between">
@@ -758,7 +756,7 @@ export default function CustomerDashboard() {
                   <div className="flex items-center justify-between mb-2">
                     <p className="font-medium text-sm truncate">{c.name}</p>
                     <span className={`text-xs px-2 py-0.5 rounded-full border ${getStatusColor(c.status)}`}>
-                      {c.status.replace('_', ' ')}
+                      {t(c.status)}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">

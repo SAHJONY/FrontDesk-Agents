@@ -121,14 +121,7 @@ interface DashboardData {
   }
 }
 
-const PIPELINE_STAGES = [
-  { key: 'new', label: 'New Leads', color: 'bg-blue-500' },
-  { key: 'contacted', label: 'Contacted', color: 'bg-cyan-500' },
-  { key: 'qualified', label: 'Qualified', color: 'bg-indigo-500' },
-  { key: 'proposal', label: 'Proposal', color: 'bg-purple-500' },
-  { key: 'negotiation', label: 'Negotiation', color: 'bg-pink-500' },
-  { key: 'closed_won', label: 'Closed Won', color: 'bg-emerald-500' },
-]
+
 
 export default function OwnerDashboard() {
   const router = useRouter()
@@ -326,6 +319,17 @@ export default function OwnerDashboard() {
   }, [success, toastError])
 
   const { t } = useTranslation()
+
+  // Derive translated pipeline stages — must be inside component to call t()
+  const PIPELINE_STAGES = [
+    { key: 'new', label: t('New Leads'), color: 'bg-blue-500' },
+    { key: 'contacted', label: t('Contacted'), color: 'bg-cyan-500' },
+    { key: 'qualified', label: t('Qualified'), color: 'bg-indigo-500' },
+    { key: 'proposal', label: t('Proposal'), color: 'bg-purple-500' },
+    { key: 'negotiation', label: t('Negotiation'), color: 'bg-pink-500' },
+    { key: 'closed_won', label: t('Closed Won'), color: 'bg-emerald-500' },
+  ]
+
   const navItems = [
     { id: 'overview', label: t('Overview'), icon: LayoutDashboard },
     { id: 'analytics', label: t('Analytics'), icon: BarChart3 },
@@ -1041,7 +1045,7 @@ export default function OwnerDashboard() {
                           customer.healthStatus === 'at_risk' ? 'bg-amber-500/20 text-amber-400' :
                           'bg-gray-500/20 text-gray-400'
                         }`}>
-                          {customer.healthStatus.replace(/_/g, ' ')}
+                          {t(customer.healthStatus)}
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
@@ -1446,7 +1450,7 @@ function CustomerDetailModal({ customer, onClose, t }: {
                 customer.healthStatus === 'at_risk' ? 'bg-amber-500/20 text-amber-400' :
                 'bg-gray-500/20 text-gray-400'
               }`}>
-                {customer.healthStatus.replace(/_/g, ' ')}
+                {t(customer.healthStatus)}
               </span>
             </div>
             <div className="text-sm text-gray-400">
@@ -1486,7 +1490,7 @@ function CustomerDetailModal({ customer, onClose, t }: {
               <div className="text-sm text-gray-400 mb-1">{t('Satisfaction')}</div>
               <div className="text-2xl font-bold text-aurora-cyan">{customer.satisfactionScore}%</div>
               <div className="mt-1 text-xs text-gray-500">
-                {customer.satisfactionScore >= 80 ? 'High' : customer.satisfactionScore >= 60 ? 'Average' : 'Low'}
+                {customer.satisfactionScore >= 80 ? t('High') : customer.satisfactionScore >= 60 ? t('Average') : t('Low')}
               </div>
             </div>
             <div className="p-4 bg-white/[0.03] rounded-xl">

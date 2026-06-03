@@ -104,6 +104,7 @@ const getTierColor = (tier: string) => {
   }
 }
 
+import { useTranslation } from '@/lib/useTranslation'
 import { downloadMergedCSV } from '@/lib/export-utils'
 import { useToast } from '@/components/ToastProvider'
 
@@ -130,24 +131,25 @@ const industries = [
   { id: 'hospitality', name: 'Hospitality', icon: '🏨', users: 167, revenue: '$7,500' },
 ]
 
-const languages = [
-  { code: 'en', name: 'English', native: 'English', flag: '🇺🇸' },
-  { code: 'es', name: 'Spanish', native: 'Español', flag: '🇪🇸' },
-  { code: 'fr', name: 'French', native: 'Français', flag: '🇫🇷' },
-  { code: 'de', name: 'German', native: 'Deutsch', flag: '🇩🇪' },
-  { code: 'zh', name: 'Chinese', native: '中文', flag: '🇨🇳' },
-  { code: 'ja', name: 'Japanese', native: '日本語', flag: '🇯🇵' },
-  { code: 'ar', name: 'Arabic', native: 'العربية', flag: '🇸🇦' },
-  { code: 'pt', name: 'Portuguese', native: 'Português', flag: '🇧🇷' },
-  { code: 'ru', name: 'Russian', native: 'Русский', flag: '🇷🇺' },
-  { code: 'ko', name: 'Korean', native: '한국어', flag: '🇰🇷' },
-  { code: 'it', name: 'Italian', native: 'Italiano', flag: '🇮🇹' },
-  { code: 'nl', name: 'Dutch', native: 'Nederlands', flag: '🇳🇱' },
+const LANGUAGES_DISPLAY: Array<{ code: string; name: string; nativeName: string; flag: string }> = [
+  { code: 'en', name: 'English', nativeName: 'English', flag: '🇺🇸' },
+  { code: 'es', name: 'Spanish', nativeName: 'Español', flag: '🇪🇸' },
+  { code: 'fr', name: 'French', nativeName: 'Français', flag: '🇫🇷' },
+  { code: 'de', name: 'German', nativeName: 'Deutsch', flag: '🇩🇪' },
+  { code: 'zh', name: 'Chinese', nativeName: '中文', flag: '🇨🇳' },
+  { code: 'ja', name: 'Japanese', nativeName: '日本語', flag: '🇯🇵' },
+  { code: 'ar', name: 'Arabic', nativeName: 'العربية', flag: '🇸🇦' },
+  { code: 'pt', name: 'Portuguese', nativeName: 'Português', flag: '🇧🇷' },
+  { code: 'ru', name: 'Russian', nativeName: 'Русский', flag: '🇷🇺' },
+  { code: 'ko', name: 'Korean', nativeName: '한국어', flag: '🇰🇷' },
+  { code: 'it', name: 'Italian', nativeName: 'Italiano', flag: '🇮🇹' },
+  { code: 'nl', name: 'Dutch', nativeName: 'Nederlands', flag: '🇳🇱' },
 ]
 
 // ─── Component ──────────────────────────────────────────
 
 export default function CustomerDashboard() {
+  const { t, language, setLanguage, languages: supportedLanguages } = useTranslation()
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -242,7 +244,7 @@ export default function CustomerDashboard() {
       <div className="min-h-screen bg-deep-space text-white flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-10 h-10 text-aurora-cyan animate-spin mx-auto mb-4 drop-shadow-glow" />
-          <p className="text-gray-400">Loading dashboard...</p>
+          <p className="text-gray-400">{t('Loading dashboard...')}</p>
         </div>
       </div>
     )
@@ -255,13 +257,13 @@ export default function CustomerDashboard() {
       <div className="min-h-screen bg-deep-space text-white flex items-center justify-center">
         <div className="text-center max-w-md">
           <AlertTriangle className="w-16 h-16 text-cinematic-red mx-auto mb-4" />
-          <h2 className="text-2xl font-bold mb-2">Failed to Load</h2>
+          <h2 className="text-2xl font-bold mb-2">{t('Failed to Load Dashboard')}</h2>
           <p className="text-gray-400 mb-6">{error}</p>
           <button
             onClick={() => { setLoading(true); fetchData(selectedBusinessId) }}
             className="px-6 py-3 rounded-xl bg-gradient-to-r from-aurora-cyan to-aurora-cyan/80 text-black font-semibold hover:opacity-90 transition-opacity"
           >
-            Retry
+            {t('Retry')}
           </button>
         </div>
       </div>
@@ -281,17 +283,16 @@ export default function CustomerDashboard() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-deep-space/90 backdrop-blur-xl border-b border-white/10">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-aurora-cyan to-aurora-cyan/80 flex items-center justify-center">
+            <div className="flex items-center gap-3">                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-aurora-cyan to-aurora-cyan/80 flex items-center justify-center">
                 <span className="text-lg font-bold text-black">FA</span>
               </div>
-              <span className="text-xl font-semibold">FRONTDESK AGENTS</span>
+              <span className="text-xl font-semibold">{t('FRONTDESK AGENTS')}</span>
             </div>
             <div className="flex items-center gap-3">
               <button
                 onClick={handleExportCSV}
                 className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-400 hover:text-white bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
-                title="Download CSV Report"
+                title={t('Export CSV')}
               >
                 <Download className="w-4 h-4" />
                 <span className="hidden sm:inline">Export CSV</span>
@@ -299,10 +300,10 @@ export default function CustomerDashboard() {
               <Link
                 href="/customer/billing"
                 className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-400 hover:text-white bg-white/10 hover:bg-white/20 rounded-lg transition-colors whitespace-nowrap"
-                title="View Billing History"
+                title={t('Billing')}
               >
                 <Receipt className="w-4 h-4" />
-                <span className="hidden sm:inline">Billing</span>
+                <span className="hidden sm:inline">{t('Billing')}</span>
               </Link>
               <div className="w-px h-5 bg-white/10" />
               <button
@@ -317,7 +318,7 @@ export default function CustomerDashboard() {
                 href="/"
                 className="px-4 py-2 text-sm font-medium rounded-lg bg-gradient-to-r from-aurora-cyan to-aurora-cyan/80 text-black hover:opacity-90 transition-opacity"
               >
-                Back to Home
+                {t('Back to Home')}
               </Link>
             </div>
           </div>
@@ -337,12 +338,12 @@ export default function CustomerDashboard() {
               <div>
                 <h1 className="text-4xl font-bold font-display bg-gradient-to-r from-white via-aurora-cyan/40 to-white bg-clip-text text-transparent animate-gradient-shift bg-[length:200%_auto]">{business.name}</h1>
                 <p className="text-gray-400 mt-1">
-                  {business.industry || 'Business'} · {business.plan.charAt(0).toUpperCase() + business.plan.slice(1)} Plan
+                  {business.industry || t('Business')} · {t(business.plan.charAt(0).toUpperCase() + business.plan.slice(1))}
                 </p>
               </div>
               <div className="text-right">
                 <p className="text-3xl font-bold text-emerald-400">${business.mrr.toLocaleString()}</p>
-                <p className="text-sm text-gray-400">Monthly Recurring Revenue</p>
+                <p className="text-sm text-gray-400">{t('Monthly Recurring Revenue')}</p>
               </div>
             </div>
           </motion.div>
@@ -395,7 +396,7 @@ export default function CustomerDashboard() {
                 />
               </div>
               <div className="flex items-center justify-between">
-                <p className="text-sm text-gray-400">Health Score</p>
+                <p className="text-sm text-gray-400">{t('Health Score')}</p>
                 <span className={`text-xs px-2 py-0.5 rounded-full border ${getStatusColor(health.status)}`}>
                   {health.status.replace('_', ' ')}
                 </span>
@@ -415,19 +416,19 @@ export default function CustomerDashboard() {
                 <span className="text-2xl font-bold">{callAnalytics.totalCalls4Weeks.toLocaleString()}</span>
               </div>
               <div className="flex items-center justify-between">
-                <p className="text-sm text-gray-400">Calls (4 weeks)</p>
+                <p className="text-sm text-gray-400">{t('Calls (4 weeks)')}</p>
                 {health.callVolumeTrend === 'increasing' && (
                   <span className="text-xs text-emerald-400 flex items-center gap-1">
-                    <ArrowUp className="w-3 h-3" /> Rising
+                    <ArrowUp className="w-3 h-3" /> {t('Rising')}
                   </span>
                 )}
                 {health.callVolumeTrend === 'decreasing' && (
                   <span className="text-xs text-cinematic-red flex items-center gap-1">
-                    <ArrowDown className="w-3 h-3" /> Declining
+                    <ArrowDown className="w-3 h-3" /> {t('Declining')}
                   </span>
                 )}
                 {health.callVolumeTrend === 'stable' && (
-                  <span className="text-xs text-gray-400">Stable</span>
+                  <span className="text-xs text-gray-400">{t('Stable')}</span>
                 )}
               </div>
             </motion.div>
@@ -445,9 +446,9 @@ export default function CustomerDashboard() {
                 <span className="text-2xl font-bold">{health.satisfactionScore}%</span>
               </div>
               <div className="flex items-center justify-between">
-                <p className="text-sm text-gray-400">Satisfaction</p>
+                <p className="text-sm text-gray-400">{t('Satisfaction')}</p>
                 <span className="text-xs text-gray-500">
-                  {health.supportTicketsOpen > 0 ? `${health.supportTicketsOpen} open tickets` : 'No tickets'}
+                  {health.supportTicketsOpen > 0 ? `${health.supportTicketsOpen} ${t('Open tickets')}` : t('No tickets')}
                 </span>
               </div>
             </motion.div>
@@ -470,7 +471,7 @@ export default function CustomerDashboard() {
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <p className="text-sm text-gray-400">Upsell Potential</p>
+                <p className="text-sm text-gray-400">{t('Upsell Potential')}</p>
                 {lead && (
                   <span className={`text-xs px-2 py-0.5 rounded-full border ${getTierColor(lead.tier)}`}>
                     {lead.tier}
@@ -491,11 +492,11 @@ export default function CustomerDashboard() {
             >
               <h2 className="text-xl font-bold font-display mb-6 flex items-center gap-2">
                 <BarChart3 className="w-5 h-5 text-aurora-cyan" />
-                Weekly Call Volume
+                {t('Weekly Call Volume')}
               </h2>
               {callAnalytics.weeklyBuckets.length === 0 ? (
                 <div className="flex items-center justify-center h-48 text-gray-500">
-                  <p>No call data available</p>
+                  <p>{t('No call data available')}</p>
                 </div>
               ) : (
                 <div className="flex items-end gap-3 h-48">
@@ -531,11 +532,11 @@ export default function CustomerDashboard() {
             >
               <h2 className="text-xl font-bold font-display mb-6 flex items-center gap-2">
                 <Star className="w-5 h-5 text-aurora-cyan" />
-                Recommended Actions
+                {t('Recommended Actions')}
               </h2>
               {health.recommendedActions.length === 0 ? (
                 <div className="flex items-center justify-center h-48 text-gray-500">
-                  <p>All clear — no actions needed</p>
+                  <p>{t('All clear, no actions needed')}</p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -564,41 +565,41 @@ export default function CustomerDashboard() {
             >
               <h2 className="text-xl font-bold font-display mb-6 flex items-center gap-2">
                 <Zap className="w-5 h-5 text-aurora-cyan" />
-                Lead Status
+                {t('Lead Status')}
               </h2>
               {lead ? (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-400">Score</span>
+                    <span className="text-gray-400">{t('Score')}</span>
                     <span className="font-bold">{lead.score}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-400">Tier</span>
+                    <span className="text-gray-400">{t('Tier')}</span>
                     <span className={`text-sm px-2 py-0.5 rounded-full border ${getTierColor(lead.tier)}`}>
                       {lead.tier.charAt(0).toUpperCase() + lead.tier.slice(1)}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-400">Qualified</span>
+                    <span className="text-gray-400">{t('Qualified')}</span>
                     {lead.qualified ? (
                       <span className="text-emerald-400 flex items-center gap-1">
-                        <CheckCircle className="w-4 h-4" /> Yes
+                        <CheckCircle className="w-4 h-4" /> {t('Qualified')}
                       </span>
                     ) : (
-                      <span className="text-cinematic-red">No</span>
+                      <span className="text-cinematic-red">{t('Not completed')}</span>
                     )}
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-400">Conv. Probability</span>
+                    <span className="text-gray-400">{t('Conv. Probability')}</span>
                     <span className="font-bold text-aurora-cyan">{lead.conversionProbability}%</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-400">Recommended Action</span>
+                    <span className="text-gray-400">{t('Recommended Action')}</span>
                     <span className="text-sm text-gray-300">{lead.recommendedAction}</span>
                   </div>
                   {lead.scoreBreakdown && (
                     <div className="pt-3 border-t border-white/10">
-                      <p className="text-sm text-gray-500 mb-3">Score Breakdown</p>
+                      <p className="text-sm text-gray-500 mb-3">{t('Score Breakdown')}</p>
                       <div className="space-y-2">
                         {Object.entries(lead.scoreBreakdown).map(([key, val]) => (
                           <div key={key} className="flex items-center justify-between">
@@ -614,7 +615,7 @@ export default function CustomerDashboard() {
                 </div>
               ) : (
                 <div className="flex items-center justify-center h-48 text-gray-500">
-                  <p>No lead data available</p>
+                  <p>{t('No lead data available')}</p>
                 </div>
               )}
             </motion.div>
@@ -628,7 +629,7 @@ export default function CustomerDashboard() {
             >
               <h2 className="text-xl font-bold font-display mb-6 flex items-center gap-2">
                 <BarChart3 className="w-5 h-5 text-aurora-cyan" />
-                Platform Metrics
+                {t('Platform Metrics')}
               </h2>
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/[0.07] transition-all duration-200">
@@ -637,8 +638,8 @@ export default function CustomerDashboard() {
                       <DollarSign className="w-4 h-4 text-emerald-400" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium">MRR</p>
-                      <p className="text-xs text-gray-500">Platform-wide</p>
+                      <p className="text-sm font-medium">{t('MRR')}</p>
+                      <p className="text-xs text-gray-500">{t('Platform-wide')}</p>
                     </div>
                   </div>
                   <span className="font-bold">${platformMetrics.mrr.toLocaleString()}</span>
@@ -650,8 +651,8 @@ export default function CustomerDashboard() {
                       <Activity className="w-4 h-4 text-cinematic-red" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium">Churn Rate</p>
-                      <p className="text-xs text-gray-500">Monthly</p>
+                      <p className="text-sm font-medium">{t('Churn Rate')}</p>
+                      <p className="text-xs text-gray-500">{t('Monthly')}</p>
                     </div>
                   </div>
                   <span className="font-bold text-cinematic-red">{platformMetrics.churnRate}%</span>
@@ -663,8 +664,8 @@ export default function CustomerDashboard() {
                       <Users className="w-4 h-4 text-aurora-cyan" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium">Customer Acq. Cost</p>
-                      <p className="text-xs text-gray-500">Average</p>
+                      <p className="text-sm font-medium">{t('Customer Acq. Cost')}</p>
+                      <p className="text-xs text-gray-500">{t('Average')}</p>
                     </div>
                   </div>
                   <span className="font-bold">${platformMetrics.cac.toLocaleString()}</span>
@@ -676,8 +677,8 @@ export default function CustomerDashboard() {
                       <TrendingUp className="w-4 h-4 text-aurora-cyan" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium">LTV</p>
-                      <p className="text-xs text-gray-500">Lifetime Value</p>
+                      <p className="text-sm font-medium">{t('LTV')}</p>
+                      <p className="text-xs text-gray-500">{t('Lifetime Value')}</p>
                     </div>
                   </div>
                   <span className="font-bold">${platformMetrics.ltv.toLocaleString()}</span>
@@ -689,8 +690,8 @@ export default function CustomerDashboard() {
                       <Building2 className="w-4 h-4 text-aurora-cyan" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium">Total Customers</p>
-                      <p className="text-xs text-gray-500">Active accounts</p>
+                      <p className="text-sm font-medium">{t('Total Customers')}</p>
+                      <p className="text-xs text-gray-500">{t('Active accounts')}</p>
                     </div>
                   </div>
                   <span className="font-bold">{platformMetrics.totalCustomers}</span>
@@ -705,34 +706,33 @@ export default function CustomerDashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
             className="p-6 rounded-2xl bg-white/5 border border-white/10 mb-8"
-          >
-            <h2 className="text-xl font-bold font-display mb-6 flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-aurora-cyan" />
-              Onboarding Status
-            </h2>
-            <div className="flex items-center gap-4">
-              <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${
-                health.onboardingCompleted
-                  ? 'bg-emerald-500/20'
-                  : 'bg-aurora-cyan/20'
-              }`}>
-                {health.onboardingCompleted
-                  ? <CheckCircle className="w-8 h-8 text-emerald-400" />
-                  : <Clock className="w-8 h-8 text-aurora-cyan" />
-                }
-              </div>
-              <div>
-                <p className="text-lg font-semibold">
-                  {health.onboardingCompleted ? 'Onboarding Complete' : 'Onboarding In Progress'}
-                </p>
-                <p className="text-sm text-gray-400">
+          >              <h2 className="text-xl font-bold font-display mb-6 flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-aurora-cyan" />
+                {t('Onboarding Status')}
+              </h2>
+              <div className="flex items-center gap-4">
+                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${
+                  health.onboardingCompleted
+                    ? 'bg-emerald-500/20'
+                    : 'bg-aurora-cyan/20'
+                }`}>
                   {health.onboardingCompleted
-                    ? `Completed ${health.daysSinceOnboarding} days ago`
-                    : `${health.daysSinceOnboarding} days since start`
+                    ? <CheckCircle className="w-8 h-8 text-emerald-400" />
+                    : <Clock className="w-8 h-8 text-aurora-cyan" />
                   }
-                </p>
+                </div>
+                <div>
+                  <p className="text-lg font-semibold">
+                    {health.onboardingCompleted ? t('Onboarding Complete') : t('Onboarding In Progress')}
+                  </p>
+                  <p className="text-sm text-gray-400">
+                    {health.onboardingCompleted
+                      ? `${health.daysSinceOnboarding} ${t('days ago')}`
+                      : `${health.daysSinceOnboarding} ${t('days since start')}`
+                    }
+                  </p>
+                </div>
               </div>
-            </div>
           </motion.div>
 
           {/* All Customers Comparison */}
@@ -741,11 +741,10 @@ export default function CustomerDashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.55 }}
             className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/[0.07] hover:scale-[1.01] transition-all duration-300"
-          >
-            <h2 className="text-xl font-bold font-display mb-6 flex items-center gap-2">
-              <Users className="w-5 h-5 text-aurora-cyan" />
-              All Businesses
-            </h2>
+          >              <h2 className="text-xl font-bold font-display mb-6 flex items-center gap-2">
+                <Users className="w-5 h-5 text-aurora-cyan" />
+                {t('All Businesses')}
+              </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {data.allCustomers.map((c) => (
                 <div
@@ -763,7 +762,7 @@ export default function CustomerDashboard() {
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500">Health Score</span>
+                    <span className="text-xs text-gray-500">{t('Health Score')}</span>
                     <span className={`text-sm font-bold ${getHealthColor(c.healthScore)}`}>
                       {c.healthScore}
                     </span>
@@ -779,11 +778,10 @@ export default function CustomerDashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
             className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/[0.07] hover:scale-[1.01] transition-all duration-300"
-          >
-            <h2 className="text-xl font-bold font-display mb-6 flex items-center gap-2">
-              <Activity className="w-5 h-5 text-aurora-cyan" />
-              Platform Services Status
-            </h2>
+          >              <h2 className="text-xl font-bold font-display mb-6 flex items-center gap-2">
+                <Activity className="w-5 h-5 text-aurora-cyan" />
+                {t('Platform Services Status')}
+              </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {platformServices.map((service, i) => (
                 <div
@@ -794,7 +792,7 @@ export default function CustomerDashboard() {
                   <div>
                     <p className="font-medium text-sm">{service.name}</p>
                     <p className="text-xs text-emerald-500 flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" /> {service.status}
+                      <CheckCircle2 className="w-3 h-3" /> {service.status === 'Operational' ? t('Operational') : service.status === 'Degraded Performance' ? t('Degraded Performance') : service.status}
                     </p>
                   </div>
                 </div>
@@ -808,11 +806,10 @@ export default function CustomerDashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.65 }}
             className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/[0.07] hover:scale-[1.01] transition-all duration-300"
-          >
-            <h2 className="text-xl font-bold font-display mb-6 flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-aurora-cyan" />
-              Industry Performance
-            </h2>
+          >              <h2 className="text-xl font-bold font-display mb-6 flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-aurora-cyan" />
+                {t('Industry Performance')}
+              </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {industries.map((industry) => (
                 <div
@@ -823,10 +820,11 @@ export default function CustomerDashboard() {
                     <span className="text-3xl">{industry.icon}</span>
                     <div>
                       <p className="font-medium">{industry.name}</p>
-                      <p className="text-sm text-gray-500">{industry.users} users</p>
+                      <p className="text-sm text-gray-500">{industry.users} {t('users')}</p>
                     </div>
                   </div>
                   <p className="text-lg font-bold text-emerald-500">{industry.revenue}</p>
+                  <p className="text-xs text-gray-500 mt-1">{t('Revenue')}</p>
                 </div>
               ))}
             </div>
@@ -838,19 +836,18 @@ export default function CustomerDashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
             className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/[0.07] hover:scale-[1.01] transition-all duration-300"
-          >
-            <h2 className="text-xl font-bold font-display mb-6 flex items-center gap-2">
-              <Globe className="w-5 h-5 text-aurora-cyan" />
-              Multi-Language Support (200+ Languages)
-            </h2>
+          >              <h2 className="text-xl font-bold font-display mb-6 flex items-center gap-2">
+                <Globe className="w-5 h-5 text-aurora-cyan" />
+                {t('Multi-Language Support (200+ Languages)')}
+              </h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {languages.map((lang) => (
+              {LANGUAGES_DISPLAY.map((lang) => (
                 <div
                   key={lang.code}
                   className="p-4 rounded-xl bg-white/5 hover:bg-white/10 hover:scale-[1.02] transition-all duration-200 text-center"
                 >
                   <p className="text-3xl mb-2">{lang.flag}</p>
-                  <p className="font-medium text-sm">{lang.native}</p>
+                  <p className="font-medium text-sm">{lang.nativeName}</p>
                   <p className="text-xs text-gray-500">{lang.name}</p>
                 </div>
               ))}

@@ -17,6 +17,7 @@ import {
   Tooltip, ResponsiveContainer, Area, AreaChart, Cell
 } from 'recharts'
 import { useToast } from "@/components/ToastProvider"
+import { useTranslation } from '@/lib/useTranslation'
 import type { BillingRecordWithCustomer } from "@/lib/supabase"
 import SendInvoiceDialog from "@/components/SendInvoiceDialog"
 import OwnerBillingContent from "@/components/OwnerBillingContent"
@@ -324,14 +325,15 @@ export default function OwnerDashboard() {
     }
   }, [success, toastError])
 
+  const { t } = useTranslation()
   const navItems = [
-    { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-    { id: 'businesses', label: 'Businesses', icon: Building2 },
-    { id: 'languages', label: 'Languages', icon: Languages },
-    { id: 'ai', label: 'AI Agents', icon: Brain },
-    { id: 'billing', label: 'Billing', icon: Receipt },
-    { id: 'settings', label: 'Settings', icon: Settings },
+    { id: 'overview', label: t('Overview'), icon: LayoutDashboard },
+    { id: 'analytics', label: t('Analytics'), icon: BarChart3 },
+    { id: 'businesses', label: t('Businesses'), icon: Building2 },
+    { id: 'languages', label: t('Languages'), icon: Languages },
+    { id: 'ai', label: t('AI Agents'), icon: Brain },
+    { id: 'billing', label: t('Billing'), icon: Receipt },
+    { id: 'settings', label: t('Settings'), icon: Settings },
   ]
 
   if (authChecking || loading) {
@@ -339,7 +341,7 @@ export default function OwnerDashboard() {
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-aurora-cyan drop-shadow-glow" />
-          <p className="text-gray-400">{authChecking ? 'Checking session...' : 'Loading dashboard...'}</p>
+          <p className="text-gray-400">{authChecking ? t('Checking session...') : t('Loading dashboard...')}</p>
         </div>
       </div>
     )
@@ -350,13 +352,13 @@ export default function OwnerDashboard() {
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
         <div className="text-center max-w-md">
           <XCircle className="w-12 h-12 mx-auto mb-4 text-cinematic-red" />
-          <h2 className="text-xl font-bold mb-2">Failed to Load Dashboard</h2>
+          <h2 className="text-xl font-bold mb-2">{t('Failed to Load Dashboard')}</h2>
           <p className="text-gray-400 mb-4">{error}</p>
           <button
             onClick={fetchDashboard}
             className="px-6 py-3 bg-blue-600 rounded-xl font-medium hover:bg-blue-500 transition-colors"
           >
-            Retry
+            {t('Retry')}
           </button>
         </div>
       </div>
@@ -420,7 +422,7 @@ export default function OwnerDashboard() {
           }}
         >
           <LogOut className="w-5 h-5" />
-          <span>Logout</span>
+          <span>{t('Logout')}</span>
         </button>
       </aside>
 
@@ -428,7 +430,7 @@ export default function OwnerDashboard() {
       <main className="flex-1 p-8 overflow-auto">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <h1 className="text-3xl font-bold capitalize">{activeTab}</h1>              <button
+            <h1 className="text-3xl font-bold capitalize">{t(activeTab.charAt(0).toUpperCase() + activeTab.slice(1))}</h1>              <button
               onClick={fetchDashboard}
               className="p-2 text-gray-400 hover:text-white transition-colors"
               title="Refresh"
@@ -469,34 +471,34 @@ export default function OwnerDashboard() {
                 icon={DollarSign}
                 iconBg="bg-aurora-cyan/20"
                 iconColor="text-aurora-cyan"
-                label="Monthly Recurring Revenue"
+                label={t('Monthly Recurring Revenue')}
                 value={`$${metrics.mrr.toLocaleString()}`}
                 subtitle="ARR: $${(metrics.arr / 1000).toFixed(0)}K"
               />
-              <MetricCard
-                icon={Target}
-                iconBg="bg-amber-500/20"
-                iconColor="text-amber-400"
-                label="Hot Leads"
-                value={sales.leadsByTier.hot.toString()}
-                subtitle={`${sales.salesMetrics.totalLeads} total leads`}
-              />
-              <MetricCard
-                icon={Users}
-                iconBg="bg-emerald-500/20"
-                iconColor="text-emerald-400"
-                label="Active Customers"
-                value={health.healthyCount.toString()}
-                subtitle={`${health.totalCustomers} total, ${health.atRiskCount} at risk`}
-              />
-              <MetricCard
-                icon={Award}
-                iconBg="bg-aurora-cyan/20"
-                iconColor="text-aurora-cyan"
-                label="Active Partners"
-                value={partners.activePartners.toString()}
-                subtitle={`${partners.totalPartners} total partners`}
-              />
+            <MetricCard
+              icon={Target}
+              iconBg="bg-amber-500/20"
+              iconColor="text-amber-400"
+              label={t('Hot Leads')}
+              value={sales.leadsByTier.hot.toString()}
+              subtitle={`${sales.salesMetrics.totalLeads} ${t('total leads')}`}
+            />
+            <MetricCard
+              icon={Users}
+              iconBg="bg-emerald-500/20"
+              iconColor="text-emerald-400"
+              label={t('Active Customers')}
+              value={health.healthyCount.toString()}
+              subtitle={`${health.totalCustomers} ${t('total, at risk')}`}
+            />
+            <MetricCard
+              icon={Award}
+              iconBg="bg-aurora-cyan/20"
+              iconColor="text-aurora-cyan"
+              label={t('Active Partners')}
+              value={partners.activePartners.toString()}
+              subtitle={`${partners.totalPartners} ${t('total partners')}`}
+            />
             </div>
 
             {/* Sales Pipeline + Customer Health */}
@@ -505,7 +507,7 @@ export default function OwnerDashboard() {
               <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
                 <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
                   <TrendingUp className="w-5 h-5 text-aurora-cyan" />
-                  Sales Funnel Pipeline
+                  {t('Sales Funnel Pipeline')}
                 </h3>
                 <div className="space-y-3">
                   {sales.pipeline.map((stage) => {
@@ -516,7 +518,7 @@ export default function OwnerDashboard() {
                       <div key={stage.stage}>
                         <div className="flex justify-between items-center mb-1">
                           <span className="text-sm text-gray-300">{stageInfo?.label || stage.stage}</span>
-                          <span className="text-sm font-semibold">{stage.count} leads</span>
+                          <span className="text-sm font-semibold">{stage.count} {t('leads')}</span>
                         </div>
                         <div className="h-2 bg-white/5 rounded-full overflow-hidden">
                           <div
@@ -530,11 +532,11 @@ export default function OwnerDashboard() {
                 </div>
                 <div className="mt-4 pt-4 border-t border-white/10">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-400">Conversion Rate</span>
+                    <span className="text-gray-400">{t('Conversion Rate')}</span>
                     <span className="font-semibold text-emerald-400">{(sales.salesMetrics.conversionRate * 100).toFixed(1)}%</span>
                   </div>
                   <div className="flex justify-between text-sm mt-1">
-                    <span className="text-gray-400">Average Lead Score</span>
+                    <span className="text-gray-400">{t('Average Lead Score')}</span>
                     <span className="font-semibold">{(sales.salesMetrics.averageScore ?? 0).toFixed(1)}</span>
                   </div>
                 </div>
@@ -544,20 +546,20 @@ export default function OwnerDashboard() {
               <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
                 <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
                   <Activity className="w-5 h-5 text-emerald-400" />
-                  Customer Health Overview
+                  {t('Customer Health Overview')}
                 </h3>
                 <div className="flex items-center justify-center gap-8 mb-6">
                   <div className="text-center">
                     <div className="text-4xl font-bold text-emerald-400">{health.healthyCount}</div>
-                    <div className="text-sm text-gray-400">Healthy</div>
+                    <div className="text-sm text-gray-400">{t('Healthy')}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-4xl font-bold text-amber-400">{health.atRiskCount}</div>
-                    <div className="text-sm text-gray-400">At Risk</div>
+                    <div className="text-sm text-gray-400">{t('At Risk')}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-4xl font-bold text-gray-400">{health.totalCustomers - health.healthyCount - health.atRiskCount}</div>
-                    <div className="text-sm text-gray-400">Needs Review</div>
+                    <div className="text-sm text-gray-400">{t('Needs Review')}</div>
                   </div>
                 </div>
                 {/* Health bar */}
@@ -577,15 +579,15 @@ export default function OwnerDashboard() {
                 </div>
                 <div className="mt-4 space-y-2">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-400">Upsell Opportunities</span>
+                    <span className="text-gray-400">{t('Upsell Opportunities')}</span>
                     <span className="font-semibold text-aurora-cyan">{health.upsellOpportunities.length}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-400">Needs Check-in</span>
+                    <span className="text-gray-400">{t('Needs Check-in')}</span>
                     <span className="font-semibold text-amber-400">{health.reviewCandidates.length}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-400">Churn Rate</span>
+                    <span className="text-gray-400">{t('Churn Rate')}</span>
                     <span className={`font-semibold ${metrics.churnRate > 0.05 ? 'text-cinematic-red' : 'text-emerald-400'}`}>
                       {(metrics.churnRate * 100).toFixed(1)}%
                     </span>
@@ -599,29 +601,29 @@ export default function OwnerDashboard() {
               <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
                 <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
                   <Award className="w-5 h-5 text-aurora-cyan" />
-                  Partner Performance
+                  {t('Partner Performance')}
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <div className="text-2xl font-bold">{partners.totalReferrals}</div>
-                    <div className="text-sm text-gray-400">Total Referrals</div>
+                    <div className="text-sm text-gray-400">{t('Total Referrals')}</div>
                   </div>
                   <div>
                     <div className="text-2xl font-bold text-emerald-400">{partners.convertedReferrals}</div>
-                    <div className="text-sm text-gray-400">Converted</div>
+                    <div className="text-sm text-gray-400">{t('Converted')}</div>
                   </div>
                   <div>
                     <div className="text-2xl font-bold">{partners.totalCommission > 0 ? `$${((partners.totalCommission / partners.totalReferrals) || 0).toFixed(0)}` : '$0'}</div>
-                    <div className="text-sm text-gray-400">Avg Commission</div>
+                    <div className="text-sm text-gray-400">{t('Avg Commission')}</div>
                   </div>
                   <div>
                     <div className="text-2xl font-bold text-aurora-cyan">{(partners.conversionRate * 100).toFixed(0)}%</div>
-                    <div className="text-sm text-gray-400">Referral Conv. Rate</div>
+                    <div className="text-sm text-gray-400">{t('Referral Conv. Rate')}</div>
                   </div>
                 </div>
                 <div className="mt-4 pt-4 border-t border-white/10">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-400">Revenue Generated via Partners</span>
+                    <span className="text-gray-400">{t('Revenue Generated via Partners')}</span>
                     <span className="font-semibold text-emerald-400">${partners.totalRevenueGenerated.toLocaleString()}</span>
                   </div>
                 </div>
@@ -630,24 +632,24 @@ export default function OwnerDashboard() {
               <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
                 <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
                   <TrendingUp className="w-5 h-5 text-aurora-cyan" />
-                  Revenue Projections
+                  {t('Revenue Projections')}
                 </h3>
                 <div className="grid grid-cols-3 gap-4 mb-4">
                   <div className="text-center p-3 bg-white/5 rounded-xl">
-                    <div className="text-sm text-gray-400 mb-1">Next Month</div>
+                    <div className="text-sm text-gray-400 mb-1">{t('Next Month')}</div>
                     <div className="text-lg font-bold text-emerald-400">${(projections.nextMonth / 1000).toFixed(1)}K</div>
                   </div>
                   <div className="text-center p-3 bg-white/5 rounded-xl">
-                    <div className="text-sm text-gray-400 mb-1">Next Quarter</div>
+                    <div className="text-sm text-gray-400 mb-1">{t('Next Quarter')}</div>
                     <div className="text-lg font-bold text-aurora-cyan">${(projections.nextQuarter / 1000).toFixed(1)}K</div>
                   </div>
                   <div className="text-center p-3 bg-white/5 rounded-xl">
-                    <div className="text-sm text-gray-400 mb-1">Next Year</div>
+                    <div className="text-sm text-gray-400 mb-1">{t('Next Year')}</div>
                     <div className="text-lg font-bold text-aurora-cyan">${(projections.nextYear / 1000).toFixed(1)}K</div>
                   </div>
                 </div>
                 <div className="flex justify-between text-sm pt-4 border-t border-white/10">
-                  <span className="text-gray-400">Projected Growth Rate</span>
+                  <span className="text-gray-400">{t('Projected Growth Rate')}</span>
                   <span className="font-semibold text-emerald-400">+{(projections.growthRate * 100).toFixed(1)}%</span>
                 </div>
               </div>
@@ -655,25 +657,25 @@ export default function OwnerDashboard() {
 
             {/* Recent Invoices */}
             <div className="mb-8">
-              <h3 className="text-lg font-semibold text-white mb-4 bg-gradient-to-r from-white via-aurora-cyan/30 to-white bg-clip-text text-transparent animate-gradient-shift bg-[length:200%_auto]">Recent Invoices</h3>
+              <h3 className="text-lg font-semibold text-white mb-4 bg-gradient-to-r from-white via-aurora-cyan/30 to-white bg-clip-text text-transparent animate-gradient-shift bg-[length:200%_auto]">{t('Recent Invoices')}</h3>
               {recentInvoicesLoading ? (
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
                 </div>
               ) : recentRecords.length === 0 ? (
                 <div className="text-center py-8 text-gray-500 text-sm">
-                  No recent invoices found.
+                  {t('No recent invoices found.')}
                 </div>
               ) : (
                 <div className="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-gray-800 text-gray-400 text-xs uppercase tracking-wider">
-                        <th className="text-left px-4 py-3 font-medium">Invoice</th>
-                        <th className="text-left px-4 py-3 font-medium">Customer</th>
-                        <th className="text-left px-4 py-3 font-medium">Amount</th>
-                        <th className="text-left px-4 py-3 font-medium">Status</th>
-                        <th className="text-right px-4 py-3 font-medium">Action</th>
+                        <th className="text-left px-4 py-3 font-medium">{t('Invoice')}</th>
+                        <th className="text-left px-4 py-3 font-medium">{t('Customer')}</th>
+                        <th className="text-left px-4 py-3 font-medium">{t('Amount')}</th>
+                        <th className="text-left px-4 py-3 font-medium">{t('Status')}</th>
+                        <th className="text-right px-4 py-3 font-medium">{t('Action')}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -703,7 +705,7 @@ export default function OwnerDashboard() {
                               {sendingState[rec.id]?.status === "sending" ? (
                                 <><Loader2 className="w-3 h-3 animate-spin" /> Sending</>
                               ) : (
-                                <><Mail className="w-3 h-3" /> Send Invoice</>
+                                <><Mail className="w-3 h-3" /> {t('Send Invoice')}</>
                               )}
                             </button>
                           </td>
@@ -726,33 +728,33 @@ export default function OwnerDashboard() {
                 icon={DollarSign}
                 iconBg="bg-aurora-cyan/20"
                 iconColor="text-aurora-cyan"
-                label="Customer Acquisition Cost"
+                label={t('Customer Acquisition Cost')}
                 value={`$${metrics.cac.toLocaleString()}`}
-                subtitle="Per customer acquired"
+                subtitle={t('Per customer acquired')}
               />
               <MetricCard
                 icon={TrendingUp}
                 iconBg="bg-emerald-500/20"
                 iconColor="text-emerald-400"
-                label="Lifetime Value"
+                label={t('Lifetime Value')}
                 value={`$${metrics.ltv.toLocaleString()}`}
-                subtitle="Avg. per customer"
+                subtitle={t('Avg. per customer')}
               />
               <MetricCard
                 icon={Target}
                 iconBg="bg-aurora-cyan/20"
                 iconColor="text-aurora-cyan"
-                label="LTV / CAC Ratio"
+                label={t('LTV / CAC Ratio')}
                 value={(metrics.ltvCacRatio ?? 0).toFixed(1) + 'x'}
-                subtitle={metrics.ltvCacRatio > 3 ? 'Healthy' : 'Needs improvement'}
+                subtitle={metrics.ltvCacRatio > 3 ? t('Healthy ratio') : t('Needs improvement')}
               />
               <MetricCard
                 icon={Activity}
                 iconBg="bg-amber-500/20"
                 iconColor="text-amber-400"
-                label="Profit Margin"
+                label={t('Profit Margin')}
                 value={`${(metrics.profitMargin * 100).toFixed(1)}%`}
-                subtitle={`Payback: ${metrics.paybackPeriod} months`}
+                subtitle={`${t('Payback period')}: ${metrics.paybackPeriod} ${t('months')}`}
               />
             </div>
 
@@ -762,7 +764,7 @@ export default function OwnerDashboard() {
               <div className="p-6 rounded-2xl bg-white/5 border border-white/10 lg:col-span-2">
                 <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-emerald-400" />
-                  System Health Checks
+                  {t('System Health Checks')}
                 </h3>
                 <div className="space-y-3">
                   {health.healthChecks.map((check, i) => (
@@ -787,7 +789,7 @@ export default function OwnerDashboard() {
               <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
                 <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
                   <TrendingUp className="w-5 h-5 text-aurora-cyan" />
-                  Revenue Trend
+                  {t('Revenue Trend')}
                 </h3>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
@@ -816,7 +818,7 @@ export default function OwnerDashboard() {
                   </ResponsiveContainer>
                 </div>
                 <div className="mt-3 flex items-center justify-between text-sm">
-                  <span className="text-gray-400">12-month MRR growth</span>
+                  <span className="text-gray-400">{t('12-month MRR growth')}</span>
                   {charts.revenueTrend.length >= 2 && (() => {
                     const first = charts.revenueTrend[0].revenue
                     const last = charts.revenueTrend[charts.revenueTrend.length - 1].revenue
@@ -837,7 +839,7 @@ export default function OwnerDashboard() {
               <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
                 <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
                   <Activity className="w-5 h-5 text-amber-400" />
-                  Churn Rate Trend
+                  {t('Churn Rate Trend')}
                 </h3>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
@@ -868,7 +870,7 @@ export default function OwnerDashboard() {
                   </ResponsiveContainer>
                 </div>
                 <div className="mt-3 flex items-center justify-between text-sm">
-                  <span className="text-gray-400">Current churn rate trend</span>
+                  <span className="text-gray-400">{t('Current churn rate trend')}</span>
                   {charts.churnHistory.length >= 2 && (() => {
                     const first = charts.churnHistory[0].churnRate
                     const last = charts.churnHistory[charts.churnHistory.length - 1].churnRate
@@ -886,11 +888,11 @@ export default function OwnerDashboard() {
               <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
                 <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
                   <TrendingUp className="w-5 h-5 text-aurora-cyan" />
-                  Revenue Projection Details
+                  {t('Revenue Projection Details')}
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-4 bg-white/[0.03] rounded-xl">
-                    <div className="text-sm text-gray-400 mb-1">Current MRR</div>
+                    <div className="text-sm text-gray-400 mb-1">{t('Current MRR')}</div>
                     <div className="text-2xl font-bold">${metrics.mrr.toLocaleString()}</div>
                   </div>
                   <div className="p-4 bg-white/[0.03] rounded-xl">
@@ -934,7 +936,7 @@ export default function OwnerDashboard() {
                       <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
                       <input
                         type="text"
-                        placeholder="Search leads..."
+                        placeholder={t('Search leads...')}
                         value={leadSearch}
                         onChange={(e) => setLeadSearch(e.target.value)}
                         className="pl-9 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-48"
@@ -945,10 +947,10 @@ export default function OwnerDashboard() {
                       onChange={(e) => setLeadFilter(e.target.value)}
                       className="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                      <option value="all">All Tiers</option>
-                      <option value="hot">Hot</option>
-                      <option value="warm">Warm</option>
-                      <option value="cold">Cold</option>
+                      <option value="all">{t('All Tiers')}</option>
+                      <option value="hot">{t('Hot')}</option>
+                      <option value="warm">{t('Warm')}</option>
+                      <option value="cold">{t('Cold')}</option>
                     </select>
                   </div>
                 </div>
@@ -957,13 +959,13 @@ export default function OwnerDashboard() {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-white/10 text-left">
-                        <th className="pb-3 text-gray-400 font-medium">Business</th>
-                        <th className="pb-3 text-gray-400 font-medium">Industry</th>
-                        <th className="pb-3 text-gray-400 font-medium">Contact</th>
-                        <th className="pb-3 text-gray-400 font-medium">Score</th>
-                        <th className="pb-3 text-gray-400 font-medium">Tier</th>
-                        <th className="pb-3 text-gray-400 font-medium">Recommended Action</th>
-                        <th className="pb-3 text-gray-400 font-medium">Created</th>
+                        <th className="pb-3 text-gray-400 font-medium">{t('Business')}</th>
+                        <th className="pb-3 text-gray-400 font-medium">{t('Industry')}</th>
+                        <th className="pb-3 text-gray-400 font-medium">{t('Contact')}</th>
+                        <th className="pb-3 text-gray-400 font-medium">{t('Score')}</th>
+                        <th className="pb-3 text-gray-400 font-medium">{t('Tier')}</th>
+                        <th className="pb-3 text-gray-400 font-medium">{t('Recommended Action')}</th>
+                        <th className="pb-3 text-gray-400 font-medium">{t('Created')}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1004,7 +1006,7 @@ export default function OwnerDashboard() {
                     </tbody>
                   </table>
                   {sales.leads.length === 0 && (
-                    <div className="text-center py-8 text-gray-500">No leads yet</div>
+                    <div className="text-center py-8 text-gray-500">{t('No leads yet')}</div>
                   )}
                 </div>
               </div>
@@ -1013,8 +1015,8 @@ export default function OwnerDashboard() {
               <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
                 <h3 className="text-xl font-semibold mb-6 flex items-center gap-2">
                   <Activity className="w-5 h-5 text-emerald-400" />
-                  Customer Health Dashboard
-                  <span className="text-sm font-normal text-gray-400 ml-auto">Click a card to view details</span>
+                  {t('Customer Health Dashboard')}
+                  <span className="text-sm font-normal text-gray-400 ml-auto">{t('Click a card to view details')}</span>
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {health.customers.map((customer) => (
@@ -1065,7 +1067,7 @@ export default function OwnerDashboard() {
                   ))}
                 </div>
                 {health.customers.length === 0 && (
-                  <div className="text-center py-8 text-gray-500">No customers yet</div>
+                  <div className="text-center py-8 text-gray-500">{t('No customers yet')}</div>
                 )}
 
                 {/* Upsell Opportunities */}
@@ -1073,7 +1075,7 @@ export default function OwnerDashboard() {
                   <div className="mt-6 pt-6 border-t border-white/10">
                     <h4 className="text-lg font-semibold mb-3 flex items-center gap-2">
                       <Star className="w-4 h-4 text-hollywood-gold" />
-                      Upsell Opportunities ({health.upsellOpportunities.length})
+                      {t('Upsell Opportunities')} ({health.upsellOpportunities.length})
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                       {health.upsellOpportunities.map((opp) => (
@@ -1092,7 +1094,7 @@ export default function OwnerDashboard() {
                   <div className="mt-6 pt-6 border-t border-white/10">
                     <h4 className="text-lg font-semibold mb-3 flex items-center gap-2">
                       <AlertTriangle className="w-4 h-4 text-amber-400" />
-                      Needs Check-in ({health.reviewCandidates.length})
+                      {t('Needs Check-in')} ({health.reviewCandidates.length})
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                       {health.reviewCandidates.map((candidate) => (
@@ -1113,8 +1115,7 @@ export default function OwnerDashboard() {
 
         {/* ============ LANGUAGES TAB ============ */}
         {activeTab === 'languages' && (
-          <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
-            <h3 className="text-xl font-semibold mb-6">Supported Languages</h3>
+          <div className="p-6 rounded-2xl bg-white/5 border border-white/10">                <h3 className="text-xl font-semibold mb-6">{t('Supported Languages')}</h3>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {Object.entries(LANGUAGES).map(([code, lang]) => (
                 <div key={code} className="p-4 bg-white/5 rounded-lg text-center">
@@ -1135,19 +1136,19 @@ export default function OwnerDashboard() {
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                 <div className="p-5 rounded-2xl bg-white/5 border border-white/10">
                   <div className="text-2xl font-bold text-cyan-400 mb-1">{aiOverview.metrics.totalDecisions}</div>
-                  <div className="text-sm text-gray-400">Total Decisions</div>
+                  <div className="text-sm text-gray-400">{t('Total Decisions')}</div>
                 </div>
                 <div className="p-5 rounded-2xl bg-white/5 border border-white/10">
                   <div className="text-2xl font-bold text-emerald-400 mb-1">{aiOverview.metrics.autonomousActions}</div>
-                  <div className="text-sm text-gray-400">Autonomous Actions</div>
+                  <div className="text-sm text-gray-400">{t('Autonomous Actions')}</div>
                 </div>
                 <div className="p-5 rounded-2xl bg-white/5 border border-white/10">
                   <div className="text-2xl font-bold text-amber-400 mb-1">{(aiOverview.metrics.avgConfidence * 100).toFixed(0)}%</div>
-                  <div className="text-sm text-gray-400">Avg Confidence</div>
+                  <div className="text-sm text-gray-400">{t('Avg Confidence')}</div>
                 </div>
                 <div className="p-5 rounded-2xl bg-white/5 border border-white/10">
                   <div className="text-2xl font-bold text-purple-400 mb-1">{aiOverview.metrics.modelSwitchEvents}</div>
-                  <div className="text-sm text-gray-400">Model Switch Events</div>
+                  <div className="text-sm text-gray-400">{t('Model Switch Events')}</div>
                 </div>
               </div>
             )}
@@ -1156,7 +1157,7 @@ export default function OwnerDashboard() {
             <div className="mb-8">
               <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
                 <Cpu className="w-5 h-5 text-cyan-400" />
-                Model Router Status
+                {t('Model Router Status')}
               </h3>
               {aiLoading ? (
                 <div className="flex items-center justify-center py-8">
@@ -1184,17 +1185,17 @@ export default function OwnerDashboard() {
                       </div>
                       <div className="grid grid-cols-2 gap-3 text-sm">
                         <div>
-                          <div className="text-gray-400 text-xs">Latency</div>
+                          <div className="text-gray-400 text-xs">{t('Latency')}</div>
                           <div className="font-medium">{model.latencyMs}ms</div>
                         </div>
                         <div>
-                          <div className="text-gray-400 text-xs">Health</div>
+                          <div className="text-gray-400 text-xs">{t('Health')}</div>
                           <div className={`font-medium ${model.healthScore >= 0.9 ? 'text-emerald-400' : model.healthScore >= 0.7 ? 'text-amber-400' : 'text-red-400'}`}>
                             {(model.healthScore * 100).toFixed(0)}%
                           </div>
                         </div>
                         <div>
-                          <div className="text-gray-400 text-xs">RPM</div>
+                          <div className="text-gray-400 text-xs">{t('RPM')}</div>
                           <div className="font-medium">{model.requestsPerMinute}</div>
                         </div>
                         {model.isPrimary && (
@@ -1205,7 +1206,7 @@ export default function OwnerDashboard() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 text-gray-500 text-sm">No model statuses available</div>
+                <div className="text-center py-8 text-gray-500 text-sm">{t('No model statuses available')}</div>
               )}
             </div>
 
@@ -1213,10 +1214,10 @@ export default function OwnerDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Decision History */}
               <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
-                <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                  <GitBranch className="w-5 h-5 text-cyan-400" />
-                  Decision History
-                </h3>
+              <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                <GitBranch className="w-5 h-5 text-cyan-400" />
+                {t('Decision History')}
+              </h3>
                 {aiOverview?.decisions && aiOverview.decisions.length > 0 ? (
                   <div className="space-y-3 max-h-80 overflow-y-auto">
                     {aiOverview.decisions.map((decision) => (
@@ -1238,17 +1239,17 @@ export default function OwnerDashboard() {
                       </div>
                     ))}
                   </div>
-                ) : (
-                  <div className="text-center py-8 text-gray-500 text-sm">No decision history available</div>
-                )}
+              ) : (
+                <div className="text-center py-8 text-gray-500 text-sm">{t('No decision history available')}</div>
+              )}
               </div>
 
               {/* Self-Healing Monitor */}
               <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
-                <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                  <Shield className="w-5 h-5 text-emerald-400" />
-                  Self-Healing Monitor
-                </h3>
+              <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                <Shield className="w-5 h-5 text-emerald-400" />
+                {t('Self-Healing Monitor')}
+              </h3>
                 {aiOverview?.selfHealing ? (
                   <div className="space-y-4">
                     <div className="flex items-center gap-3">
@@ -1259,29 +1260,29 @@ export default function OwnerDashboard() {
                       }`}>
                         {aiOverview.selfHealing.overall}
                       </span>
-                      <span className="text-sm text-gray-400">System Health</span>
+                      <span className="text-sm text-gray-400">{t('System Health')}</span>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="p-3 bg-white/[0.03] rounded-lg">
                         <div className="text-lg font-bold text-amber-400">{aiOverview.selfHealing.anomaliesDetected}</div>
-                        <div className="text-xs text-gray-400">Anomalies Detected</div>
+                        <div className="text-xs text-gray-400">{t('Anomalies Detected')}</div>
                       </div>
                       <div className="p-3 bg-white/[0.03] rounded-lg">
                         <div className="text-lg font-bold text-emerald-400">{aiOverview.selfHealing.autoRemediated}</div>
-                        <div className="text-xs text-gray-400">Auto-Remediated</div>
+                        <div className="text-xs text-gray-400">{t('Auto-Remediated')}</div>
                       </div>
                       <div className="p-3 bg-white/[0.03] rounded-lg">
                         <div className="text-lg font-bold text-cyan-400">{aiOverview.selfHealing.uptimePercent?.toFixed(1)}%</div>
-                        <div className="text-xs text-gray-400">Uptime</div>
+                        <div className="text-xs text-gray-400">{t('Uptime')}</div>
                       </div>
                       <div className="p-3 bg-white/[0.03] rounded-lg">
                         <div className="text-lg font-bold text-white">{aiOverview.selfHealing.avgResponseTime}ms</div>
-                        <div className="text-xs text-gray-400">Avg Response</div>
+                        <div className="text-xs text-gray-400">{t('Avg Response')}</div>
                       </div>
                     </div>
                     {aiOverview.selfHealing.activeAlerts && aiOverview.selfHealing.activeAlerts.length > 0 && (
                       <div>
-                        <div className="text-sm font-medium text-gray-300 mb-2">Active Alerts</div>
+                        <div className="text-sm font-medium text-gray-300 mb-2">{t('Active Alerts')}</div>
                         <div className="space-y-2">
                           {aiOverview.selfHealing.activeAlerts.map((alert) => (
                             <div key={alert.id} className="p-3 bg-amber-500/5 border border-amber-500/20 rounded-lg">
@@ -1296,9 +1297,9 @@ export default function OwnerDashboard() {
                       </div>
                     )}
                   </div>
-                ) : (
-                  <div className="text-center py-8 text-gray-500 text-sm">Self-healing data not available</div>
-                )}
+              ) : (
+                <div className="text-center py-8 text-gray-500 text-sm">{t('Self-healing data not available')}</div>
+              )}
               </div>
             </div>
           </>
@@ -1312,8 +1313,8 @@ export default function OwnerDashboard() {
         {/* ============ SETTINGS TAB ============ */}
         {activeTab === 'settings' && (
           <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
-            <h3 className="text-xl font-semibold mb-6">Settings</h3>
-            <p className="text-gray-400">Settings are coming soon. The platform currently supports {Object.keys(LANGUAGES).length} languages across 50+ industries worldwide.</p>
+            <h3 className="text-xl font-semibold mb-6">{t('Settings')}</h3>
+            <p className="text-gray-400">{t('Settings are coming soon').replace('{count}', Object.keys(LANGUAGES).length.toString())}</p>
           </div>
         )}
 
@@ -1358,6 +1359,7 @@ export default function OwnerDashboard() {
             key={selectedCustomer.customerId}
             customer={selectedCustomer}
             onClose={() => setSelectedCustomer(null)}
+            t={t}
           />
         )}
       </AnimatePresence>
@@ -1365,9 +1367,10 @@ export default function OwnerDashboard() {
   )
 }
 
-function CustomerDetailModal({ customer, onClose }: {
+function CustomerDetailModal({ customer, onClose, t }: {
   customer: DashboardData['health']['customers'][0]
   onClose: () => void
+  t: (key: string) => string
 }) {
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {

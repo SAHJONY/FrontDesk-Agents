@@ -3,9 +3,11 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Mail, Lock, Eye, EyeOff, Bot, Sun, Moon } from 'lucide-react'
+import { useTranslation } from '@/lib/useTranslation'
 
 export default function OwnerLogin() {
   const router = useRouter()
+  const { t } = useTranslation()
   const [isDarkMode, setIsDarkMode] = useState(true)
   const [email, setEmail] = useState('sahjonycapitalllc@outlook.com')
   const [password, setPassword] = useState('')
@@ -59,10 +61,10 @@ export default function OwnerLogin() {
         </div>
         
         <h2 className="mt-6 text-3xl font-bold text-center">
-          Owner Login
+          {t('Owner Login')}
         </h2>
         <p className={`mt-2 text-center text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-          Access your owner dashboard
+          {t('Access your owner dashboard')}
         </p>
       </div>
 
@@ -72,7 +74,7 @@ export default function OwnerLogin() {
             {/* Email */}
             <div>
               <label htmlFor="email" className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                Email
+                {t('Email')}
               </label>
               <div className="mt-1 relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -85,7 +87,7 @@ export default function OwnerLogin() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className={`appearance-none block w-full pl-10 pr-3 py-3 rounded-xl ${isDarkMode ? 'bg-white/5 border-white/10 text-white placeholder-gray-500' : 'bg-white border-gray-300 text-gray-900'} border focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all`}
-                  placeholder="you@example.com"
+                  placeholder={t('you@company.com')}
                 />
               </div>
             </div>
@@ -93,7 +95,7 @@ export default function OwnerLogin() {
             {/* Password */}
             <div>
               <label htmlFor="password" className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                Password
+                {t('Password')}
               </label>
               <div className="mt-1 relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -106,13 +108,13 @@ export default function OwnerLogin() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className={`appearance-none block w-full pl-10 pr-10 py-3 rounded-xl ${isDarkMode ? 'bg-white/5 border-white/10 text-white placeholder-gray-500' : 'bg-white border-gray-300 text-gray-900'} border focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all`}
-                  placeholder="••••••••"
+                  placeholder={t('Enter your password')}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-label={showPassword ? t('Hide password') : t('Show password')}
                 >
                   {showPassword ? (
                     <EyeOff className={`h-5 w-5 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} />
@@ -125,7 +127,7 @@ export default function OwnerLogin() {
 
             {error && (
               <div className="rounded-xl bg-red-500/10 border border-red-500/20 p-4">
-                <p className="text-sm text-red-400">{error}</p>
+                <p className="text-sm text-red-400">{error || t('Invalid credentials')}</p>
               </div>
             )}
 
@@ -141,10 +143,10 @@ export default function OwnerLogin() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Signing in...
+                    {t('Signing in...')}
                   </>
                 ) : (
-                  'Sign in'
+                  t('Sign in')
                 )}
               </button>
             </div>
@@ -157,7 +159,7 @@ export default function OwnerLogin() {
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className={`px-2 ${isDarkMode ? 'bg-black text-gray-400' : 'bg-white text-gray-500'}`}>
-                  Or
+                  {t('Or')}
                 </span>
               </div>
             </div>
@@ -166,14 +168,13 @@ export default function OwnerLogin() {
               <a
                 href="/customer/login"
                 className={`w-full flex justify-center py-3 px-4 border rounded-xl shadow-sm text-sm font-medium transition-all ${isDarkMode ? 'border-white/20 text-white hover:bg-white/10' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
-              >
-                Customer Login
-              </a>
-              <a
-                href="/"
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-black bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 transition-all"
-              >
-                Back to Home
+              >                  {t('Customer Login')}
+                </a>
+                <a
+                  href="/"
+                  className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-black bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 transition-all"
+                >
+                  {t('Back to Home')}
               </a>
             </div>
           </div>

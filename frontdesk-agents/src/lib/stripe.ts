@@ -52,7 +52,7 @@ export const PLANS = {
   starter: {
     id: 'starter',
     name: 'Starter',
-    price: 19900, // $199/month
+    price: 9900, // $99/month — aligns with FINANCIAL_FORECAST.md
     features: [
       'Basic AI Receptionist',
       '100 calls/month',
@@ -63,7 +63,7 @@ export const PLANS = {
   professional: {
     id: 'professional',
     name: 'Professional',
-    price: 39900, // $399/month
+    price: 29900, // $299/month — aligns with FINANCIAL_FORECAST.md
     features: [
       'Unlimited AI Receptionist',
       '1,000 calls/month',
@@ -84,6 +84,21 @@ export const PLANS = {
       'Custom integrations',
       'White-label options',
       'Dedicated account manager'
+    ]
+  },
+  ultimate: {
+    id: 'ultimate',
+    name: 'Ultimate',
+    price: 199900, // $1,999/month — aligns with FINANCIAL_FORECAST.md
+    features: [
+      'Everything in Enterprise',
+      'Unlimited calls',
+      '24/7 phone support',
+      'Custom AI training',
+      'White-label options',
+      'API access',
+      'Dedicated account manager',
+      'SLA guarantee'
     ]
   }
 }

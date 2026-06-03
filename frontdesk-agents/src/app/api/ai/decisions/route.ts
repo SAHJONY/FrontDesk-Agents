@@ -21,10 +21,10 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '50', 10), 1), 200)
     const includeMetrics = searchParams.get('metrics') === 'true'
 
-    const decisions = getDecisions(limit)
+    const decisions = await getDecisions(limit)
     const modelStatuses = getModelRouterStatuses()
-    const selfHealing = getSelfHealingStatus()
-    const metrics = includeMetrics ? getAIDecisionMetrics() : null
+    const selfHealing = await getSelfHealingStatus()
+    const metrics = includeMetrics ? await getAIDecisionMetrics() : null
 
     return NextResponse.json({
       success: true,
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
 
     if (action === 'evaluate') {
       // Autonomous evaluation and decision making
-      const decisions = evaluateAndDecide(context || {})
+      const decisions = await evaluateAndDecide(context || {})
       return NextResponse.json({
         success: true,
         decisionsMade: decisions.length,
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
 
     if (action === 'decide') {
       // Manual decision trigger
-      const { category, severity, trigger, reasoning, action: decisionAction, metadata } = body
+      const { category, severity, trigger, reasoning, decisionAction, metadata } = body
       if (!category || !severity || !trigger || !reasoning || !decisionAction) {
         return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 })
       }
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
       if (metadata && typeof metadata !== 'object') {
         return NextResponse.json({ success: false, error: 'metadata must be an object' }, { status: 400 })
       }
-      const decision = makeDecision({ category, severity, trigger, reasoning, action: decisionAction, metadata })
+      const decision = await makeDecision({ category, severity, trigger, reasoning, action: decisionAction, metadata })
       return NextResponse.json({ success: true, decision, timestamp: new Date().toISOString() })
     }
 
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
       if (!validOutcomes.includes(outcome)) {
         return NextResponse.json({ success: false, error: `Invalid outcome. Must be one of: ${validOutcomes.join(', ')}` }, { status: 400 })
       }
-      resolveDecision(decisionId, outcome)
+      await resolveDecision(decisionId, outcome)
       return NextResponse.json({ success: true, timestamp: new Date().toISOString() })
     }
 

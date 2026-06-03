@@ -1,10 +1,11 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+import { authRateLimit, getClientIp } from '@/lib/rate-limit'
+import { authService } from '@/lib/auth'
+
 export const dynamic = 'force-dynamic'
 
-
-const OWNER_EMAIL = process.env.OWNER_EMAIL
-const OWNER_PASSWORD = process.env.OWNER_PASSWORD
+const OWNER_EMAIL = process.env.OWNER_EMAIL || ''
 const SESSION_COOKIE_NAME = 'owner_session'
 const SESSION_DURATION = 60 * 60 * 24 * 7 // 7 days
 
@@ -18,21 +19,31 @@ interface OwnerSession {
 }
 
 // POST /api/owner/login - Owner login
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     // Validate production configuration
-    if (!OWNER_EMAIL || !OWNER_PASSWORD) {
-      console.error('Owner credentials not configured. Set OWNER_EMAIL and OWNER_PASSWORD env vars.')
+    if (!OWNER_EMAIL) {
+      console.error('OWNER_EMAIL env var is not configured')
       return NextResponse.json(
         { success: false, error: 'Server configuration error' },
         { status: 500 }
       )
     }
 
+    // Rate limiting — 5 failed attempts per minute locks out the IP
+    const clientIp = getClientIp(request)
+    const rateLimitResult = authRateLimit(clientIp)
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { success: false, error: 'Too many requests. Please try again later.' },
+        { status: 429, headers: { 'Retry-After': String(rateLimitResult.retryAfter) } }
+      )
+    }
+
     const body = await request.json()
     const { email, password } = body
 
-    // Validate credentials
+    // Check email matches
     if (email !== OWNER_EMAIL) {
       return NextResponse.json(
         { success: false, error: 'Invalid owner credentials' },
@@ -40,7 +51,9 @@ export async function POST(request: Request) {
       )
     }
 
-    if (password !== OWNER_PASSWORD) {
+    // Use SHA-256 password verification (not plain-text comparison)
+    const passwordValid = await authService.verifyPassword(password)
+    if (!passwordValid) {
       return NextResponse.json(
         { success: false, error: 'Invalid owner credentials' },
         { status: 401 }
@@ -92,17 +105,13 @@ export async function GET() {
     const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)
 
     if (!sessionCookie) {
-      return NextResponse.json(
-        { success: false, authenticated: false }
-      )
+      return NextResponse.json({ success: false, authenticated: false })
     }
 
     const session: OwnerSession = JSON.parse(sessionCookie.value)
 
     if (!session.authenticated) {
-      return NextResponse.json(
-        { success: false, authenticated: false }
-      )
+      return NextResponse.json({ success: false, authenticated: false })
     }
 
     return NextResponse.json({
@@ -114,10 +123,8 @@ export async function GET() {
         role: session.role
       }
     })
-  } catch (error) {
-    return NextResponse.json(
-      { success: false, authenticated: false }
-    )
+  } catch {
+    return NextResponse.json({ success: false, authenticated: false })
   }
 }
 
@@ -126,15 +133,9 @@ export async function DELETE() {
   try {
     const cookieStore = await cookies()
     cookieStore.delete(SESSION_COOKIE_NAME)
-
-    return NextResponse.json({
-      success: true,
-      message: 'Logged out successfully'
-    })
+    return NextResponse.json({ success: true, message: 'Logged out successfully' })
   } catch (error) {
-    return NextResponse.json(
-      { success: false, error: 'Logout failed' },
-      { status: 500 }
-    )
+    console.error('Logout error:', error)
+    return NextResponse.json({ success: false, error: 'Logout failed' }, { status: 500 })
   }
 }

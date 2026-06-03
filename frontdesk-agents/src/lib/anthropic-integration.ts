@@ -177,7 +177,7 @@ export function getModelInfo(modelId: string): typeof ANTHROPIC_MODELS[number] |
   return ANTHROPIC_MODELS.find(m => m.id === modelId)
 }
 
-export default {
+const anthropicExports = {
   initializeAnthropic,
   isConfigured,
   getAPIKey,
@@ -188,6 +188,8 @@ export default {
   getModelInfo,
   ANTHROPIC_MODELS,
 }
+export default anthropicExports
+
 export function getClaudeModels() {
   return ANTHROPIC_MODELS.map(m => ({ ...m, provider: 'anthropic' as const }))
 }

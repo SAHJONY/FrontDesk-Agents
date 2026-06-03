@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAllBillingRecords } from '@/lib/supabase'
-import { authService } from '@/lib/auth'
+import { getOwnerSession } from '@/lib/owner-session'
+export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await authService.getSession()
+    const session = await getOwnerSession()
     if (!session) {
       return NextResponse.json({ success: false, error: 'Not authenticated' }, { status: 401 })
     }

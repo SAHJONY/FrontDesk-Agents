@@ -189,7 +189,8 @@ export async function getCustomerSession(): Promise<CustomerSession | null> {
     }
 
     const session: CustomerSession = JSON.parse(sessionCookie.value)
-    return session
+    // Validate authenticated flag (same pattern as owner-session)
+    return session?.authenticated ? session : null
   } catch (error) {
     console.error('Get session error:', error)
     return null

@@ -41,9 +41,13 @@ export class AuthService {
     const inputHash = await this.hashPassword(password);
     const storedHash = OWNER_PASSWORD_HASH;
     
-    // For development, accept 'owner123' as default password
+    // Fail secure: if hash is still the placeholder, production must reject all passwords
     if (storedHash === 'placeholder_hash_change_in_env') {
-      return password === 'owner123';
+      if (process.env.NODE_ENV === 'production') {
+        console.error('FATAL: OWNER_PASSWORD_HASH is not configured in production environment!');
+        return false; // fail secure — do not fall back to dev password
+      }
+      return password === 'owner123'; // dev only
     }
     
     return inputHash === storedHash;

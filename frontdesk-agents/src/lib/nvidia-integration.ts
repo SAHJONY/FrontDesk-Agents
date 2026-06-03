@@ -430,7 +430,7 @@ export function getModelInfo(modelId: string): typeof NVIDIA_MODELS[number] | un
 }
 
 
-export default {
+const nvidiaExports = {
   initializeNVIDIA,
   isConfigured,
   getAPIKey,
@@ -454,6 +454,8 @@ export default {
   NVIDIA_MODELS,
   MODEL_CATEGORIES,
 }
+export default nvidiaExports
+
 export function getNvidiaModels() {
   return NVIDIA_MODELS.map(m => ({ ...m, provider: 'nvidia' as const }))
 }

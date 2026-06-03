@@ -4,6 +4,8 @@
 import { NextResponse } from 'next/server'
 import { signOutCustomer } from '@/lib/customer-auth'
 
+export const dynamic = 'force-dynamic'
+
 export async function POST() {
   try {
     await signOutCustomer()

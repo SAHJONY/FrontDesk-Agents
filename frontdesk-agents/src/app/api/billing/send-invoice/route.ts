@@ -1,7 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { getCustomerSession } from '@/lib/customer-auth'
-import { authService } from '@/lib/auth'
+import { getOwnerSession } from '@/lib/owner-session'
+import { cookies } from 'next/headers'
+export const dynamic = 'force-dynamic'
+
+const CUSTOMER_SESSION_COOKIE = 'customer_session'
+
+interface CustomerSession {
+  id: string; email: string; businessName: string; ownerName: string
+  plan: string; customerId: string; authenticated: boolean; loginTime: string
+}
+
+async function getCustomerSessionLocal(): Promise<CustomerSession | null> {
+  try {
+    const store = await cookies()
+    const cookie = store.get(CUSTOMER_SESSION_COOKIE)
+    if (!cookie) {
+      // No customer_session cookie — try the shared getCustomerSession which may
+      // use a different storage mechanism (e.g. server-side session, Supabase auth)
+      return getCustomerSession()
+    }
+    const session: CustomerSession = JSON.parse(cookie.value)
+    return session?.authenticated ? session : null
+  } catch { return null }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,23 +38,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Try owner auth first, then customer auth
-    let session = null
-    try {
-      session = await authService.getSession()
-    } catch {
-      // Not an owner session, try customer
+    // Try owner session first, then customer session
+    let session: { authenticated: boolean } | null = await getOwnerSession()
+    if (!session?.authenticated) {
+      session = await getCustomerSessionLocal()
     }
 
-    if (!session) {
-      try {
-        session = await getCustomerSession()
-      } catch {
-        // Not authenticated at all
-      }
-    }
-
-    if (!session) {
+    if (!session?.authenticated) {
       return NextResponse.json(
         { success: false, error: 'Not authenticated' },
         { status: 401 }

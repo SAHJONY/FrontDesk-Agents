@@ -164,7 +164,7 @@ export function getModelInfo(modelId: string): typeof OPENAI_MODELS[number] | un
   return OPENAI_MODELS.find(m => m.id === modelId)
 }
 
-export default {
+const openaiExports = {
   initializeOpenAI,
   isConfigured,
   getAPIKey,
@@ -175,6 +175,8 @@ export default {
   getModelInfo,
   OPENAI_MODELS,
 }
+export default openaiExports
+
 export function getOpenAIModels() {
   return OPENAI_MODELS.map(m => ({ ...m, provider: 'openai' as const }))
 }

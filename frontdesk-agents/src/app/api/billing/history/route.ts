@@ -6,8 +6,13 @@ import { getBillingHistory } from '@/lib/supabase'
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getCustomerSession()
-    if (!session) {
+    let session
+    try {
+      session = await getCustomerSession()
+    } catch {
+      session = null
+    }
+    if (!session?.authenticated) {
       return NextResponse.json(
         { success: false, error: 'Not authenticated' },
         { status: 401 }

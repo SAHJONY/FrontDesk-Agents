@@ -9,6 +9,7 @@ import {
   AlertTriangle, CheckCircle, Zap, Award, ArrowUp, ArrowDown,
   XCircle, ChevronRight, ChevronUp, ChevronDown, Star, Search, Filter,
   RefreshCw, Loader2, Mail, Receipt, Download, FileText, Clock, AlertCircle,
+  Brain, Cpu, Shield, Radio, GitBranch, ArrowUpRight, Key, Eye, Bell, AlertOctagon,
 } from 'lucide-react'
 import HermesChat from './HermesChat'
 import {
@@ -144,6 +145,35 @@ export default function OwnerDashboard() {
   const [sendingState, setSendingState] = useState<Record<string, { status: "idle" | "sending" }>>({})
   const [confirmSendId, setConfirmSendId] = useState<string | null>(null)
   const [authChecking, setAuthChecking] = useState(true)
+  // AI Agentic state
+  const [aiOverview, setAiOverview] = useState<{
+    decisions: Array<{
+      id: string; timestamp: string; action: string; agent: string;
+      context: string; result: string; reasoning: string;
+      severity: 'critical' | 'high' | 'medium' | 'low'
+      acknowledged: boolean; resolved: boolean; outcome?: string
+    }>
+    modelStatuses: Array<{
+      provider: string; model: string; status: string; latencyMs: number;
+      requestsPerMinute: number; healthScore: number; isPrimary: boolean;
+      fallbackOf: string | null
+    }>
+    selfHealing: {
+      overall: 'healthy' | 'degraded' | 'critical'
+      anomaliesDetected: number; autoRemediated: number; pendingAlerts: number;
+      uptimePercent: number; avgResponseTime: number;
+      activeAlerts: Array<{
+        id: string; type: string; severity: string; message: string;
+        timestamp: string; acknowledged: boolean
+      }>
+    }
+    metrics: {
+      totalDecisions: number; autonomousActions: number; avgConfidence: number;
+      activeAgents: number; modelSwitchEvents: number
+    }
+  } | null>(null)
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiError, setAiError] = useState<string | null>(null)
   const [harnessRunning, setHarnessRunning] = useState(false)
   const [harnessStatus, setHarnessStatus] = useState<{
     running: boolean
@@ -188,6 +218,20 @@ export default function OwnerDashboard() {
     }
   }, [])
 
+  // AI Agentic data fetcher
+  const fetchAIOverview = useCallback(async () => {
+    setAiLoading(true)
+    setAiError(null)
+    try {
+      const res = await fetch('/api/ai/decisions?limit=20')
+      if (!res.ok) throw new Error(`AI API ${res.status}`)
+      const json = await res.json()
+      setAiOverview(json)
+    } catch (err) {
+      setAiError(err instanceof Error ? err.message : 'Failed to load AI data')
+    } finally { setAiLoading(false) }
+  }, [])
+
   // Auth guard - check session on mount
   useEffect(() => {
     async function checkAuth() {
@@ -200,6 +244,7 @@ export default function OwnerDashboard() {
           setAuthChecking(false)
           fetchDashboard()
           fetchHarnessStatus()
+          fetchAIOverview()
         }
       } catch {
         router.push('/owner/login')
@@ -214,6 +259,12 @@ export default function OwnerDashboard() {
     const interval = setInterval(fetchHarnessStatus, 30000)
     return () => clearInterval(interval)
   }, [fetchHarnessStatus])
+
+  // Poll AI overview every 15 seconds for real-time updates
+  useEffect(() => {
+    const interval = setInterval(fetchAIOverview, 15000)
+    return () => clearInterval(interval)
+  }, [fetchAIOverview])
 
   const fetchDashboard = useCallback(async () => {
     setLoading(true)
@@ -278,6 +329,7 @@ export default function OwnerDashboard() {
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'businesses', label: 'Businesses', icon: Building2 },
     { id: 'languages', label: 'Languages', icon: Languages },
+    { id: 'ai', label: 'AI Agents', icon: Brain },
     { id: 'billing', label: 'Billing', icon: Receipt },
     { id: 'settings', label: 'Settings', icon: Settings },
   ]
@@ -1073,6 +1125,183 @@ export default function OwnerDashboard() {
               ))}
             </div>
           </div>
+        )}
+
+        {/* ============ AI AGENTS TAB ============ */}
+        {activeTab === 'ai' && (
+          <>
+            {/* AI Metrics Overview */}
+            {aiOverview?.metrics && (
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div className="p-5 rounded-2xl bg-white/5 border border-white/10">
+                  <div className="text-2xl font-bold text-cyan-400 mb-1">{aiOverview.metrics.totalDecisions}</div>
+                  <div className="text-sm text-gray-400">Total Decisions</div>
+                </div>
+                <div className="p-5 rounded-2xl bg-white/5 border border-white/10">
+                  <div className="text-2xl font-bold text-emerald-400 mb-1">{aiOverview.metrics.autonomousActions}</div>
+                  <div className="text-sm text-gray-400">Autonomous Actions</div>
+                </div>
+                <div className="p-5 rounded-2xl bg-white/5 border border-white/10">
+                  <div className="text-2xl font-bold text-amber-400 mb-1">{(aiOverview.metrics.avgConfidence * 100).toFixed(0)}%</div>
+                  <div className="text-sm text-gray-400">Avg Confidence</div>
+                </div>
+                <div className="p-5 rounded-2xl bg-white/5 border border-white/10">
+                  <div className="text-2xl font-bold text-purple-400 mb-1">{aiOverview.metrics.modelSwitchEvents}</div>
+                  <div className="text-sm text-gray-400">Model Switch Events</div>
+                </div>
+              </div>
+            )}
+
+            {/* Model Router Status */}
+            <div className="mb-8">
+              <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                <Cpu className="w-5 h-5 text-cyan-400" />
+                Model Router Status
+              </h3>
+              {aiLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
+                </div>
+              ) : aiError ? (
+                <div className="text-center py-8 text-red-400 text-sm">{aiError}</div>
+              ) : aiOverview?.modelStatuses && aiOverview.modelStatuses.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {aiOverview.modelStatuses.map((model) => (
+                    <div key={`${model.provider}-${model.model}`} className="p-4 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 transition-all">
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <div className="font-semibold text-white">{model.provider}</div>
+                          <div className="text-xs text-gray-400 font-mono">{model.model}</div>
+                        </div>
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                          model.status === 'active' ? 'bg-emerald-500/20 text-emerald-400' :
+                          model.status === 'degraded' ? 'bg-amber-500/20 text-amber-400' :
+                          model.status === 'down' ? 'bg-red-500/20 text-red-400' :
+                          'bg-gray-500/20 text-gray-400'
+                        }`}>
+                          {model.status}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                          <div className="text-gray-400 text-xs">Latency</div>
+                          <div className="font-medium">{model.latencyMs}ms</div>
+                        </div>
+                        <div>
+                          <div className="text-gray-400 text-xs">Health</div>
+                          <div className={`font-medium ${model.healthScore >= 0.9 ? 'text-emerald-400' : model.healthScore >= 0.7 ? 'text-amber-400' : 'text-red-400'}`}>
+                            {(model.healthScore * 100).toFixed(0)}%
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-gray-400 text-xs">RPM</div>
+                          <div className="font-medium">{model.requestsPerMinute}</div>
+                        </div>
+                        {model.isPrimary && (
+                          <span className="text-xs text-cyan-400 col-span-2">Primary</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500 text-sm">No model statuses available</div>
+              )}
+            </div>
+
+            {/* Decision History + Self-Healing side by side */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Decision History */}
+              <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
+                <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                  <GitBranch className="w-5 h-5 text-cyan-400" />
+                  Decision History
+                </h3>
+                {aiOverview?.decisions && aiOverview.decisions.length > 0 ? (
+                  <div className="space-y-3 max-h-80 overflow-y-auto">
+                    {aiOverview.decisions.map((decision) => (
+                      <div key={decision.id} className="p-3 bg-white/[0.02] rounded-lg border border-white/5">
+                        <div className="flex items-start justify-between mb-1">
+                          <span className="text-sm font-medium text-white">{decision.result || decision.action}</span>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                            decision.severity === 'critical' ? 'bg-red-500/20 text-red-400' :
+                            decision.severity === 'high' ? 'bg-amber-500/20 text-amber-400' :
+                            decision.severity === 'medium' ? 'bg-blue-500/20 text-blue-400' :
+                            'bg-gray-500/20 text-gray-400'
+                          }`}>
+                            {decision.severity}
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-400 mb-1">{decision.agent}</div>
+                        <div className="text-xs text-gray-500">{decision.reasoning}</div>
+                        <div className="text-xs text-gray-600 mt-1">{new Date(decision.timestamp).toLocaleString()}</div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500 text-sm">No decision history available</div>
+                )}
+              </div>
+
+              {/* Self-Healing Monitor */}
+              <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
+                <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                  <Shield className="w-5 h-5 text-emerald-400" />
+                  Self-Healing Monitor
+                </h3>
+                {aiOverview?.selfHealing ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        aiOverview.selfHealing.overall === 'healthy' ? 'bg-emerald-500/20 text-emerald-400' :
+                        aiOverview.selfHealing.overall === 'degraded' ? 'bg-amber-500/20 text-amber-400' :
+                        'bg-red-500/20 text-red-400'
+                      }`}>
+                        {aiOverview.selfHealing.overall}
+                      </span>
+                      <span className="text-sm text-gray-400">System Health</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="p-3 bg-white/[0.03] rounded-lg">
+                        <div className="text-lg font-bold text-amber-400">{aiOverview.selfHealing.anomaliesDetected}</div>
+                        <div className="text-xs text-gray-400">Anomalies Detected</div>
+                      </div>
+                      <div className="p-3 bg-white/[0.03] rounded-lg">
+                        <div className="text-lg font-bold text-emerald-400">{aiOverview.selfHealing.autoRemediated}</div>
+                        <div className="text-xs text-gray-400">Auto-Remediated</div>
+                      </div>
+                      <div className="p-3 bg-white/[0.03] rounded-lg">
+                        <div className="text-lg font-bold text-cyan-400">{aiOverview.selfHealing.uptimePercent?.toFixed(1)}%</div>
+                        <div className="text-xs text-gray-400">Uptime</div>
+                      </div>
+                      <div className="p-3 bg-white/[0.03] rounded-lg">
+                        <div className="text-lg font-bold text-white">{aiOverview.selfHealing.avgResponseTime}ms</div>
+                        <div className="text-xs text-gray-400">Avg Response</div>
+                      </div>
+                    </div>
+                    {aiOverview.selfHealing.activeAlerts && aiOverview.selfHealing.activeAlerts.length > 0 && (
+                      <div>
+                        <div className="text-sm font-medium text-gray-300 mb-2">Active Alerts</div>
+                        <div className="space-y-2">
+                          {aiOverview.selfHealing.activeAlerts.map((alert) => (
+                            <div key={alert.id} className="p-3 bg-amber-500/5 border border-amber-500/20 rounded-lg">
+                              <div className="flex items-center gap-2 mb-1">
+                                <AlertOctagon className="w-4 h-4 text-amber-400" />
+                                <span className="text-sm font-medium text-amber-400">{alert.type}</span>
+                              </div>
+                              <div className="text-xs text-gray-400">{alert.message}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500 text-sm">Self-healing data not available</div>
+                )}
+              </div>
+            </div>
+          </>
         )}
 
         {/* ============ BILLING TAB ============ */}

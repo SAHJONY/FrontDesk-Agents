@@ -1,8 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
+// ─── Mocks ────────────────────────────────────────────────────────────────────
+
 const mockSendInvoice = vi.hoisted(() => vi.fn())
-const mockGetSession = vi.hoisted(() => vi.fn())
+const mockGetOwnerSession = vi.hoisted(() => vi.fn())
 const mockGetCustomerSession = vi.hoisted(() => vi.fn())
+const mockCookiesGet = vi.hoisted(() => vi.fn())
 
 vi.mock('@/lib/stripe', () => ({
   stripe: {
@@ -16,57 +19,57 @@ vi.mock('@/lib/stripe', () => ({
   },
 }))
 
-vi.mock('@/lib/auth', () => ({
-  authService: {
-    getSession: mockGetSession,
-  },
+vi.mock('@/lib/owner-session', () => ({
+  getOwnerSession: mockGetOwnerSession,
 }))
 
 vi.mock('@/lib/customer-auth', () => ({
   getCustomerSession: mockGetCustomerSession,
 }))
 
+vi.mock('next/headers', () => ({
+  cookies: vi.fn(() => ({
+    get: mockCookiesGet,
+  })),
+}))
+
 vi.mock('next/server', () => {
   return {
     NextRequest: vi.fn(),
     NextResponse: {
-      json: vi.fn((data, init) => {
-        const body = JSON.stringify(data)
-        return {
-          status: init?.status ?? 200,
-          async text() { return body },
-          async json() { return data },
-        }
-      }),
+      json: vi.fn((data, init) => ({
+        status: init?.status ?? 200,
+        async json() { return data },
+      })),
     },
   }
 })
 
 import { POST } from '@/app/api/billing/send-invoice/route'
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 function createRequest(body: Record<string, unknown>): any {
   return { json: async () => body }
 }
 
-async function parseResponse(res: { text: () => Promise<string>; status: number }) {
-  const text = await res.text()
-  return { data: JSON.parse(text), status: res.status }
-}
+// ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe('POST /api/billing/send-invoice', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockSendInvoice.mockResolvedValue(undefined)
-    mockGetSession.mockRejectedValue(new Error('No owner session'))
-    mockGetCustomerSession.mockResolvedValue({ id: 'cust_123' })
+    mockGetOwnerSession.mockResolvedValue(null)
+    mockGetCustomerSession.mockResolvedValue(null)
+    mockCookiesGet.mockReturnValue(null)
   })
 
   describe('input validation', () => {
     it('returns 400 when invoiceId is missing', async () => {
       const req = createRequest({})
       const res = await POST(req)
-      const { data, status } = await parseResponse(res)
-      expect(status).toBe(400)
+      const data = await res.json()
+      expect(res.status).toBe(400)
       expect(data.success).toBe(false)
       expect(data.error).toContain('invoiceId')
     })
@@ -74,8 +77,8 @@ describe('POST /api/billing/send-invoice', () => {
     it('returns 400 when invoiceId is not a string', async () => {
       const req = createRequest({ invoiceId: 123 })
       const res = await POST(req)
-      const { data, status } = await parseResponse(res)
-      expect(status).toBe(400)
+      const data = await res.json()
+      expect(res.status).toBe(400)
       expect(data.success).toBe(false)
       expect(data.error).toContain('invoiceId')
     })
@@ -83,42 +86,60 @@ describe('POST /api/billing/send-invoice', () => {
     it('returns 400 when invoiceId is empty', async () => {
       const req = createRequest({ invoiceId: '' })
       const res = await POST(req)
-      const { data, status } = await parseResponse(res)
-      expect(status).toBe(400)
+      const data = await res.json()
+      expect(res.status).toBe(400)
       expect(data.success).toBe(false)
     })
   })
 
   describe('authentication', () => {
     it('proceeds with owner auth when session exists', async () => {
-      mockGetSession.mockResolvedValue({ id: 'owner_1' })
+      mockGetOwnerSession.mockResolvedValue({ id: 'owner_1', authenticated: true })
       const req = createRequest({ invoiceId: 'in_abc123' })
       const res = await POST(req)
-      const { data, status } = await parseResponse(res)
-      expect(status).toBe(200)
+      const data = await res.json()
+      expect(res.status).toBe(200)
       expect(data.success).toBe(true)
       expect(mockGetCustomerSession).not.toHaveBeenCalled()
+      expect(mockCookiesGet).not.toHaveBeenCalled()
     })
 
-    it('falls back to customer auth when owner auth throws', async () => {
-      mockGetSession.mockRejectedValue(new Error('Not authenticated'))
-      mockGetCustomerSession.mockResolvedValue({ id: 'cust_456' })
+    it('falls back to customer auth when owner auth returns null', async () => {
+      // owner session is null, customer session is valid via cookie
+      mockGetOwnerSession.mockResolvedValue(null)
+      mockCookiesGet.mockReturnValue({
+        value: JSON.stringify({ id: 'cust_456', authenticated: true }),
+      })
       const req = createRequest({ invoiceId: 'in_abc123' })
       const res = await POST(req)
-      const { data, status } = await parseResponse(res)
-      expect(status).toBe(200)
+      const data = await res.json()
+      expect(res.status).toBe(200)
       expect(data.success).toBe(true)
-      expect(mockGetSession).toHaveBeenCalled()
+      expect(mockGetOwnerSession).toHaveBeenCalled()
+    })
+
+    it('falls back to customer auth when owner session is null and cookie not present', async () => {
+      // getOwnerSession returns null, getCustomerSessionLocal returns null (no cookie),
+      // so route falls back to getCustomerSession which returns a valid session
+      mockGetOwnerSession.mockResolvedValue(null)
+      mockCookiesGet.mockReturnValue(null) // no customer_session cookie
+      mockGetCustomerSession.mockResolvedValue({ id: 'cust_456', authenticated: true })
+      const req = createRequest({ invoiceId: 'in_abc123' })
+      const res = await POST(req)
+      const data = await res.json()
+      expect(res.status).toBe(200)
+      expect(data.success).toBe(true)
       expect(mockGetCustomerSession).toHaveBeenCalled()
     })
 
-    it('returns 401 when both auths fail', async () => {
-      mockGetSession.mockRejectedValue(new Error('Not authenticated'))
-      mockGetCustomerSession.mockRejectedValue(new Error('No session'))
+    it('returns 401 when both auth methods fail', async () => {
+      mockGetOwnerSession.mockResolvedValue(null)
+      mockCookiesGet.mockReturnValue(null)
+      mockGetCustomerSession.mockResolvedValue(null)
       const req = createRequest({ invoiceId: 'in_abc123' })
       const res = await POST(req)
-      const { data, status } = await parseResponse(res)
-      expect(status).toBe(401)
+      const data = await res.json()
+      expect(res.status).toBe(401)
       expect(data.success).toBe(false)
       expect(data.error).toBe('Not authenticated')
     })
@@ -126,14 +147,16 @@ describe('POST /api/billing/send-invoice', () => {
 
   describe('Stripe invoice sending', () => {
     it('returns success when Stripe sendInvoice succeeds', async () => {
+      mockGetOwnerSession.mockResolvedValue({ id: 'owner_1', authenticated: true })
       const req = createRequest({ invoiceId: 'in_abc123' })
       const res = await POST(req)
-      const { data, status } = await parseResponse(res)
-      expect(status).toBe(200)
+      const data = await res.json()
+      expect(res.status).toBe(200)
       expect(data.success).toBe(true)
     })
 
     it('passes the invoiceId to Stripe correctly', async () => {
+      mockGetOwnerSession.mockResolvedValue({ id: 'owner_1', authenticated: true })
       const req = createRequest({ invoiceId: 'in_xyz789' })
       await POST(req)
       expect(mockSendInvoice).toHaveBeenCalledTimes(1)
@@ -142,14 +165,18 @@ describe('POST /api/billing/send-invoice', () => {
   })
 
   describe('Stripe error handling', () => {
+    beforeEach(() => {
+      mockGetOwnerSession.mockResolvedValue({ id: 'owner_1', authenticated: true })
+    })
+
     it('handles already-sent invoice', async () => {
       const err = new Error('This invoice has already been sent.') as Error & { type: string }
       err.type = 'StripeInvalidRequestError'
       mockSendInvoice.mockRejectedValue(err)
       const req = createRequest({ invoiceId: 'in_abc123' })
       const res = await POST(req)
-      const { data, status } = await parseResponse(res)
-      expect(status).toBe(400)
+      const data = await res.json()
+      expect(res.status).toBe(400)
       expect(data.error).toContain('already been sent')
     })
 
@@ -159,8 +186,8 @@ describe('POST /api/billing/send-invoice', () => {
       mockSendInvoice.mockRejectedValue(err)
       const req = createRequest({ invoiceId: 'in_abc123' })
       const res = await POST(req)
-      const { data, status } = await parseResponse(res)
-      expect(status).toBe(400)
+      const data = await res.json()
+      expect(res.status).toBe(400)
       expect(data.error).toContain('finalized or paid')
     })
 
@@ -170,8 +197,8 @@ describe('POST /api/billing/send-invoice', () => {
       mockSendInvoice.mockRejectedValue(err)
       const req = createRequest({ invoiceId: 'in_abc123' })
       const res = await POST(req)
-      const { data, status } = await parseResponse(res)
-      expect(status).toBe(400)
+      const data = await res.json()
+      expect(res.status).toBe(400)
       expect(data.error).toContain('finalized or paid')
     })
 
@@ -181,8 +208,8 @@ describe('POST /api/billing/send-invoice', () => {
       mockSendInvoice.mockRejectedValue(err)
       const req = createRequest({ invoiceId: 'in_abc123' })
       const res = await POST(req)
-      const { data, status } = await parseResponse(res)
-      expect(status).toBe(400)
+      const data = await res.json()
+      expect(res.status).toBe(400)
       expect(data.error).toContain('Stripe error')
     })
 
@@ -190,9 +217,9 @@ describe('POST /api/billing/send-invoice', () => {
       mockSendInvoice.mockRejectedValue(new Error('Something went wrong'))
       const req = createRequest({ invoiceId: 'in_abc123' })
       const res = await POST(req)
-      const { data, status } = await parseResponse(res)
-      expect(status).toBe(500)
+      const data = await res.json()
+      expect(res.status).toBe(500)
       expect(data.error).toContain('try again')
     })
   })
-})
+})

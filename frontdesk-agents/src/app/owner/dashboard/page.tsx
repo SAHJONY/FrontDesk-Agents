@@ -18,6 +18,7 @@ import {
 import { useToast } from "@/components/ToastProvider"
 import type { BillingRecordWithCustomer } from "@/lib/supabase"
 import SendInvoiceDialog from "@/components/SendInvoiceDialog"
+import OwnerBillingContent from "@/components/OwnerBillingContent"
 
 const LANGUAGES: Record<string, { name: string; nativeName: string; flag: string }> = {
   en: { name: 'English', nativeName: 'English', flag: '🇺🇸' },
@@ -1027,7 +1028,7 @@ export default function OwnerDashboard() {
 
         {/* ============ BILLING TAB ============ */}
         {activeTab === 'billing' && (
-          <OwnerBillingContent />
+          <OwnerBillingContent embedded />
         )}
 
         {/* ============ SETTINGS TAB ============ */}
@@ -1339,155 +1340,6 @@ function formatDateLabel(dateStr: string): string {
   } catch {
     return dateStr
   }
-}
-
-function OwnerBillingContent() {
-  // Inline billing content to avoid iframe issues
-  const [records, setRecords] = useState<BillingRecordWithCustomer[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState<string>('all')
-  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest')
-  const [expandedId, setExpandedId] = useState<string | null>(null)
-  const [page, setPage] = useState(1)
-  const [hasMore, setHasMore] = useState(false)
-  const [sendingState, setSendingState] = useState<Record<string, { status: 'idle' | 'sending' }>>({})
-  const [confirmSendId, setConfirmSendId] = useState<string | null>(null)
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
-  const { success, error: toastError } = useToast()
-
-  const fetchBillingHistory = useCallback(async (pageNum = 1) => {
-    setLoading(true)
-    setError(null)
-    try {
-      const res = await fetch(`/api/owner/billing?page=${pageNum}&limit=50`)
-      const json = await res.json()
-      if (json.success) {
-        if (pageNum === 1) setRecords(json.data)
-        else setRecords((prev) => [...prev, ...json.data])
-        setHasMore(json.pagination?.hasMore ?? false)
-        setPage(pageNum)
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => { fetchBillingHistory(1) }, [fetchBillingHistory])
-
-  const sendInvoice = useCallback(async (rec: { id: string; invoice_id: string; amount: number; currency: string }) => {
-    setSendingState((prev) => ({ ...prev, [rec.id]: { status: 'sending' } }))
-    try {
-      const res = await fetch('/api/billing/send-invoice', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ invoiceId: rec.invoice_id }),
-      })
-      const json = await res.json()
-      setSendingState((prev) => ({ ...prev, [rec.id]: { status: 'idle' } }))
-      if (json.success) {
-        setConfirmSendId(null)
-        success('Invoice Sent', 'Invoice ' + rec.invoice_id + ' has been emailed.')
-      } else {
-        toastError('Sending Failed', json.error || 'Failed to send invoice.')
-      }
-    } catch {
-      setSendingState((prev) => ({ ...prev, [rec.id]: { status: 'idle' } }))
-      toastError('Network Error', 'Please try again.')
-    }
-  }, [success, toastError])
-
-  const filteredRecords = records.filter(r => {
-    if (statusFilter !== 'all' && r.status !== statusFilter) return false
-    if (startDate && new Date(r.created_at) < new Date(startDate)) return false
-    if (endDate) { const e = new Date(endDate); e.setHours(23,59,59,999); if (new Date(r.created_at) > e) return false }
-    if (searchQuery) { const q = searchQuery.toLowerCase(); return r.description.toLowerCase().includes(q) || r.invoice_id.toLowerCase().includes(q) || (r.customer_name || '').toLowerCase().includes(q) || (r.business_name || '').toLowerCase().includes(q) }
-    return true
-  }).sort((a, b) => sortOrder === 'newest' ? -new Date(a.created_at).getTime() + new Date(b.created_at).getTime() : new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
-
-  const totalRevenue = records.filter(r => r.status === 'succeeded').reduce((s, r) => s + r.amount, 0)
-  const failedCount = records.filter(r => r.status === 'failed').length
-
-  function formatCurrency(amount: number, currency: string) {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency.toUpperCase() }).format(amount / 100)
-  }
-  function formatDate(dateStr: string) {
-    return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
-  }
-  function csvEscape(val: unknown): string { const s = String(val ?? ''); if (s.includes(',') || s.includes('"') || s.includes('\n')) return `"${s.replace(/"/g, '""')}"`; return s }
-
-  function exportCSV() {
-    const headers = ['Date', 'Customer', 'Business', 'Email', 'Description', 'Amount', 'Currency', 'Status', 'Invoice ID']
-    const rows = filteredRecords.map(r => [formatDate(r.created_at), r.customer_name || '', r.business_name || '', r.customer_email || '', r.description, (r.amount / 100).toFixed(2), r.currency.toUpperCase(), r.status, r.invoice_id].map(csvEscape))
-    const csv = [headers.map(csvEscape).join(','), ...rows.join('\n')].join('\n')
-    const blob = new Blob([csv], { type: 'text/csv' }); const url = URL.createObjectURL(blob)
-    const a = document.createElement('a'); a.href = url; a.download = 'billing-history.csv'; a.click()
-    URL.revokeObjectURL(url)
-  }
-
-  if (loading && records.length === 0) return <div className="flex items-center justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>
-  if (error && records.length === 0) return <div className="text-center py-16 text-cinematic-red">{error}</div>
-
-  return (
-    <div>
-      {confirmSendId && (() => { const rec = records.find(r => r.id === confirmSendId); return rec ? <SendInvoiceDialog record={rec} isSending={sendingState[confirmSendId]?.status === 'sending'} onClose={() => setConfirmSendId(null)} onSend={() => sendInvoice(rec)} /> : null })()}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="p-4 rounded-xl bg-white/5 border border-white/10"><div className="text-xs text-gray-500 uppercase tracking-wider">Total Revenue</div><div className="text-2xl font-bold text-emerald-400">{formatCurrency(totalRevenue, 'usd')}</div></div>
-        <div className="p-4 rounded-xl bg-white/5 border border-white/10"><div className="text-xs text-gray-500 uppercase tracking-wider">Transactions</div><div className="text-2xl font-bold">{records.length}</div></div>
-        <div className="p-4 rounded-xl bg-white/5 border border-white/10"><div className="text-xs text-gray-500 uppercase tracking-wider">Failed</div><div className="text-2xl font-bold text-cinematic-red">{failedCount}</div></div>
-        <div className="p-4 rounded-xl bg-white/5 border border-white/10"><div className="text-xs text-gray-500 uppercase tracking-wider">Unique Customers</div><div className="text-2xl font-bold">{new Set(records.map(r => r.customer_id)).size}</div></div>
-      </div>
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <div className="relative flex-1"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" /><input type="text" placeholder="Search..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-aurora-cyan/40" /></div>
-        <div className="flex gap-2 flex-wrap">
-          {(['all', 'succeeded', 'failed', 'refunded', 'pending'] as const).map(s => (
-            <button key={s} onClick={() => setStatusFilter(s)} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${statusFilter === s ? 'bg-aurora-cyan text-white animate-glow' : 'bg-gray-800/50 text-gray-400 border border-gray-700/50'}`}>{s === 'all' ? 'All' : s.charAt(0).toUpperCase() + s.slice(1)}</button>
-          ))}
-        </div>
-        <button onClick={exportCSV} disabled={filteredRecords.length === 0} className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-gray-400 hover:text-white disabled:opacity-40"><Download className="w-4 h-4" />Export</button>
-      </div>
-      <AnimatePresence mode="popLayout">
-        {filteredRecords.length === 0 ? (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16 text-gray-500">{records.length === 0 ? 'No billing records yet' : 'No records match your filters'}</motion.div>
-        ) : (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
-            {filteredRecords.map((record, index) => (
-              <motion.div key={record.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(index * 0.03, 0.3) }} className="rounded-xl bg-white/[0.03] border border-white/[0.06] overflow-hidden hover:bg-white/[0.05] transition-all">
-                <button onClick={() => setExpandedId(expandedId === record.id ? null : record.id)} className="w-full flex items-center gap-4 p-4 hover:bg-white/[0.05] transition-all text-left">
-                  <div className={`p-2 rounded-lg border ${record.status === 'succeeded' ? 'text-green-400 border-green-500/20' : record.status === 'failed' ? 'text-cinematic-red border-red-500/20' : record.status === 'refunded' ? 'text-hollywood-gold border-yellow-500/20' : 'text-aurora-cyan border-blue-500/20'}`}>
-                    {record.status === 'succeeded' ? <CheckCircle className="w-5 h-5" /> : record.status === 'failed' ? <XCircle className="w-5 h-5" /> : record.status === 'refunded' ? <Clock className="w-5 h-5" /> : <Loader2 className="w-5 h-5 animate-spin" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5"><span className="text-sm font-medium text-white truncate">{record.description}</span><span className={`inline-block text-xs px-2 py-0.5 rounded-full border capitalize ${record.status === 'succeeded' ? 'text-green-400 border-green-500/20 bg-green-500/5' : record.status === 'failed' ? 'text-cinematic-red border-red-500/20 bg-red-500/5' : 'text-aurora-cyan border-blue-500/20'}`}>{record.status}</span></div>
-                    <div className="flex items-center gap-3 text-xs text-gray-500"><span>{record.business_name || record.customer_name || 'Unknown'}</span><span>{formatDate(record.created_at)}</span></div>
-                  </div>
-                  <div className="text-right"><p className="text-sm font-semibold text-white">{formatCurrency(record.amount, record.currency)}</p></div>
-                  {expandedId === record.id ? <ChevronUp className="w-4 h-4 text-gray-500 shrink-0" /> : <ChevronDown className="w-4 h-4 text-gray-500 shrink-0" />}
-                </button>
-                <AnimatePresence>{expandedId === record.id && (
-                  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                    <div className="px-4 pb-4 pt-2 border-t border-gray-700/20 grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-                      <div><span className="text-gray-500 block text-xs">Invoice ID</span><span className="text-gray-300 font-mono text-xs">{record.invoice_id}</span></div>
-                      {record.subscription_id && <div><span className="text-gray-500 block text-xs">Subscription</span><span className="text-gray-300">{record.subscription_id}</span></div>}
-                      <div><span className="text-gray-500 block text-xs">Customer ID</span><span className="text-gray-300">{record.customer_id}</span></div>
-                      {record.business_name && <div><span className="text-gray-500 block text-xs">Business</span><span className="text-gray-300">{record.business_name}</span></div>}
-                      {record.customer_email && <div><span className="text-gray-500 block text-xs">Email</span><span className="text-gray-300">{record.customer_email}</span></div>}
-                      {record.invoice_pdf_url && <div className="col-span-full"><a href={record.invoice_pdf_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-aurora-cyan hover:text-blue-300 text-xs"><FileText className="w-3.5 h-3.5" />View Invoice PDF</a></div>}
-                    </div>
-                  </motion.div>
-                )}</AnimatePresence>
-              </motion.div>
-            ))}
-            {hasMore && <div className="text-center pt-4"><button onClick={() => fetchBillingHistory(page + 1)} disabled={loading} className="px-6 py-2.5 bg-gray-800/50 border border-gray-700/50 rounded-lg text-sm text-gray-400 hover:text-white disabled:opacity-50">{loading ? <Loader2 className="w-4 h-4 animate-spin inline" /> : 'Load More'}</button></div>}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  )
 }
 
 function MetricCard({

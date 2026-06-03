@@ -80,7 +80,12 @@ export async function GET() {
   try {
     ensureSeeded()
 
-    const metrics = metricsEngine.getMetrics()
+    const baseMetrics = metricsEngine.getMetrics()
+    const healthChecks = metricsEngine.evaluateHealth()
+    const metrics = {
+      ...baseMetrics,
+      evaluations: healthChecks.map(h => ({ metric: h.metric, status: h.passing ? 'healthy' : 'warning', message: `${h.current.toFixed(1)} / target ${h.target}` })),
+    }
     const sales = {
       pipeline: salesEngine.getPipeline(),
       salesMetrics: salesEngine.getMetrics(),

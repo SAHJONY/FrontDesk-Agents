@@ -21,146 +21,7 @@ import { useTranslation, SUPPORTED_LANGUAGES } from '@/lib/useTranslation'
 import type { BillingRecordWithCustomer } from "@/lib/supabase"
 import SendInvoiceDialog from "@/components/SendInvoiceDialog"
 import OwnerBillingContent from "@/components/OwnerBillingContent"
-
-function LanguagePreviewSwitcher() {
-  const { language: sessionLang, setLanguage, t } = useTranslation()
-  const [previewLang, setPreviewLang] = useState<string | null>(null)
-  const [isExpanded, setIsExpanded] = useState(false)
-
-  const activeLang = previewLang || sessionLang
-  const activeLabel = SUPPORTED_LANGUAGES.find(l => l.code === activeLang)
-  const sessionLabel = SUPPORTED_LANGUAGES.find(l => l.code === sessionLang)
-
-  const selectLanguage = (code: string) => {
-    setLanguage(code as any)
-    setPreviewLang(null)
-    setIsExpanded(false)
-  }
-
-  const applyPreview = (code: string) => {
-    // Switch to a new language (persists to localStorage via setLanguage).
-    // previewLang tracks the switch so we can offer a "Reset" button.
-    setLanguage(code as any)
-    setPreviewLang(code)
-    setIsExpanded(false)
-  }
-
-  const resetToSession = () => {
-    setLanguage(sessionLang as any)
-    setPreviewLang(null)
-    setIsExpanded(false)
-  }
-
-  return (
-    <div className="relative">
-      {/* Preview trigger button */}
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-          previewLang
-            ? 'bg-gradient-to-r from-amber-500/20 to-amber-400/10 border border-amber-500/30 text-amber-400 hover:border-amber-500/50'
-            : 'bg-white/10 border border-white/20 text-gray-300 hover:bg-white/15 hover:text-white'
-        }`}
-      >
-        <Globe className="w-4 h-4" />
-        <span>{activeLabel?.flag} {activeLabel?.name}</span>
-        {previewLang && (
-          <span className="ml-1 px-1.5 py-0.5 rounded text-[10px] bg-amber-500/30 text-amber-300 font-bold uppercase tracking-wide">
-            Preview
-          </span>
-        )}
-        <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
-      </button>
-
-      {/* Dropdown panel */}
-      <AnimatePresence>
-        {isExpanded && (
-          <>
-            {/* Backdrop to close */}
-            <div className="fixed inset-0 z-40" onClick={() => setIsExpanded(false)} />
-            <motion.div
-              initial={{ opacity: 0, y: -8, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -8, scale: 0.96 }}
-              transition={{ duration: 0.15 }}
-              className="absolute right-0 top-full mt-2 w-64 bg-gray-900 border border-white/15 rounded-xl shadow-2xl z-50 overflow-hidden"
-            >
-              <div className="p-3 border-b border-white/10">
-                <p className="text-xs text-gray-400 font-medium">Preview Language (no persistence)</p>
-              </div>
-              <div className="p-1.5 max-h-64 overflow-y-auto">
-                {SUPPORTED_LANGUAGES.map((lang) => {
-                  const isActive = lang.code === activeLang
-                  const isPreview = lang.code === previewLang
-                  const isSession = lang.code === sessionLang
-                  return (
-                    <button
-                      key={lang.code}
-                      onClick={() => isSession ? resetToSession() : applyPreview(lang.code)}
-                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-150 ${
-                        isActive
-                          ? 'bg-aurora-cyan/15 text-aurora-cyan'
-                          : 'text-gray-300 hover:bg-white/8 hover:text-white'
-                      }`}
-                    >
-                      <span className="text-base">{lang.flag}</span>
-                      <span className="flex-1 text-left">{lang.name}</span>
-                      {isSession && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-gray-400">
-                          Session
-                        </span>
-                      )}
-                      {isPreview && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400">
-                          Preview
-                        </span>
-                      )}
-                      {isActive && !isPreview && !isSession && (
-                        <span className="text-amber-400 text-xs">Active</span>
-                      )}
-                    </button>
-                  )
-                })}
-              </div>
-              {previewLang && (
-                <div className="p-2 border-t border-white/10">
-                  <button
-                    onClick={resetToSession}
-                    className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white transition-colors"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" />
-                    Reset to session ({sessionLabel?.flag} {sessionLabel?.name})
-                  </button>
-                </div>
-              )}
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-    </div>
-  )
-}
-
-// Standalone language selector for the nav (uses session language only — no preview)
-function NavLanguageSelector() {
-  const { language: sessionLang, setLanguage } = useTranslation()
-  return (
-    <div className="flex items-center gap-2">
-      <Globe className="w-5 h-5 text-gray-400" />
-      <select
-        value={sessionLang}
-        onChange={(e) => setLanguage(e.target.value as any)}
-        className="flex-1 bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-aurora-cyan/50 text-white"
-      >
-        {SUPPORTED_LANGUAGES.map((lang) => (
-          <option key={lang.code} value={lang.code}>
-            {lang.flag} {lang.name}
-          </option>
-        ))}
-      </select>
-    </div>
-  )
-}
+import LanguagePreviewSwitcher from "@/components/LanguagePreviewSwitcher"
 
 interface DashboardData {
   metrics: {
@@ -550,7 +411,7 @@ export default function OwnerDashboard() {
           </div>
           <div className="flex items-center gap-3">
             {/* Language Preview Switcher for admin testing */}
-            <LanguagePreviewSwitcher />
+            <LanguagePreviewSwitcher subtitle="Preview Language (no persistence)" />
             <button
               className="md:hidden"
               onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -880,8 +741,8 @@ export default function OwnerDashboard() {
                   {t('System Health Checks')}
                 </h3>
                 <div className="space-y-3">
-                  {health.healthChecks.map((check, i) => (
-                    <div key={i} className="flex items-start gap-3 p-3 bg-white/[0.02] rounded-lg">
+                  {health.healthChecks.map((check) => (
+                    <div key={check.metric} className="flex items-start gap-3 p-3 bg-white/[0.02] rounded-lg">
                       {check.status === 'healthy' ? (
                         <CheckCircle className="w-5 h-5 text-emerald-400 mt-0.5 flex-shrink-0" />
                       ) : check.status === 'warning' ? (
@@ -1712,8 +1573,8 @@ function CustomerDetailModal({ customer, onClose, t }: {
                 {t('Recommended Actions')}
               </h4>
               <div className="space-y-2">
-                {customer.recommendedActions.map((action, i) => (
-                  <div key={i} className="flex items-start gap-2 text-sm">
+                {customer.recommendedActions.map((action, idx) => (
+                  <div key={`${customer.customerId}-action-${idx}`} className="flex items-start gap-2 text-sm">
                     <ChevronRight className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
                     <span className="text-gray-300">{action}</span>
                   </div>

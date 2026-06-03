@@ -429,7 +429,6 @@ export function getModelInfo(modelId: string): typeof NVIDIA_MODELS[number] | un
   return NVIDIA_MODELS.find(m => m.id === modelId)
 }
 
-export { NVIDIA_MODELS, MODEL_CATEGORIES, getModelsByCategory, getVerifiedModels }
 
 export default {
   initializeNVIDIA,
@@ -454,4 +453,7 @@ export default {
   recordModelFailure,
   NVIDIA_MODELS,
   MODEL_CATEGORIES,
+}
+export function getNvidiaModels() {
+  return NVIDIA_MODELS.map(m => ({ ...m, provider: 'nvidia' as const }))
 }

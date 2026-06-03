@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { MODEL_CATEGORIES, getModelsByCategory } from '@/lib/nvidia-integration'
 import { getAvailableModels as getOpenAIModels } from '@/lib/openai-integration'
-import { getAvailableModels as getClaudeModels } from '@/lib/anthropic-integration'
+import { getClaudeModels } from '@/lib/anthropic-integration'
 
 // Helper to parse JSON response once
 function parseResponse(response: string): { parsed: any; isJSON: boolean } {

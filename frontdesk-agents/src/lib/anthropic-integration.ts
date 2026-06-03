@@ -188,3 +188,6 @@ export default {
   getModelInfo,
   ANTHROPIC_MODELS,
 }
+export function getClaudeModels() {
+  return ANTHROPIC_MODELS.map(m => ({ ...m, provider: 'anthropic' as const }))
+}

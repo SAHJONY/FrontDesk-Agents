@@ -24,6 +24,7 @@ export interface CompletionOptions {
   frequencyPenalty?: number
   presencePenalty?: number
   stop?: string | string[]
+  response_format?: { type: 'json_object' | 'text' }
 }
 
 export interface OpenAIResponse {
@@ -89,6 +90,7 @@ export async function chat(
       frequency_penalty: options.frequencyPenalty,
       presence_penalty: options.presencePenalty,
       stop: options.stop,
+      response_format: options.response_format,
     }),
   })
 
@@ -172,4 +174,7 @@ export default {
   getAvailableModels,
   getModelInfo,
   OPENAI_MODELS,
+}
+export function getOpenAIModels() {
+  return OPENAI_MODELS.map(m => ({ ...m, provider: 'openai' as const }))
 }

@@ -2,6 +2,7 @@
 // Handles customer signup, login, logout with Supabase Auth
 
 import { createClient } from '@/lib/supabase-client'
+import { supabaseAdmin } from '@/lib/supabase'
 import { cookies } from 'next/headers'
 import type { Customer } from '@/lib/supabase'
 
@@ -50,20 +51,26 @@ export async function signUpCustomer(
       return { success: false, error: 'Failed to create user' }
     }
 
-    // Create customer record in database
-    const { data: customerData, error: customerError } = await supabase
-      .from('customers')
-      .insert({
-        id: authData.user.id,
-        email,
-        business_name: businessName,
-        owner_name: ownerName,
-        phone: '',
-        plan: 'starter',
-        status: 'trial'
-      })
-      .select()
-      .single()
+    // Create customer record in database — use admin client to bypass RLS
+    let customerData = null
+    let customerError = null
+    if (supabaseAdmin) {
+      const result = await supabaseAdmin
+        .from('customers')
+        .insert({
+          id: authData.user.id,
+          email,
+          business_name: businessName,
+          owner_name: ownerName,
+          phone: '',
+          plan: 'starter',
+          status: 'trial'
+        })
+        .select()
+        .single()
+      customerData = result.data
+      customerError = result.error
+    }
 
     if (customerError) {
       console.error('Customer creation error:', customerError)
@@ -120,12 +127,23 @@ export async function signInCustomer(
       return { success: false, error: 'Failed to sign in' }
     }
 
-    // Get customer record — use the customer record's actual ID (which may differ from auth user ID)
-    const { data: customerData, error: customerError } = await supabase
-      .from('customers')
-      .select('id, business_name, owner_name, plan')
-      .eq('email', authData.user.email || email)
-      .single()
+    // Get customer record — use admin client to bypass RLS during auth
+    // The customer record ID may differ from the auth user ID, so we look up by email
+    let customerData = null
+    let customerError = null
+    if (supabaseAdmin) {
+      const result = await supabaseAdmin
+        .from('customers')
+        .select('id, business_name, owner_name, plan')
+        .eq('email', authData.user.email || email)
+        .single()
+      customerData = result.data
+      customerError = result.error
+    }
+
+    if (customerError && customerError.code !== 'PGRST116') {
+      console.error('Customer fetch error:', customerError)
+    }
 
     if (customerError && customerError.code !== 'PGRST116') {
       console.error('Customer fetch error:', customerError)

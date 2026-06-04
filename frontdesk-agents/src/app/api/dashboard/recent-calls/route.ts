@@ -46,7 +46,15 @@ export async function GET() {
       formattedDuration: formatDuration(c.duration)
     }))
 
-    return NextResponse.json({ calls })
+    return NextResponse.json(
+      { calls },
+      {
+        headers: {
+          'Cache-Control': 'no-store, must-revalidate',
+          'Vary': 'cookie',
+        }
+      }
+    )
   } catch (error) {
     console.error('Dashboard recent calls error:', error)
     return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 })

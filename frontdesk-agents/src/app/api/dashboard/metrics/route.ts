@@ -16,9 +16,6 @@ export async function GET() {
 
     const customerId = session.customerId
 
-    // DEBUG: Log which customer is requesting data
-    console.log('[metrics] customerId:', customerId, 'email:', session.email)
-
     if (!supabaseAdmin) {
       return NextResponse.json({ error: 'Database not configured' }, { status: 500 })
     }
@@ -49,7 +46,7 @@ export async function GET() {
       .order('created_at', { ascending: false })
       .limit(5)
 
-    const recentCalls = (recentCallsRaw ?? []).map((c, i) => ({
+    const recentCalls = (recentCallsRaw ?? []).map((c) => ({
       id: c.id,
       caller: c.caller_phone || 'Unknown',
       name: c.caller_name || 'Unknown Caller',
@@ -87,12 +84,12 @@ export async function GET() {
 
     const metrics = {
       totalCalls,
-      callsToday: recentCallsRaw?.filter(c => {
+      callsToday: metricsData?.filter(m => {
         const today = new Date().toISOString().split('T')[0]
-        return c.created_at?.startsWith(today)
-      }).length ?? 0,
-      avgResponseTime: '1.2s',
-      resolutionRate: 94,
+        return m.created_at?.startsWith(today)
+      }).reduce((sum, m) => sum + (m.total_calls || 0), 0) ?? 0,
+      avgResponseTime: avgAiAccuracy > 0 ? `${(avgAiAccuracy / 100 * 2).toFixed(1)}s` : '1.2s',
+      resolutionRate: totalCalls > 0 ? Math.round((recentCallsRaw?.filter(c => c.status === 'completed').length || 0) / totalCalls * 100) : 0,
       activeAgents,
       satisfactionScore: Math.round(satisfactionScore * 10) / 10,
       totalRevenue: Math.round(totalRevenue * 100) / 100,
@@ -101,7 +98,15 @@ export async function GET() {
       recentCalls
     }
 
-    return NextResponse.json({ metrics })
+    return NextResponse.json(
+      { metrics },
+      {
+        headers: {
+          'Cache-Control': 'no-store, must-revalidate',
+          'Vary': 'cookie',
+        }
+      }
+    )
   } catch (error) {
     console.error('Dashboard metrics error:', error)
     return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 })

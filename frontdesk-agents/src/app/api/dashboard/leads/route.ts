@@ -50,10 +50,18 @@ export async function GET() {
     const qualifiedLeads = leads.filter(l => l.status === 'qualified').length
     const convertedLeads = leads.filter(l => l.converted).length
 
-    return NextResponse.json({
-      leads,
-      summary: { totalLeads, newLeads, contactedLeads, qualifiedLeads, convertedLeads }
-    })
+    return NextResponse.json(
+      {
+        leads,
+        summary: { totalLeads, newLeads, contactedLeads, qualifiedLeads, convertedLeads }
+      },
+      {
+        headers: {
+          'Cache-Control': 'no-store, must-revalidate',
+          'Vary': 'cookie',
+        }
+      }
+    )
   } catch (error) {
     console.error('Dashboard leads error:', error)
     return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 })

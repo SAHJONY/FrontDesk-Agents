@@ -363,7 +363,7 @@ export default function LandingPage() {
     { icon: Clock, title: t('24/7/365 Availability'), desc: t('24/7 Desc') },
     { icon: Headphones, title: t('Human-like Voice'), desc: t('Human-like Voice Desc') },
     { icon: Bot, title: t('Smart Escalation'), desc: t('Smart Escalation Desc') },
-  ], [language, t])
+  ], [t])
 
   const INDUSTRIES = useMemo(() => INDUSTRIES_DATA.map(ind => ({
     ...ind,
@@ -372,7 +372,7 @@ export default function LandingPage() {
       : ind.name === 'Automotive' ? t('Automotive')
       : ind.name === 'Insurance' ? t('Insurance')
       : ind.name,
-  })), [language, t])
+  })), [t])
 
   const PRICING_PLANS = useMemo(() => PRICING_PLANS_DATA.map(plan => ({
     ...plan,
@@ -398,7 +398,7 @@ export default function LandingPage() {
       return f
     }),
     cta: t('Start Free Trial'),
-  })), [language, t])
+  })), [t])
 
   const METRICS = METRICS_DATA.map(m => ({
     ...m,

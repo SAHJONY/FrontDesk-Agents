@@ -2,10 +2,25 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import React from 'react'
 
-// ─── Throw helper (must be before the ToastProvider import for vi.mock hoisting) ─
+// ─── Throw helper (must be before ALL vi.mock calls for hoisting) ─────────────
+// vi.mock factories run at module-evaluation time (hoisted above all imports).
+// Since throwingUseToast is a module-level const, it must be defined BEFORE
+// the vi.mock calls so the factory can reference it when it runs.
 const throwingUseToast = () => {
   throw new Error('useToast must be used within <ToastProvider>')
 }
+
+// ─── Module-level mocks ─────────────────────────────────────────────────────────
+// Phase 1: Replace useToast with throwing version (for the "outside provider" test)
+vi.mock('@/components/ToastProvider', () => ({
+  ToastProvider: ({ children }: { children: React.ReactNode }) => children,
+  useToast: throwingUseToast,
+}))
+// Phase 2: Pre-cache the real module (for all subsequent tests)
+vi.mock('@/components/ToastProvider', async () => {
+  const mod = await import('@/components/ToastProvider')
+  return { ...mod }
+})
 
 import { ToastProvider, useToast } from '@/components/ToastProvider'
 
@@ -128,23 +143,14 @@ describe('ToastProvider', () => {
     })
 
     it('throws useToast when called outside provider', () => {
-      // vi.mock is hoisted above the import at module-load time, so this
-      // replacement takes effect before useToast is ever resolved.
-      vi.mock('@/components/ToastProvider', () => ({
-        ToastProvider: ({ children }: { children: React.ReactNode }) => children,
-        useToast: throwingUseToast,
-      }))
-      // Call the throwing helper directly — avoids React's "invalid hook call"
-      // error that fires when useToast() is called outside a component render.
-      // The test verifies the context-check error message instead.
+      // At this point the module-level mock has already replaced useToast with
+      // throwingUseToast (vi.mock hoisting runs before the real import).  Calling
+      // throwingUseToast() directly bypasses React's render pipeline and avoids
+      // the "invalid hook call" error that occurs when a hook is called outside
+      // component render context.  We assert the custom error message instead.
       expect(() => throwingUseToast()).toThrow(
         'useToast must be used within <ToastProvider>'
       )
-      // Restore the real ToastProvider module for subsequent tests.
-      vi.mock('@/components/ToastProvider', async () => {
-        const mod = await import('@/components/ToastProvider')
-        return { ...mod }
-      })
     })
   })
 

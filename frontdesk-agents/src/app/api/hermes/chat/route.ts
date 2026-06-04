@@ -8,7 +8,7 @@ import { NextResponse } from 'next/server'
 
 // NVIDIA NIM Configuration
 const NVIDIA_CONFIG = {
-  apiKey: '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',
+  apiKey: process.env.NVIDIA_NIM_API_KEY,
   baseUrl: 'https://integrate.api.nvidia.com/v1',
   // Model rotation pool - rotates based on load/availability
   models: [

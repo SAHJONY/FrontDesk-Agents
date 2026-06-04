@@ -10,7 +10,7 @@ const llm = new ChatOpenAI({
   model: 'z-ai/glm-5.1',
   temperature: 0.7,
   streaming: true,
-  apiKey: process.env.NVIDIA_NIM_API_KEY || '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',
+  apiKey: process.env.NVIDIA_NIM_API_KEY,
   configuration: {
     baseURL: 'https://integrate.api.nvidia.com/v1'
   }

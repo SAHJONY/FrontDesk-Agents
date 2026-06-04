@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 // NVIDIA NIM Configuration for CEO Brain
 const NVIDIA_CONFIG = {
-  apiKey: process.env.NVIDIA_NIM_API_KEY || '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',
+  apiKey: process.env.NVIDIA_NIM_API_KEY,
   baseUrl: 'https://integrate.api.nvidia.com/v1',
   models: [
     { id: 'z-ai/glm-5.1', name: 'GLM-5.1', priority: 1 },

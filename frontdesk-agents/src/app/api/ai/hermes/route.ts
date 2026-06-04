@@ -5,7 +5,7 @@ import { initializeAnthropic, isConfigured as isAnthropicConfigured } from '@/li
 import { authRateLimit, getClientIp } from '@/lib/rate-limit'
 
 // Initialize AI providers
-const nvidiaApiKey = process.env.NVIDIA_API_KEY || ''
+const nvidiaApiKey = process.env.NVIDIA_NIM_API_KEY || ''
 const openaiApiKey = process.env.OPENAI_API_KEY || ''
 const anthropicApiKey = process.env.ANTHROPIC_API_KEY || ''
 

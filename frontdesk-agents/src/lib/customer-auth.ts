@@ -120,25 +120,25 @@ export async function signInCustomer(
       return { success: false, error: 'Failed to sign in' }
     }
 
-    // Get customer record
+    // Get customer record — use the customer record's actual ID (which may differ from auth user ID)
     const { data: customerData, error: customerError } = await supabase
       .from('customers')
-      .select('*')
-      .eq('id', authData.user.id)
+      .select('id, business_name, owner_name, plan')
+      .eq('email', authData.user.email || email)
       .single()
 
     if (customerError && customerError.code !== 'PGRST116') {
       console.error('Customer fetch error:', customerError)
     }
 
-    // Create session
+    // Create session — store the customer record's own ID, not the auth user ID
     const session: CustomerSession = {
       id: authData.user.id,
       email: authData.user.email || email,
       businessName: customerData?.business_name || '',
       ownerName: customerData?.owner_name || '',
-      plan: customerData?.plan || 'starter',
-      customerId: authData.user.id,
+      plan: (customerData?.plan as CustomerSession['plan']) || 'starter',
+      customerId: customerData?.id || authData.user.id,
       authenticated: true,
       loginTime: new Date().toISOString()
     }

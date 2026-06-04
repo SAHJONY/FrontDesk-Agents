@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { completeWithAutonomousFallback, initializeNVIDIA, isConfigured as isNvidiaConfigured, resetModelFailures } from '@/lib/nvidia-integration'
 import { initializeOpenAI, isConfigured as isOpenAIConfigured } from '@/lib/openai-integration'
 import { initializeAnthropic, isConfigured as isAnthropicConfigured } from '@/lib/anthropic-integration'
+import { authRateLimit, getClientIp } from '@/lib/rate-limit'
 
 // Initialize AI providers
 const nvidiaApiKey = process.env.NVIDIA_API_KEY || ''
@@ -19,6 +20,16 @@ if (anthropicApiKey && !isAnthropicConfigured()) {
 }
 
 export async function POST(request: NextRequest) {
+  // Rate limiting — outside try so throws propagate as 500, not misleading
+  const clientIp = getClientIp(request)
+  const rateLimitResult = authRateLimit(clientIp)
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { success: false, error: 'Too many requests. Please try again later.' },
+      { status: 429, headers: { 'Retry-After': String(rateLimitResult.retryAfter ?? 60) } }
+    )
+  }
+
   try {
     const body = await request.json()
     const { messages, systemPrompt, task, context } = body
@@ -88,7 +99,17 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Rate limiting — outside try so throws propagate as 500
+  const clientIp = getClientIp(request)
+  const rateLimitResult = authRateLimit(clientIp)
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { success: false, error: 'Too many requests. Please try again later.' },
+      { status: 429, headers: { 'Retry-After': String(rateLimitResult.retryAfter ?? 60) } }
+    )
+  }
+
   return NextResponse.json({
     status: 'ok',
     provider: 'hermes',

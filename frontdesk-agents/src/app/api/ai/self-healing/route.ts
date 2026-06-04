@@ -4,10 +4,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSelfHealingStatus, acknowledgeAlert, resolveAlert } from '@/lib/ai-decision-engine'
 import { getOwnerSession } from '@/lib/owner-session'
+import { authRateLimit, getClientIp } from '@/lib/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Rate limiting — outside try so throws propagate as 500, not misleading
+  const clientIp = getClientIp(request)
+  const rateLimitResult = authRateLimit(clientIp)
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { success: false, error: 'Too many requests. Please try again later.' },
+      { status: 429, headers: { 'Retry-After': String(rateLimitResult.retryAfter ?? 60) } }
+    )
+  }
+
   try {
     const session = await getOwnerSession()
     if (!session) {
@@ -28,6 +39,16 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  // Rate limiting — outside try so throws propagate as 500, not misleading
+  const clientIp = getClientIp(request)
+  const rateLimitResult = authRateLimit(clientIp)
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { success: false, error: 'Too many requests. Please try again later.' },
+      { status: 429, headers: { 'Retry-After': String(rateLimitResult.retryAfter ?? 60) } }
+    )
+  }
+
   try {
     const session = await getOwnerSession()
     if (!session) {

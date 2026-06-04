@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { chat as nvidiaChat, isConfigured as isNvidiaConfigured, initializeNVIDIA } from '@/lib/nvidia-integration'
 import { chat as openaiChat, isConfigured as isOpenAIConfigured, initializeOpenAI } from '@/lib/openai-integration'
 import { chat as anthropicChat, isConfigured as isAnthropicConfigured, initializeAnthropic } from '@/lib/anthropic-integration'
+import { authRateLimit, getClientIp } from '@/lib/rate-limit'
 
 // Initialize clients
 const nvidiaApiKey = process.env.NVIDIA_API_KEY || ''
@@ -19,6 +20,16 @@ if (anthropicApiKey && !isAnthropicConfigured()) {
 }
 
 export async function POST(request: NextRequest) {
+  // Rate limiting — outside try so throws propagate as 500, not misleading
+  const clientIp = getClientIp(request)
+  const rateLimitResult = authRateLimit(clientIp)
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { success: false, error: 'Too many requests. Please try again later.' },
+      { status: 429, headers: { 'Retry-After': String(rateLimitResult.retryAfter ?? 60) } }
+    )
+  }
+
   try {
     const body = await request.json()
     const { provider, prompt, systemPrompt, model } = body

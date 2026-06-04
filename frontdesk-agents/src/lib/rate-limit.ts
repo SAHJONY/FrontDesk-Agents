@@ -21,7 +21,7 @@ export function getClientIp(request: NextRequest): string {
   }
 }
 
-const rateLimitStore = new Map<string, RateLimitEntry>()
+export const rateLimitStore = new Map<string, RateLimitEntry>()
 
 export interface RateLimitConfig {
   maxRequests: number
@@ -71,6 +71,11 @@ function cleanupExpiredEntries(now: number) {
       rateLimitStore.delete(key)
     }
   }
+}
+
+// Resets the in-memory rate limit store — use only in tests
+export function resetRateLimitStore(): void {
+  rateLimitStore.clear()
 }
 
 // Auth-specific rate limiter (stricter)

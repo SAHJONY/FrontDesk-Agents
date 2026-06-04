@@ -353,11 +353,10 @@ describe('OwnerBillingContent – Pagination', () => {
       if (url.includes('/api/owner/billing')) {
         const data = page === 1
           ? [makeRec({ id: 'bill_page1', description: 'Page 1 plan' })]
-          : [makeRec({ id: 'bill_page1', description: 'Page 1 plan' }), makeRec({ id: 'bill_page2', description: 'Page 2 plan' })]
+          : [makeRec({ id: 'bill_page2_a', description: 'Page 1 plan' }), makeRec({ id: 'bill_page2_b', description: 'Page 2 plan' })]
         const hasMore = page === 1
         page++
-        // Fix: reset page counter for subsequent tests to avoid duplicate id pollution
-        if (page > 2) page = 1
+        // page 1 response has 1 record; page 2 response has 2 records (no duplicate keys)
         return Promise.resolve({
           ok: true,
           json: () => Promise.resolve({ success: true, data, pagination: { hasMore } }),

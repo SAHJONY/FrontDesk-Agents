@@ -412,7 +412,7 @@ describe('Toast integration: Multiple sequential toasts', () => {
   })
 
   it('shows and dismisses multiple toasts in sequence', () => {
-    vi.useFakeTimers()
+    vi.useFakeTimers({ shouldAdvanceTime: false })
 
     render(
       <ToastProvider>

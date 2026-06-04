@@ -364,7 +364,7 @@ describe('ToastProvider', () => {
     })
 
     it('auto-dismisses all rapid success toasts after 4 seconds', () => {
-      vi.useFakeTimers()
+      vi.useFakeTimers({ shouldAdvanceTime: false })
       render(
         <ToastProvider>
           <RapidToastHarness />
@@ -383,7 +383,7 @@ describe('ToastProvider', () => {
     })
 
     it('only removes the clicked toast when close button is pressed', () => {
-      vi.useFakeTimers()
+      vi.useFakeTimers({ shouldAdvanceTime: false })
       render(
         <ToastProvider>
           <RapidToastHarness />
@@ -505,7 +505,7 @@ describe('ToastProvider', () => {
     })
 
     it('dismisses only the clicked toast when types are mixed', () => {
-      vi.useFakeTimers()
+      vi.useFakeTimers({ shouldAdvanceTime: false })
       render(
         <ToastProvider>
           <TypeCycleHarness />
@@ -532,7 +532,7 @@ describe('ToastProvider', () => {
     })
 
     it('auto-dismisses success/info at 4s and error at 6s when mixed types are shown', () => {
-      vi.useFakeTimers()
+      vi.useFakeTimers({ shouldAdvanceTime: false })
       render(
         <ToastProvider>
           <TypeCycleHarness />

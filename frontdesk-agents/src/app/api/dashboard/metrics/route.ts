@@ -61,11 +61,13 @@ export async function GET() {
       calls: m.total_calls || 0
     }))
 
-    // Calculate intent breakdown from call records
+    // Calculate intent breakdown from call records (limit to recent 500 for performance)
     const { data: allCalls } = await supabaseAdmin
       .from('call_records')
       .select('intent')
       .eq('customer_id', customerId)
+      .order('created_at', { ascending: false })
+      .limit(500)
 
     const intentCounts: Record<string, number> = {}
     for (const call of (allCalls ?? [])) {

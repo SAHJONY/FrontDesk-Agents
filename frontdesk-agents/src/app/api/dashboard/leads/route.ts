@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     // Fetch paginated leads
     const { data, error } = await supabaseAdmin
       .from('leads')
-      .select('id, name, email, phone, status, source, notes, converted_at, created_at')
+      .select('id, name, email, phone, status, source, converted_at, created_at')
       .eq('customer_id', customerId)
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1)
@@ -49,7 +49,6 @@ export async function GET(request: NextRequest) {
       phone: l.phone || '',
       status: l.status,
       source: l.source || '',
-      notes: l.notes || '',
       converted: l.converted_at ? true : false,
       createdAt: l.created_at
     }))

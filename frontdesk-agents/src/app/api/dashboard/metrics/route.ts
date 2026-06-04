@@ -3,8 +3,8 @@
 
 import { NextResponse } from 'next/server'
 import { requireCustomerAuth } from '@/lib/customer-auth'
+import { supabaseAdmin } from '@/lib/supabase'
 export const dynamic = 'force-dynamic'
-
 
 export async function GET() {
   try {
@@ -13,37 +13,86 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // In production, fetch from database
-    // For now, return realistic mock metrics
+    const customerId = session.customerId
+
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 500 })
+    }
+
+    // Fetch business_metrics for this customer only
+    const { data: metricsData } = await supabaseAdmin
+      .from('business_metrics')
+      .select('*')
+      .eq('customer_id', customerId)
+      .order('created_at', { ascending: false })
+      .limit(30)
+
+    // Calculate aggregates from real data
+    const totalCalls = metricsData?.reduce((sum, m) => sum + (m.total_calls || 0), 0) ?? 0
+    const totalSms = metricsData?.reduce((sum, m) => sum + (m.total_sms || 0), 0) ?? 0
+    const totalRevenue = metricsData?.reduce((sum, m) => sum + (m.total_revenue || 0), 0) ?? 0
+    const avgAiAccuracy = metricsData?.length
+      ? metricsData.reduce((sum, m) => sum + (m.ai_accuracy || 0), 0) / metricsData.length
+      : 0
+    const activeAgents = metricsData?.[0]?.active_agents ?? 0
+    const satisfactionScore = metricsData?.[0]?.satisfaction_score ?? 0
+
+    // Fetch recent call records for this customer
+    const { data: recentCallsRaw } = await supabaseAdmin
+      .from('call_records')
+      .select('id, caller_phone, caller_name, duration, status, intent, created_at')
+      .eq('customer_id', customerId)
+      .order('created_at', { ascending: false })
+      .limit(5)
+
+    const recentCalls = (recentCallsRaw ?? []).map((c, i) => ({
+      id: c.id,
+      caller: c.caller_phone || 'Unknown',
+      name: c.caller_name || 'Unknown Caller',
+      time: timeAgo(c.created_at),
+      duration: formatDuration(c.duration),
+      status: c.status,
+      intent: c.intent || 'General Inquiry'
+    }))
+
+    // Build monthly trend from metrics data
+    const monthlyTrend = (metricsData ?? []).slice(0, 7).reverse().map(m => ({
+      date: m.created_at ? m.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
+      calls: m.total_calls || 0
+    }))
+
+    // Calculate intent breakdown from call records
+    const { data: allCalls } = await supabaseAdmin
+      .from('call_records')
+      .select('intent')
+      .eq('customer_id', customerId)
+
+    const intentCounts: Record<string, number> = {}
+    for (const call of (allCalls ?? [])) {
+      const intent = call.intent || 'General Inquiry'
+      intentCounts[intent] = (intentCounts[intent] || 0) + 1
+    }
+    const totalIntentCount = Object.values(intentCounts).reduce((s, v) => s + v, 0) || 1
+    const intentBreakdown = Object.entries(intentCounts).map(([intent, count]) => ({
+      intent,
+      count,
+      percentage: Math.round((count / totalIntentCount) * 100)
+    }))
+
     const metrics = {
-      totalCalls: 247,
-      callsToday: 23,
+      totalCalls,
+      callsToday: recentCallsRaw?.filter(c => {
+        const today = new Date().toISOString().split('T')[0]
+        return c.created_at?.startsWith(today)
+      }).length ?? 0,
       avgResponseTime: '1.2s',
       resolutionRate: 94,
-      activeAgents: 3,
-      satisfactionScore: 4.8,
-      totalRevenue: 12499.50,
-      monthlyTrend: [
-        { date: '2026-05-01', calls: 45 },
-        { date: '2026-05-02', calls: 52 },
-        { date: '2026-05-03', calls: 38 },
-        { date: '2026-05-04', calls: 61 },
-        { date: '2026-05-05', calls: 55 },
-        { date: '2026-05-06', calls: 41 },
-        { date: '2026-05-07', calls: 48 },
-      ],
-      intentBreakdown: [
-        { intent: 'Schedule Appointment', count: 89, percentage: 36 },
-        { intent: 'General Inquiry', count: 67, percentage: 27 },
-        { intent: 'Speak to Representative', count: 45, percentage: 18 },
-        { intent: 'Leave Voicemail', count: 32, percentage: 13 },
-        { intent: 'Billing Question', count: 14, percentage: 6 }
-      ],
-      recentCalls: [
-        { id: '1', caller: '+1 (555) 123-4567', name: 'Sarah Johnson', time: '2 min ago', duration: '4:32', status: 'completed', intent: 'Schedule Appointment' },
-        { id: '2', caller: '+1 (555) 987-6543', name: 'Michael Chen', time: '8 min ago', duration: '2:15', status: 'transferred', intent: 'Speak to Representative' },
-        { id: '3', caller: '+1 (555) 456-7890', name: 'Emily Davis', time: '15 min ago', duration: '5:01', status: 'voicemail', intent: 'Leave Message' },
-      ]
+      activeAgents,
+      satisfactionScore: Math.round(satisfactionScore * 10) / 10,
+      totalRevenue: Math.round(totalRevenue * 100) / 100,
+      monthlyTrend,
+      intentBreakdown,
+      recentCalls
     }
 
     return NextResponse.json({ metrics })
@@ -51,4 +100,19 @@ export async function GET() {
     console.error('Dashboard metrics error:', error)
     return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 })
   }
+}
+
+function timeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 60) return `${mins} min ago`
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 24) return `${hrs}h ago`
+  return `${Math.floor(hrs / 24)}d ago`
+}
+
+function formatDuration(seconds: number): string {
+  const m = Math.floor(seconds / 60)
+  const s = seconds % 60
+  return `${m}:${s.toString().padStart(2, '0')}`
 }

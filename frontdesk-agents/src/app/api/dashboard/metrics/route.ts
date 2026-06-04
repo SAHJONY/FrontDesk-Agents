@@ -15,6 +15,9 @@ export async function GET() {
 
     const customerId = session.customerId
 
+    // DEBUG: Log which customer is requesting data
+    console.log('[metrics] customerId:', customerId, 'email:', session.email)
+
     if (!supabaseAdmin) {
       return NextResponse.json({ error: 'Database not configured' }, { status: 500 })
     }

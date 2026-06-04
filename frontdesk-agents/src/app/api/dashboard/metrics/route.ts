@@ -57,8 +57,9 @@ export async function GET() {
       intent: c.intent || 'General Inquiry'
     }))
 
-    // Build monthly trend from metrics data
-    const monthlyTrend = (metricsData ?? []).slice(0, 7).reverse().map(m => ({
+    // Build monthly trend from metrics data — use monthly records only
+    const trendSource = monthlyMetrics.length ? monthlyMetrics : (metricsData ?? []).slice(0, 7)
+    const monthlyTrend = trendSource.reverse().map(m => ({
       date: m.created_at ? m.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
       calls: m.total_calls || 0
     }))

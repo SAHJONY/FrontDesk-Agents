@@ -6,6 +6,7 @@ import { authService } from '@/lib/auth'
 export const dynamic = 'force-dynamic'
 
 const OWNER_EMAIL = process.env.OWNER_EMAIL || ''
+const OWNER_PASSWORD_HASH = process.env.OWNER_PASSWORD_HASH || ''
 const SESSION_COOKIE_NAME = 'owner_session'
 const SESSION_DURATION = 60 * 60 * 24 * 7 // 7 days
 

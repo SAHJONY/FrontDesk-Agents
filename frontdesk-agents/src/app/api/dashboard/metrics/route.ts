@@ -64,16 +64,24 @@ export async function GET() {
       calls: m.total_calls || 0
     }))
 
-    // Calculate intent breakdown from call records (limit to recent 500 for performance)
+    // Calculate intent breakdown and resolution rate from call records (limit to recent 500 for performance)
     const { data: allCalls } = await supabaseAdmin
       .from('call_records')
-      .select('intent')
+      .select('intent, status')
       .eq('customer_id', customerId)
       .order('created_at', { ascending: false })
       .limit(500)
 
+    // Compute real resolution rate from call_records — completed calls / total calls
+    const allCallsForRate = allCalls ?? []
+    const completedCount = allCallsForRate.filter(c => c.status === 'completed').length
+    const totalCallCount = allCallsForRate.length
+    const resolutionRate = totalCallCount > 0
+      ? Math.round((completedCount / totalCallCount) * 100)
+      : 0
+
     const intentCounts: Record<string, number> = {}
-    for (const call of (allCalls ?? [])) {
+    for (const call of allCallsForRate) {
       const intent = call.intent || 'General Inquiry'
       intentCounts[intent] = (intentCounts[intent] || 0) + 1
     }
@@ -91,7 +99,7 @@ export async function GET() {
         return m.created_at?.startsWith(today)
       }).reduce((sum, m) => sum + (m.total_calls || 0), 0) ?? 0,
       avgResponseTime: avgAiAccuracy > 0 ? `${(avgAiAccuracy / 100 * 2).toFixed(1)}s` : '1.2s',
-      resolutionRate: latestMetrics ? 94 : 0, // Use business_metrics resolution_rate or compute from calls
+      resolutionRate,
       activeAgents,
       satisfactionScore: Math.round(satisfactionScore * 10) / 10,
       totalRevenue: Math.round(totalRevenue * 100) / 100,

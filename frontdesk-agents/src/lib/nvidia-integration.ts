@@ -384,33 +384,74 @@ export interface NVIDIAModelConfig {
 }
 
 export const NVIDIA_MODELS: NVIDIAModelConfig[] = [
+  // ── Quick Test (Fast, small models) ──────────────────────────────────────
   { id: 'google/gemma-2-2b-it', name: 'Gemma 2 2B ⚡', description: 'Ultra-fast, great for simple tasks', category: 'QUICK_TEST', verified: true },
   { id: 'meta/llama-3.2-1b-instruct', name: 'Llama 3.2 1B ⚡', description: 'Smallest Llama, blazing fast', category: 'QUICK_TEST', verified: true },
   { id: 'meta/llama-3.2-3b-instruct', name: 'Llama 3.2 3B ⚡', description: 'Compact Llama with good quality', category: 'QUICK_TEST', verified: true },
   { id: 'nvidia/nemotron-mini-4b-instruct', name: 'Nemotron Mini 4B ⚡', description: 'On-device SLM, roleplay, RAG, function calling', category: 'QUICK_TEST', verified: true },
+
+  // ── Balanced (Medium size) ───────────────────────────────────────────────
   { id: 'meta/llama-3.1-8b-instruct', name: 'Llama 3.1 8B', description: 'Fast, efficient, great all-rounder', category: 'BALANCED', verified: true },
   { id: 'mistralai/mistral-7b-instruct-v0.3', name: 'Mistral 7B', description: 'Classic Mistral, reliable performance', category: 'BALANCED', verified: true },
-  { id: 'google/gemma-3-4b-it', name: 'Gemma 3 4B', description: 'Google efficient model', category: 'BALANCED', verified: false },
+  { id: 'google/gemma-3-4b-it', name: 'Gemma 3 4B', description: 'Google efficient model', category: 'BALANCED', verified: true },
   { id: 'mistralai/mixtral-8x7b-instruct-v0.1', name: 'Mixtral 8x7B 🌟', description: 'MoE architecture, excellent value', category: 'BALANCED', verified: true },
   { id: 'mistralai/ministral-14b-instruct-2512', name: 'Ministral 14B', description: 'Mistral compact model', category: 'BALANCED', verified: true },
+  { id: 'nvidia/nemotron-3-nano-30b-a3b', name: 'Nemotron Nano 30B', description: 'Efficient MoE, 1M context, reasoning', category: 'BALANCED', verified: true, reasoning: true },
+  { id: 'nvidia/gliner-pii', name: 'GLiNER PII', description: 'Detects personally identifiable information in text', category: 'BALANCED', verified: true },
+  { id: 'nvidia/riva-translate-4b-instruct-v1_1', name: 'Riva Translate 4B', description: '12-language translation with few-shot prompts', category: 'BALANCED', verified: true },
   { id: 'meta/llama-3.1-70b-instruct', name: 'Llama 3.1 70B 💪', description: 'High capability, complex reasoning', category: 'ADVANCED', verified: true },
-  { id: 'google/gemma-2-27b-instruct', name: 'Gemma 2 27B', description: 'Balanced large model', category: 'ADVANCED', verified: false },
-  { id: 'google/gemma-4-31b-it', name: 'Gemma 4 31B', description: 'Google latest, strong reasoning', category: 'ADVANCED', verified: true },
-  { id: 'deepseek-ai/deepseek-v4-flash', name: 'DeepSeek V4 Flash 🌟', description: '284B MoE, 1M context, coding/agents', category: 'ADVANCED', verified: false },
-  { id: 'minimaxai/minimax-m2.7', name: 'MiniMax M2.7', description: '230B text-to-text, coding/reasoning', category: 'ADVANCED', verified: false },
-  { id: 'qwen/qwen3.5-122b-a10b', name: 'Qwen3.5 122B', description: '122B MoE (10B active), agent-ready', category: 'ADVANCED', verified: false },
-  { id: 'mistralai/mistral-medium-3.5-128b', name: 'Mistral Medium 3.5 128B', description: 'High performing for coding and agentic use', category: 'ADVANCED', verified: false },
-  { id: 'mistralai/mistral-small-4-119b-2603', name: 'Mistral Small 4 119B', description: 'Hybrid MoE, 256k context, multimodal', category: 'ADVANCED', verified: false },
-  { id: 'stepfun-ai/step-3.7-flash', name: 'Step 3.7 Flash', description: 'Enterprise MoE, agentic and coding tasks', category: 'ADVANCED', verified: false },
-  { id: 'stepfun-ai/step-3.5-flash', name: 'Step 3.5 Flash', description: '200B open-source reasoning engine', category: 'ADVANCED', verified: false },
-  { id: 'z-ai/glm-5.1', name: 'GLM-5.1', description: 'Agentic workflows, coding, long-horizon reasoning', category: 'ADVANCED', verified: false },
-  { id: 'mistralai/mistral-large-3-675b-instruct-2512', name: 'Mistral Large 3 675B 🏆', description: 'State-of-the-art MoE VLM for chat and agentic', category: 'ADVANCED', verified: false },
-  { id: 'qwen/qwen3-next-80b-a3b-instruct', name: 'Qwen3 Next 80B', description: 'Hybrid attention + sparse MoE, ultra-long context', category: 'ADVANCED', verified: false },
-  { id: 'qwen/qwen3-coder-480b-a35b-instruct', name: 'Qwen3 Coder 480B 💻', description: '480B MoE (35B active), agentic coding, 256K context', category: 'ADVANCED', verified: false },
-  { id: 'bytedance/seed-oss-36b-instruct', name: 'Seed OSS 36B', description: 'Long-context reasoning and agentic intelligence', category: 'ADVANCED', verified: false },
-  { id: 'nvidia/nemotron-3-nano-30b-a3b', name: 'Nemotron Nano 30B ⚠️', description: 'Efficient MoE, 1M context, reasoning model', category: 'ADVANCED', verified: true, reasoning: true },
-  { id: 'mistralai/mistral-nemotron', name: 'Mistral Nemotron', description: 'Agentic workflows, coding, function calling', category: 'ADVANCED', verified: false },
-  { id: 'deepseek-ai/deepseek-coder-6.7b-instruct', name: 'DeepSeek Coder 6.7B', description: 'Code-specialized model', category: 'ADVANCED', verified: false },
+
+  // ── Advanced (Large, high-capability models) ─────────────────────────────
+  { id: 'google/gemma-2-27b-instruct', name: 'Gemma 2 27B', description: 'Balanced large model', category: 'ADVANCED', verified: true },
+  { id: 'google/gemma-4-31b-it', name: 'Gemma 4 31B 🏆', description: 'Google latest, strong reasoning', category: 'ADVANCED', verified: true },
+  { id: 'mistralai/mistral-nemotron', name: 'Mistral Nemotron 🌟', description: 'Agentic workflows, coding, function calling', category: 'ADVANCED', verified: true },
+  { id: 'mistralai/mistral-large-3-675b-instruct-2512', name: 'Mistral Large 3 675B 🏆', description: 'State-of-the-art MoE VLM for chat and agentic', category: 'ADVANCED', verified: true },
+  { id: 'mistralai/mistral-medium-3.5-128b', name: 'Mistral Medium 3.5 128B 🌟', description: 'High performing for coding and agentic use', category: 'ADVANCED', verified: true },
+  { id: 'mistralai/mistral-small-4-119b-2603', name: 'Mistral Small 4 119B', description: 'Hybrid MoE, 256k context, multimodal input', category: 'ADVANCED', verified: true },
+
+  // ── NVIDIA Native Models ─────────────────────────────────────────────────
+  { id: 'nvidia/nemotron-3-ultra-550b-a55b', name: 'Nemotron Ultra 550B 🏆', description: 'Hybrid Mamba-Transformer MoE, 1M context, agentic reasoning, coding, planning, tool calling', category: 'ADVANCED', verified: true },
+  { id: 'nvidia/nemotron-3-super-120b-a12b', name: 'Nemotron Super 120B', description: 'Hybrid Mamba-Transformer MoE, 1M context, reasoning, coding, tool calling', category: 'ADVANCED', verified: true },
+  { id: 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning', name: 'Nemotron Nano Omni 30B', description: 'Omni-modal reasoning model: images, video, speech, text', category: 'ADVANCED', verified: true, reasoning: true },
+  { id: 'nvidia/nemotron-content-safety-reasoning-4b', name: 'Nemotron Safety Reasoning 4B', description: 'Context-aware safety model with reasoning for NeMo Guardrails', category: 'ADVANCED', verified: true },
+  // Note: cosmos3-nano is a video generation model — outputs video, not text chat
+  // { id: 'nvidia/cosmos3-nano', name: 'Cosmos 3 Nano 🌟', description: 'Physics-aware video generation from text/image for autonomous vehicles', category: 'ADVANCED', verified: true },
+  // { id: 'nvidia/cosmos3-nano-reasoner', name: 'Cosmos 3 Nano Reasoner', description: 'Vision language model for physical world reasoning on videos/images', category: 'ADVANCED', verified: true },
+  // Note: nemotron-voicechat is a voice model — returns audio, not text chat. Excluded from chat flow.
+  // { id: 'nvidia/nemotron-voicechat', name: 'Nemotron Voicechat', description: 'English voice chat model', category: 'ADVANCED', verified: true },
+  { id: 'nvidia/llama-3.3-nemotron-super-49b-v1.5', name: 'Llama 3.3 Nemotron Super 49B', description: 'High efficiency, leading accuracy for reasoning, tool calling, chat', category: 'ADVANCED', verified: true },
+  { id: 'nvidia/llama-3.1-nemotron-nano-8b-v1', name: 'Llama 3.1 Nemotron Nano 8B', description: 'Leading reasoning and agentic AI for PC and edge', category: 'ADVANCED', verified: true },
+  { id: 'nvidia/usdcode', name: 'USDCode', description: 'OpenUSD knowledge Q&A and USD-Python code generation', category: 'ADVANCED', verified: true },
+
+  // ── Third-party Open Models ──────────────────────────────────────────────
+  { id: 'deepseek-ai/deepseek-v4-flash', name: 'DeepSeek V4 Flash 🌟', description: '284B MoE, 1M context, fast coding and agents', category: 'ADVANCED', verified: true },
+  { id: 'deepseek-ai/deepseek-coder-6.7b-instruct', name: 'DeepSeek Coder 6.7B', description: 'Code-specialized model', category: 'ADVANCED', verified: true },
+  { id: 'qwen/qwen3.5-122b-a10b', name: 'Qwen3.5 122B 🌟', description: '122B MoE (10B active), agent-ready', category: 'ADVANCED', verified: true },
+  { id: 'qwen/qwen3-next-80b-a3b-instruct', name: 'Qwen3 Next 80B 🌟', description: 'Hybrid attention + sparse MoE, ultra-long context', category: 'ADVANCED', verified: true },
+  { id: 'qwen/qwen3-coder-480b-a35b-instruct', name: 'Qwen3 Coder 480B 💻', description: '480B MoE (35B active), agentic coding, 256K context', category: 'ADVANCED', verified: true },
+  { id: 'stepfun-ai/step-3.7-flash', name: 'Step 3.7 Flash 🌟', description: 'Sparse MoE, enterprise agentic and coding tasks', category: 'ADVANCED', verified: true },
+  { id: 'stepfun-ai/step-3.5-flash', name: 'Step 3.5 Flash', description: '200B open-source reasoning engine, sparse MoE', category: 'ADVANCED', verified: true },
+  { id: 'moonshotai/kimi-k2.6', name: 'Kimi K2.6 🌟', description: '1T multimodal MoE, long-horizon coding, agentic tool use, image/video understanding', category: 'ADVANCED', verified: true },
+  { id: 'z-ai/glm-5.1', name: 'GLM-5.1 🌟', description: 'Flagship LLM for agentic workflows, coding, long-horizon reasoning', category: 'ADVANCED', verified: true },
+  { id: 'minimaxai/minimax-m2.7', name: 'MiniMax M2.7', description: '230B text-to-text, coding/reasoning/office tasks', category: 'ADVANCED', verified: true },
+  { id: 'bytedance/seed-oss-36b-instruct', name: 'Seed OSS 36B', description: 'Long-context, reasoning, and agentic intelligence', category: 'ADVANCED', verified: true },
+  { id: 'qwen/qwen3.5-397b-a17b', name: 'Qwen 3.5 397B', description: '400B MoE VLM, advanced vision, chat, RAG, agentic', category: 'ADVANCED', verified: true },
+  { id: 'stockmark/stockmark-2-100b-instruct', name: 'Stockmark 100B', description: 'Japanese-specialized LLM for business document understanding', category: 'ADVANCED', verified: true },
+  { id: 'sarvamai/sarvam-m', name: 'Sarvam M', description: 'Multilingual hybrid-reasoning model for Indian languages, programming, math', category: 'ADVANCED', verified: true },
+  { id: 'meta/llama-guard-4-12b', name: 'Llama Guard 4 12B', description: 'Multi-modal safety classifier for input/output prompts', category: 'ADVANCED', verified: true },
+  { id: 'google/gemma-3n-e4b-it', name: 'Gemma 3N E4B', description: 'Edge AI model: text, audio, image input', category: 'QUICK_TEST', verified: true },
+  { id: 'google/gemma-3n-e2b-it', name: 'Gemma 3N E2B', description: 'Edge AI model: text, audio, image input', category: 'QUICK_TEST', verified: true },
+  { id: 'meta/llama-3.2-11b-vision-instruct', name: 'Llama 3.2 11B Vision', description: 'Cutting-edge vision-language model', category: 'ADVANCED', verified: true },
+  { id: 'meta/llama-3.2-90b-vision-instruct', name: 'Llama 3.2 90B Vision', description: 'Large vision-language model', category: 'ADVANCED', verified: true },
+  { id: 'nvidia/llama-3.1-nemotron-safety-guard-8b-v3', name: 'Llama Safety Guard 8B', description: 'Leading multilingual content safety model', category: 'ADVANCED', verified: true },
+  { id: 'nvidia/nemotron-nano-12b-v2-vl', name: 'Nemotron Nano 12B v2 VL', description: 'Multi-image and video understanding, visual Q&A and summarization', category: 'ADVANCED', verified: true },
+  { id: 'nvidia/nvidia-nemotron-nano-9b-v2', name: 'Nemotron Nano 9B v2', description: 'High-efficiency hybrid Transformer-Mamba, reasoning and agentic tasks', category: 'ADVANCED', verified: true },
+  { id: 'meta/llama-4-maverick-17b-128e-instruct', name: 'Llama 4 Maverick 17B', description: '128 MoE model, multimodal, multilingual', category: 'ADVANCED', verified: true },
+  { id: 'microsoft/phi-4-mini-instruct', name: 'Phi-4 Mini', description: 'Lightweight multilingual LLM for latency/memory-constrained environments', category: 'QUICK_TEST', verified: true },
+  { id: 'microsoft/phi-4-multimodal-instruct', name: 'Phi-4 Multimodal', description: 'Cutting-edge multimodal reasoning from image and audio', category: 'ADVANCED', verified: true },
+  // Note: esmfold is a protein folding model — requires special handling (3D output, not text chat)
+  // { id: 'meta/esmfold', name: 'ESMFold', description: 'Predicts 3D protein structure from amino acid sequence', category: 'ADVANCED', verified: true },
+  { id: 'meta/llama-3.3-70b-instruct', name: 'Llama 3.3 70B', description: 'Advanced LLM: reasoning, math, function calling', category: 'ADVANCED', verified: true },
 ]
 
 export function getModelsByCategory(category: keyof typeof MODEL_CATEGORIES) {

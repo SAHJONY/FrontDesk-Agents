@@ -1,11 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-// ─── Mocks for send-invoice route ─────────────────────────────────────────────
+// ─── Shared mocks (hoisted before vi.mock calls) ───────────────────────────────
 
 const mockSendInvoice = vi.hoisted(() => vi.fn())
 const mockGetOwnerSession = vi.hoisted(() => vi.fn())
 const mockGetCustomerSession = vi.hoisted(() => vi.fn())
 const mockCookiesGet = vi.hoisted(() => vi.fn())
+const mockGetBillingHistory = vi.hoisted(() => vi.fn())
+
+// ─── Mocks for send-invoice and billing-history routes ────────────────────────
 
 vi.mock('@/lib/stripe', () => ({
   stripe: {
@@ -25,6 +28,10 @@ vi.mock('@/lib/customer-auth', () => ({
   getCustomerSession: mockGetCustomerSession,
 }))
 
+vi.mock('@/lib/supabase', () => ({
+  getBillingHistory: mockGetBillingHistory,
+}))
+
 vi.mock('next/headers', () => ({
   cookies: vi.fn(() => ({ get: mockCookiesGet })),
 }))
@@ -37,19 +44,6 @@ vi.mock('next/server', () => ({
       async json() { return data },
     })),
   },
-}))
-
-// ─── Mocks for billing-history route ─────────────────────────────────────────
-
-const mockGetBillingHistory = vi.hoisted(() => vi.fn())
-const mockBillingHistoryCustomerSession = vi.hoisted(() => vi.fn())
-
-vi.mock('@/lib/supabase', () => ({
-  getBillingHistory: mockGetBillingHistory,
-}))
-
-vi.mock('@/lib/customer-auth', () => ({
-  getCustomerSession: mockBillingHistoryCustomerSession,
 }))
 
 // ─── Imports ──────────────────────────────────────────────────────────────────
@@ -79,10 +73,9 @@ beforeEach(() => {
   mockGetOwnerSession.mockResolvedValue(null)
   mockGetCustomerSession.mockResolvedValue(null)
   mockCookiesGet.mockReturnValue(null)
-  mockSendInvoice.mockResolvedValue(undefined)
-  // Default billing-history mocks
-  mockBillingHistoryCustomerSession.mockResolvedValue(null)
-  mockGetBillingHistory.mockResolvedValue([])
+  mockSendInvoice.mockResolvedValue(undefined)      // Default billing-history mocks
+      mockGetCustomerSession.mockResolvedValue(null)
+      mockGetBillingHistory.mockResolvedValue([])
 })
 
 // ─── POST /api/billing/send-invoice — Edge Cases ──────────────────────────────
@@ -251,6 +244,8 @@ describe('POST /api/billing/send-invoice — edge cases', () => {
     it('returns 401 when getCustomerSession throws unexpectedly', async () => {
       mockGetOwnerSession.mockResolvedValue(null)
       mockCookiesGet.mockReturnValue(null)
+      // getOwnerSession() returns null → getCustomerSessionLocal() runs and throws
+      // The route's try/catch around auth calls should catch this and return 401
       mockGetCustomerSession.mockRejectedValue(new Error('Unexpected session error'))
       const req = createMockRequest({ invoiceId: 'in_session_err' })
       const res = await sendInvoicePOST(req as any)
@@ -296,7 +291,7 @@ describe('GET /api/billing/history — edge cases', () => {
   describe('authentication edge cases', () => {
     it('returns 401 when session is null', async () => {
       // Override beforeEach auth setup — must be BEFORE the test runs
-      mockBillingHistoryCustomerSession.mockResolvedValue(null)
+      mockGetCustomerSession.mockResolvedValue(null)
       mockGetBillingHistory.mockResolvedValue([])
 
       const req = createMockRequest({}) as any
@@ -310,7 +305,7 @@ describe('GET /api/billing/history — edge cases', () => {
     })
 
     it('returns 401 when session authenticated is false', async () => {
-      mockBillingHistoryCustomerSession.mockResolvedValue({
+      mockGetCustomerSession.mockResolvedValue({
         id: 'cust_123',
         email: 'test@test.com',
         authenticated: false,
@@ -326,7 +321,7 @@ describe('GET /api/billing/history — edge cases', () => {
     })
 
     it('returns 401 when getCustomerSession throws', async () => {
-      mockBillingHistoryCustomerSession.mockRejectedValue(new Error('Session error'))
+      mockGetCustomerSession.mockRejectedValue(new Error('Session error'))
       mockGetBillingHistory.mockResolvedValue([])
 
       const req = createMockRequest({}) as any
@@ -340,7 +335,7 @@ describe('GET /api/billing/history — edge cases', () => {
 
   describe('pagination edge cases', () => {
     beforeEach(() => {
-      mockBillingHistoryCustomerSession.mockResolvedValue(AUTHED_CUSTOMER)
+      mockGetCustomerSession.mockResolvedValue(AUTHED_CUSTOMER)
     })
 
     it('uses default limit of 50 when no limit param', async () => {
@@ -463,7 +458,7 @@ describe('GET /api/billing/history — edge cases', () => {
 
   describe('empty and error state edge cases', () => {
     beforeEach(() => {
-      mockBillingHistoryCustomerSession.mockResolvedValue(AUTHED_CUSTOMER)
+      mockGetCustomerSession.mockResolvedValue(AUTHED_CUSTOMER)
     })
 
     it('returns empty array and hasMore=false when no billing history', async () => {
@@ -512,7 +507,7 @@ describe('GET /api/billing/history — edge cases', () => {
 
   describe('customerId edge cases', () => {
     beforeEach(() => {
-      mockBillingHistoryCustomerSession.mockResolvedValue(AUTHED_CUSTOMER)
+      mockGetCustomerSession.mockResolvedValue(AUTHED_CUSTOMER)
     })
 
     it('passes customerId from session to getBillingHistory', async () => {
@@ -527,7 +522,7 @@ describe('GET /api/billing/history — edge cases', () => {
     })
 
     it('returns 500 when session has no customerId field', async () => {
-      mockBillingHistoryCustomerSession.mockResolvedValue({
+      mockGetCustomerSession.mockResolvedValue({
         id: 'cust_no_customerid',
         authenticated: true,
         // customerId is missing → getBillingHistory gets undefined → throws → 500

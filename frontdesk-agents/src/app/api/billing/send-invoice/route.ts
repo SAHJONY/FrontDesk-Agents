@@ -39,9 +39,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Try owner session first, then customer session
-    let session: { authenticated: boolean } | null = await getOwnerSession()
-    if (!session?.authenticated) {
-      session = await getCustomerSessionLocal()
+    let session: { authenticated: boolean } | null
+    try {
+      session = await getOwnerSession()
+      if (!session?.authenticated) {
+        session = await getCustomerSessionLocal()
+      }
+    } catch {
+      session = null
     }
 
     if (!session?.authenticated) {

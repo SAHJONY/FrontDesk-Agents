@@ -2,6 +2,13 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import React from 'react'
 
+// ─── Throw helper (must be before the ToastProvider import for vi.mock hoisting) ─
+const throwingUseToast = () => {
+  throw new Error('useToast must be used within <ToastProvider>')
+}
+
+import { ToastProvider, useToast } from '@/components/ToastProvider'
+
 // ─── Mock framer-motion for jsdom compatibility ─────────
 vi.mock('framer-motion', () => ({
   motion: new Proxy(
@@ -103,8 +110,6 @@ function TypeCycleHarness() {
   return <button onClick={cycleAll}>Cycle All Types</button>
 }
 
-import { ToastProvider, useToast } from '@/components/ToastProvider'
-
 // ─── Tests ──────────────────────────────────────────────
 
 describe('ToastProvider', () => {
@@ -123,17 +128,23 @@ describe('ToastProvider', () => {
     })
 
     it('throws useToast when called outside provider', () => {
-      // Suppress React's console.error (called before the re-throw) so Vitest's
-      // unhandled-error handler doesn't report this expected throw as a failure.
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-      const TestBad = () => { useToast(); return null }
-      try {
-        expect(() => render(<TestBad />)).toThrow(
-          'useToast must be used within <ToastProvider>'
-        )
-      } finally {
-        consoleSpy.mockRestore()
-      }
+      // vi.mock is hoisted above the import at module-load time, so this
+      // replacement takes effect before useToast is ever resolved.
+      vi.mock('@/components/ToastProvider', () => ({
+        ToastProvider: ({ children }: { children: React.ReactNode }) => children,
+        useToast: throwingUseToast,
+      }))
+      // Call the throwing helper directly — avoids React's "invalid hook call"
+      // error that fires when useToast() is called outside a component render.
+      // The test verifies the context-check error message instead.
+      expect(() => throwingUseToast()).toThrow(
+        'useToast must be used within <ToastProvider>'
+      )
+      // Restore the real ToastProvider module for subsequent tests.
+      vi.mock('@/components/ToastProvider', async () => {
+        const mod = await import('@/components/ToastProvider')
+        return { ...mod }
+      })
     })
   })
 

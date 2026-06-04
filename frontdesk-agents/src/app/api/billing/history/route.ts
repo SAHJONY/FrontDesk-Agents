@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '50', 10), 1), 100)
     const page = Math.max(parseInt(searchParams.get('page') || '1', 10), 1)
 
-    const allRecords = await getBillingHistory(session.customerId, limit * page)
+    const allRecords = (await getBillingHistory(session.customerId, limit * page)) ?? []
     const start = (page - 1) * limit
     const data = allRecords.slice(start, start + limit)
 

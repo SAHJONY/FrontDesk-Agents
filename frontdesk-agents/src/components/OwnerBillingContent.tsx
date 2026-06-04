@@ -429,15 +429,13 @@ export default function OwnerBillingContent({ embedded = false }: OwnerBillingCo
             </motion.div>
           ) : (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
-              {filteredRecords.map((record, index) => (
-                <motion.div
-                  key={record.id}
-                  layout
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: Math.min(index * 0.03, 0.3) }}
-                  className="rounded-xl bg-white/5 border border-white/10 overflow-hidden hover:bg-white/5 hover:border-white/20 transition-all"
-                >
+              {filteredRecords.map((record, index) => (                  <motion.div
+                    key={record.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: Math.min(index * 0.03, 0.3) }}
+                    className="rounded-xl bg-white/5 border border-white/10 overflow-hidden hover:bg-white/5 hover:border-white/20 transition-all"
+                  >
                   <button
                     onClick={() => setExpandedId(expandedId === record.id ? null : record.id)}
                     className="w-full flex items-center gap-4 p-4 hover:bg-white/5 active:scale-[0.99] transition-all text-left"

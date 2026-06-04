@@ -500,8 +500,10 @@ describe('GET /api/billing/history — edge cases', () => {
       const res = await billingHistoryGET(req)
       const data = await res.json()
 
-      // null.slice(...) → TypeError → caught → 500
-      expect(res.status).toBe(500)
+      // null is coerced to [] with ?? so no TypeError → 200 with empty result
+      expect(res.status).toBe(200)
+      const body = await res.json()
+      expect(body.data).toEqual([])
     })
   })
 

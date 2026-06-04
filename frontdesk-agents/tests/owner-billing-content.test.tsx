@@ -4,7 +4,16 @@ import React from 'react'
 
 // ─── Mock framer-motion so animation delays don't stall tests ───────────────
 vi.mock('framer-motion', () => ({
-  motion: { div: 'div' },
+  motion: new Proxy(
+    {},
+    {
+      get: () => ({ children, ...props }: any) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { initial, animate, exit, layout, transition, ...divProps } = props
+        return React.createElement('div', divProps, children)
+      },
+    }
+  ),
   AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }))
 
@@ -347,6 +356,8 @@ describe('OwnerBillingContent – Pagination', () => {
           : [makeRec({ id: 'bill_page1', description: 'Page 1 plan' }), makeRec({ id: 'bill_page2', description: 'Page 2 plan' })]
         const hasMore = page === 1
         page++
+        // Fix: reset page counter for subsequent tests to avoid duplicate id pollution
+        if (page > 2) page = 1
         return Promise.resolve({
           ok: true,
           json: () => Promise.resolve({ success: true, data, pagination: { hasMore } }),

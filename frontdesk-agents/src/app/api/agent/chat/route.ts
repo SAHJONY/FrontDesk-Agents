@@ -13,7 +13,15 @@ interface ContextData {
 export async function POST(req: NextRequest) {
   try {
     const { message, phone, business_id, conversation_history } = await req.json()
-    
+
+    // Guard against missing or empty message — crash prevention
+    if (!message || typeof message !== 'string' || message.trim().length === 0) {
+      return NextResponse.json(
+        { success: false, error: 'Message is required and must be a non-empty string' },
+        { status: 400 }
+      )
+    }
+
     // Initialize context manager
     const contextManager = new ContextManager(business_id || 'default')
     

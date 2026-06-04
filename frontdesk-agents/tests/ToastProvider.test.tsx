@@ -243,7 +243,7 @@ describe('ToastProvider', () => {
     })
 
     it('auto-dismisses success toast after 4 seconds', () => {
-      vi.useFakeTimers()
+      vi.useFakeTimers({ shouldAdvanceTime: false })
       render(
         <ToastProvider>
           <TestHarness />
@@ -260,7 +260,7 @@ describe('ToastProvider', () => {
     })
 
     it('auto-dismisses error toast after 6 seconds', () => {
-      vi.useFakeTimers()
+      vi.useFakeTimers({ shouldAdvanceTime: false })
       render(
         <ToastProvider>
           <TestHarness />
@@ -310,7 +310,7 @@ describe('ToastProvider', () => {
 
   describe('custom duration', () => {
     it('respects custom duration via addToast', () => {
-      vi.useFakeTimers()
+      vi.useFakeTimers({ shouldAdvanceTime: false })
       const CustomHarness = () => {
         const { addToast } = useToast()
         return (

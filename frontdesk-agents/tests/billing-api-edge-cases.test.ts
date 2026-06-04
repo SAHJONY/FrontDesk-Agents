@@ -46,6 +46,13 @@ vi.mock('next/server', () => ({
   },
 }))
 
+// ─── Mock rate-limit (bypass in-memory rate limiter in tests) ───────────────
+
+vi.mock('@/lib/rate-limit', () => ({
+  getClientIp: vi.fn(() => '127.0.0.1'),
+  authRateLimit: vi.fn(() => ({ success: true })),
+}))
+
 // ─── Imports ──────────────────────────────────────────────────────────────────
 
 import { POST as sendInvoicePOST } from '@/app/api/billing/send-invoice/route'

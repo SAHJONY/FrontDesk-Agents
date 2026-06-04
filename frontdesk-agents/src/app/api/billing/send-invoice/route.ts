@@ -3,6 +3,7 @@ import { stripe } from '@/lib/stripe'
 import { getCustomerSession } from '@/lib/customer-auth'
 import { getOwnerSession } from '@/lib/owner-session'
 import { cookies } from 'next/headers'
+import { authRateLimit, getClientIp } from '@/lib/rate-limit'
 export const dynamic = 'force-dynamic'
 
 const CUSTOMER_SESSION_COOKIE = 'customer_session'
@@ -27,6 +28,16 @@ async function getCustomerSessionLocal(): Promise<CustomerSession | null> {
 }
 
 export async function POST(request: NextRequest) {
+  // Rate limiting — outside try so throws propagate as 500, not misleading "Failed to send invoice"
+  const clientIp = getClientIp(request)
+  const rateLimitResult = authRateLimit(clientIp)
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { success: false, error: 'Too many requests. Please try again later.' },
+      { status: 429, headers: { 'Retry-After': String(rateLimitResult.retryAfter ?? 60) } }
+    )
+  }
+
   try {
     const body = await request.json()
     const { invoiceId } = body

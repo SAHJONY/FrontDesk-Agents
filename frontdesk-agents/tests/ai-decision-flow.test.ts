@@ -10,6 +10,13 @@ vi.mock('@/lib/owner-session', () => ({
   getOwnerSession: mockGetOwnerSession,
 }))
 
+// ─── Mock rate-limit (bypass in-memory rate limiter in tests) ───────────────
+
+vi.mock('@/lib/rate-limit', () => ({
+  getClientIp: vi.fn(() => '127.0.0.1'),
+  authRateLimit: vi.fn(() => ({ success: true })),
+}))
+
 // ─── Imports ─────────────────────────────────────────────────────────────────
 
 import { GET as decisionsGET, POST as decisionsPOST } from '@/app/api/ai/decisions/route'

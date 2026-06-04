@@ -9,11 +9,16 @@ interface RateLimitEntry {
 }
 
 export function getClientIp(request: NextRequest): string {
-  const forwarded = request.headers.get('x-forwarded-for')
-  if (forwarded) {
-    return forwarded.split(',')[0].trim()
+  try {
+    const headers = request.headers
+    const forwarded = headers?.get('x-forwarded-for')
+    if (forwarded) {
+      return forwarded.split(',')[0].trim()
+    }
+    return headers?.get('x-real-ip') || 'unknown'
+  } catch {
+    return 'unknown'
   }
-  return request.headers.get('x-real-ip') || 'unknown'
 }
 
 const rateLimitStore = new Map<string, RateLimitEntry>()

@@ -34,6 +34,13 @@ vi.mock('@/lib/owner-session', () => ({
   getOwnerSession: mockGetOwnerSession,
 }))
 
+// ─── Mock rate-limit (bypass in-memory rate limiter in tests) ───────────────
+
+vi.mock('@/lib/rate-limit', () => ({
+  getClientIp: vi.fn(() => '127.0.0.1'),
+  authRateLimit: vi.fn(() => ({ success: true })),
+}))
+
 // ─── Mock next/server ──────────────────────────────────────────────────────
 
 vi.mock('next/server', () => ({
@@ -154,6 +161,7 @@ describe('GET /api/ai/decisions', () => {
     req.nextUrl.searchParams.get = (k: string) => null
     const res = await decisionsGET(req)
     const { data } = await parseResponse(res)
+    // Route returns null when metrics param is absent
     expect(data.metrics).toBeNull()
   })
 

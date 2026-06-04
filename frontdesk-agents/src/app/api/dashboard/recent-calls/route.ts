@@ -1,12 +1,12 @@
 // Dashboard Recent Calls API Route
-// GET /api/dashboard/recent-calls - Get recent calls for authenticated customer
+// GET /api/dashboard/recent-calls?page=1&limit=20 - Get paginated recent calls for authenticated customer
 
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { requireCustomerAuth } from '@/lib/customer-auth'
 import { supabaseAdmin } from '@/lib/supabase'
 export const dynamic = 'force-dynamic'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const { authorized, session } = await requireCustomerAuth()
     if (!authorized || !session) {
@@ -14,17 +14,28 @@ export async function GET() {
     }
 
     const customerId = session.customerId
+    const { searchParams } = new URL(request.url)
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
+    const limit = Math.min(Math.max(1, parseInt(searchParams.get('limit') || '20', 10)), 100)
+    const offset = (page - 1) * limit
 
     if (!supabaseAdmin) {
       return NextResponse.json({ error: 'Database not configured' }, { status: 500 })
     }
 
+    // Get total count for pagination metadata
+    const { count: totalCount } = await supabaseAdmin
+      .from('call_records')
+      .select('*', { count: 'exact', head: true })
+      .eq('customer_id', customerId)
+
+    // Fetch paginated call records
     const { data, error } = await supabaseAdmin
       .from('call_records')
       .select('id, caller_phone, caller_name, type, direction, duration, status, revenue, intent, notes, created_at')
       .eq('customer_id', customerId)
       .order('created_at', { ascending: false })
-      .limit(20)
+      .range(offset, offset + limit - 1)
 
     if (error) {
       console.error('Recent calls error:', error)
@@ -46,8 +57,21 @@ export async function GET() {
       formattedDuration: formatDuration(c.duration)
     }))
 
+    const total = totalCount ?? 0
+    const totalPages = Math.ceil(total / limit)
+
     return NextResponse.json(
-      { calls },
+      {
+        calls,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages,
+          hasNextPage: page < totalPages,
+          hasPrevPage: page > 1
+        }
+      },
       {
         headers: {
           'Cache-Control': 'no-store, must-revalidate',

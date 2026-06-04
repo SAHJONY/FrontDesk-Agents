@@ -2,13 +2,15 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import React from 'react'
 
+// ─── Mock framer-motion first (before any component imports) ───────────────────
 vi.mock('framer-motion', () => ({
-  motion: { div: 'div' },
+  motion: { div: 'div', button: 'button', section: 'section', nav: 'nav', header: 'header', main: 'main', footer: 'footer', span: 'span' },
   AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }))
 
+// ─── Mock recharts ────────────────────────────────────────────────────────────
 vi.mock('recharts', () => ({
-  ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div data-testid="responsive-container">{children}</div>,
   AreaChart: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   Area: () => <div />,
   BarChart: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
@@ -23,21 +25,41 @@ vi.mock('recharts', () => ({
   Legend: () => <div />,
 }))
 
+// ─── Mock ToastProvider ────────────────────────────────────────────────────────
 const mockSuccess = vi.fn()
 const mockError = vi.fn()
-
 vi.mock('@/components/ToastProvider', () => ({
   useToast: () => ({ success: mockSuccess, error: mockError }),
 }))
 
-const mockFetch = vi.fn()
-globalThis.fetch = mockFetch
-
+// ─── Mock next/navigation ─────────────────────────────────────────────────────
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }),
   usePathname: () => '/owner/dashboard',
   useSearchParams: () => new URLSearchParams(),
 }))
+
+// ─── Mock LanguagePreviewSwitcher (shared component used in owner dashboard) ──
+vi.mock('@/components/LanguagePreviewSwitcher', () => ({
+  default: ({ subtitle }: { subtitle?: string }) => (
+    <div data-testid="language-preview-switcher">Preview Language — {subtitle ?? 'default'}</div>
+  ),
+}))
+
+// ─── Global fetch mock ─────────────────────────────────────────────────────────
+const mockFetch = vi.fn()
+globalThis.fetch = mockFetch
+
+// ─── TranslationProvider wrapper ──────────────────────────────────────────────
+// Provides the TranslationContext that useTranslation() requires.
+// Import useTranslation mock so the provider works in tests without real i18n data.
+vi.mock('@/lib/useTranslation', () => ({
+  TranslationProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useTranslation: () => ({ t: (k: string) => k, language: 'en', setLanguage: vi.fn(), translations: {}, languages: [], isLoaded: true }),
+  SUPPORTED_LANGUAGES: [],
+}))
+
+// ─── Helper factories ──────────────────────────────────────────────────────────
 
 function makeDashData() {
   return {
@@ -56,11 +78,35 @@ function makeDashData() {
 }
 
 function makeEmptyDash() {
-  return { metrics: { mrr: 0, arr: 0, activeCustomers: 0, totalCustomers: 0, evaluations: [], churnRate: 0 }, sales: { pipeline: [], salesMetrics: { totalLeads: 0, conversionRate: 0, averageScore: 0 }, leadsByTier: { hot: 0, warm: 0, cold: 0 }, leads: [] }, health: { healthyCount: 0, atRiskCount: 0, totalCustomers: 0, customers: [], upsellOpportunities: [], reviewCandidates: [], healthChecks: [] },    partners: { totalPartners: 0, activePartners: 0, totalReferrals: 0, convertedReferrals: 0, conversionRate: 0, totalCommission: 0, totalRevenueGenerated: 0 }, projections: {}, charts: { revenueTrend: [], churnHistory: [] } }
+  return {
+    metrics: { mrr: 0, arr: 0, activeCustomers: 0, totalCustomers: 0, evaluations: [], churnRate: 0 },
+    sales: { pipeline: [], salesMetrics: { totalLeads: 0, conversionRate: 0, averageScore: 0 }, leadsByTier: { hot: 0, warm: 0, cold: 0 }, leads: [] },
+    health: { healthyCount: 0, atRiskCount: 0, totalCustomers: 0, customers: [], upsellOpportunities: [], reviewCandidates: [], healthChecks: [] },
+    partners: { totalPartners: 0, activePartners: 0, totalReferrals: 0, convertedReferrals: 0, conversionRate: 0, totalCommission: 0, totalRevenueGenerated: 0 },
+    projections: {},
+    charts: { revenueTrend: [], churnHistory: [] },
+  }
 }
 
-function makeRec(ov: Record<string, unknown>) {
-  return Object.assign({ id: 'bill_001', customer_id: 'cus_001', invoice_id: 'INV-001', subscription_id: 'sub_001', amount: 2999, currency: 'usd', status: 'succeeded', description: 'Monthly subscription', billing_reason: 'subscription_cycle', invoice_pdf_url: 'https://example.com/invoice.pdf', period_start: '2025-05-01T00:00:00Z', period_end: '2025-06-01T00:00:00Z', created_at: '2025-05-01T00:00:00Z', customer_email: 'test@example.com', customer_name: 'Test Customer', business_name: 'Test Business' }, ov || {})
+function makeRec(ov: Record<string, unknown> = {}) {
+  return Object.assign({
+    id: 'bill_001',
+    customer_id: 'cus_001',
+    invoice_id: 'INV-001',
+    subscription_id: 'sub_001',
+    amount: 2999,
+    currency: 'usd',
+    status: 'succeeded',
+    description: 'Monthly subscription',
+    billing_reason: 'subscription_cycle',
+    invoice_pdf_url: 'https://example.com/invoice.pdf',
+    period_start: '2025-05-01T00:00:00Z',
+    period_end: '2025-06-01T00:00:00Z',
+    created_at: '2025-05-01T00:00:00Z',
+    customer_email: 'test@example.com',
+    customer_name: 'Test Customer',
+    business_name: 'Test Business',
+  }, ov)
 }
 
 async function renderDash(recs?: Record<string, unknown>[]) {
@@ -76,8 +122,14 @@ async function renderDash(recs?: Record<string, unknown>[]) {
   return render(React.createElement(OwnerDashboard))
 }
 
+// ─── Tests ────────────────────────────────────────────────────────────────────
+
 describe('OwnerDashboard - Recent Invoices', () => {
-  beforeEach(() => { vi.resetAllMocks() })
+  beforeEach(() => {
+    vi.resetAllMocks()
+    mockSuccess.mockClear()
+    mockError.mockClear()
+  })
 
   it('renders the Recent Invoices section with fetched records', async () => {
     await renderDash()

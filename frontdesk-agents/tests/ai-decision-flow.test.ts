@@ -41,10 +41,10 @@ const AUTHED_OWNER = {
 
 // ─── Setup ────────────────────────────────────────────────────────────────────
 
-beforeEach(() => {
+beforeEach(async () => {
   vi.clearAllMocks()
   mockGetOwnerSession.mockResolvedValue(AUTHED_OWNER)
-  resetDecisionsState()
+  await resetDecisionsState()
 })
 
 // ─── Full Decision Flow ───────────────────────────────────────────────────────
@@ -94,9 +94,9 @@ describe('AI Decision Flow E2E', () => {
 
       const found = get.decisions.find((d: { id: string }) => d.id === decisionId)
       expect(found).toBeDefined()
-      expect(found.category).toBe('upsell')
+      expect(found.result).toBe('Send upgrade offer with 1-month free trial on professional plan')
+      expect(found.agent).toBe('E2E upsell trigger')
       expect(found.severity).toBe('medium')
-      expect(found.trigger).toBe('E2E upsell trigger')
       expect(found.outcome).toBe('pending')
     })
 
@@ -121,8 +121,8 @@ describe('AI Decision Flow E2E', () => {
       const get = await getRes.json()
 
       // Most recent decision should be first (newest-first ordering)
-      expect(get.decisions[0].trigger).toBe('Hot lead: Acme Corp')
-      expect(get.decisions[0].category).toBe('escalate')
+      expect(get.decisions[0].agent).toBe('Hot lead: Acme Corp')
+      expect(get.decisions[0].severity).toBe('high')
     })
 
     it('GET with limit=1 returns only the newest decision', async () => {
@@ -176,7 +176,7 @@ describe('AI Decision Flow E2E', () => {
       const get = await getRes.json()
 
       for (const trigger of triggers) {
-        const found = get.decisions.find((d: { trigger: string }) => d.trigger === trigger)
+        const found = get.decisions.find((d: { agent: string }) => d.agent === trigger)
         expect(found).toBeDefined()
       }
     })
@@ -208,6 +208,8 @@ describe('AI Decision Flow E2E', () => {
 
       const getBefore = await (await decisionsGET(getReq)).json()
       const before = getBefore.decisions.find((d: { id: string }) => d.id === decisionId)
+      expect(before.result).toBe('IMMEDIATE: Retention offer + schedule check-in call via AI agent')
+      expect(before.agent).toBe('At-risk customer: BadBuster Inc')
       expect(before.outcome).toBe('pending')
 
       // ── Step 3: Resolve it to 'success' ───────────────────────────────────
@@ -335,7 +337,7 @@ describe('AI Decision Flow E2E', () => {
 
       const get = await (await decisionsGET(getReq)).json()
       const found = get.decisions.find((d: { id: string }) => d.id === post.decision.id)
-      expect(found.metadata).toEqual(complexMetadata)
+      expect(JSON.parse(found.context)).toEqual(complexMetadata)
     })
   })
 
@@ -354,6 +356,8 @@ describe('AI Decision Flow E2E', () => {
       expect(get.modelStatuses.length).toBeGreaterThan(0)
       expect(get.selfHealing).toBeDefined()
       expect(typeof get.selfHealing.monitorRunning).toBe('boolean')
+      expect(typeof get.selfHealing.overall).toBe('string')
+      expect(get.selfHealing.uptimePercent).toBeGreaterThan(0)
     })
 
     it('GET with metrics=true includes AI decision metrics', async () => {

@@ -1305,7 +1305,7 @@ export default function OwnerDashboard() {
                   totalUsers: metrics.totalCustomers,
                   activeUsers: health.healthyCount,
                   revenue: metrics.mrr,
-                  callsToday: metrics.evaluations.length,
+                  callsToday: aiOverview?.metrics?.totalDecisions ?? data?.metrics?.evaluations?.length ?? 0,
                   successRate: harnessStatus?.currentMetrics?.callSuccessRate != null
                     ? Math.round(harnessStatus.currentMetrics.callSuccessRate * 100)
                     : Math.round((1 - metrics.churnRate) * 100),

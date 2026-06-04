@@ -76,6 +76,9 @@ let inMemSelfHealing: SelfHealingStatus = {
   activeAlerts: [],
 }
 
+// Tracks whether the DB has already been seeded this server lifetime
+let dbSeeded = false
+
 // ─── DB Persistence Layer ──────────────────────────────────────────────────
 
 function isDbConfigured(): boolean {
@@ -92,7 +95,7 @@ function now(): string {
 
 async function persistDecisionDb(decision: Decision): Promise<void> {
   if (!supabaseAdmin) return
-  await supabaseAdmin.from('ai_decisions').insert({
+  await supabaseAdmin.from('ai_decisions').upsert({
     id: decision.id,
     category: decision.category,
     severity: decision.severity,
@@ -102,7 +105,7 @@ async function persistDecisionDb(decision: Decision): Promise<void> {
     outcome: decision.outcome,
     metadata: decision.metadata ?? {},
     created_at: decision.timestamp,
-  })
+  }, { onConflict: 'id' })
 }
 
 async function loadDecisionsFromDb(limit = 500): Promise<Decision[]> {
@@ -124,6 +127,48 @@ async function loadDecisionsFromDb(limit = 500): Promise<Decision[]> {
     outcome: r.outcome,
     metadata: r.metadata ?? {},
   }))
+}
+
+// Seed demo decisions into DB only when the table is empty.
+// Called lazily from getDecisions() so it runs after Supabase is configured.
+async function seedDecisionsToDbIfEmpty(): Promise<void> {
+  if (!supabaseAdmin || dbSeeded) return
+
+  // Check if any decisions already exist
+  const { data, error } = await supabaseAdmin
+    .from('ai_decisions')
+    .select('id')
+    .limit(1)
+    .maybeSingle()
+
+  if (error || data) return // either error or already has rows — skip
+
+  const seeds: Omit<Decision, 'id' | 'timestamp'>[] = [
+    { category: 'escalate', severity: 'high', trigger: 'Hot lead: Sunrise Medical Center', reasoning: 'Lead scored 92/100 with urgent urgency. 120 employees, $800/mo estimated call volume.', action: 'IMMEDIATE: Slack alert + auto-demo booking', outcome: 'success' },
+    { category: 'onboard', severity: 'medium', trigger: 'New customer activated: AutoNation Dealers', reasoning: 'Customer activated on starter plan. Recommended onboarding sequence: 3-step setup.', action: 'Send onboarding sequence email + schedule welcome call', outcome: 'success' },
+    { category: 'upsell', severity: 'medium', trigger: 'Upsell: Elite Dental Care', reasoning: 'Health score 88/100 on starter plan for 4 months. High engagement signals readiness to upgrade.', action: 'Send professional plan upgrade offer with 1-month free trial', outcome: 'pending' },
+    { category: 'retain', severity: 'high', trigger: 'At-risk: Home Plus Services', reasoning: 'Health score dropped to 31/100. 23 days since last call. High churn risk if no action.', action: 'IMMEDIATE: Retention offer + check-in call scheduled', outcome: 'success' },
+    { category: 'optimize', severity: 'low', trigger: 'LTV/CAC ratio optimization', reasoning: 'LTV/CAC ratio is 3.4x, above 3x target. Monitoring for further improvement.', action: 'Continue current acquisition channels + optimize high-performers', outcome: 'success' },
+    { category: 'alert', severity: 'info', trigger: 'Model routing health check', reasoning: 'All 4 AI providers operating within normal parameters. NVIDIA NIM: 96 health, latency 124ms.', action: 'No action required — system nominal', outcome: 'success' },
+    { category: 'retain', severity: 'medium', trigger: 'Engagement drop: Quick Mart Retail', reasoning: 'Only 2 calls in past 14 days. Satisfaction may be declining. Proactive outreach needed.', action: 'Send engagement email + offer product walkthrough', outcome: 'pending' },
+    { category: 'escalate', severity: 'medium', trigger: 'New lead: AllState Insurance', reasoning: 'Lead scored 78/100. 60 employees, $400/mo potential. Moderate urgency.', action: 'Send intro email + schedule discovery call within 48h', outcome: 'success' },
+  ]
+
+  const now = new Date()
+  const rows = seeds.map((s, i) => ({
+    id: generateId(),
+    category: s.category,
+    severity: s.severity,
+    trigger: s.trigger,
+    reasoning: s.reasoning,
+    action: s.action,
+    outcome: s.outcome ?? 'pending',
+    metadata: {},
+    created_at: new Date(now.getTime() - (seeds.length - i) * 8 * 60000).toISOString(),
+  }))
+
+  await supabaseAdmin.from('ai_decisions').insert(rows)
+  dbSeeded = true
 }
 
 async function loadAlertsFromDb(): Promise<Alert[]> {
@@ -219,9 +264,15 @@ export function getModelRouterStatuses(): ModelRouterStatus[] {
 
 export async function getDecisions(limit = 50): Promise<Decision[]> {
   if (isDbConfigured()) {
+    // Lazily seed DB with demo decisions if it's empty
+    await seedDecisionsToDbIfEmpty()
     const all = await loadDecisionsFromDb(500)
+    // Sync in-memory cache
+    inMemDecisions = all.slice(-500)
     return all.slice(-limit).reverse()
   }
+  // Dev fallback: seed in-memory if empty
+  if (inMemDecisions.length === 0) seedDecisions()
   return inMemDecisions.slice(-limit).reverse()
 }
 
@@ -465,11 +516,10 @@ export async function getAIDecisionMetrics(): Promise<AIDecisionMetrics> {
 }
 
 // ─── Test-only reset ────────────────────────────────────────────────────────
-// Clears all in-memory state and re-seeds demo decisions.
-// In production with DB, also clears the ai_decisions and ai_alerts tables.
+// Clears all in-memory state and DB tables, then re-seeds.
+// Used by tests to get a clean state.
 
-export function resetDecisionsState(): void {
-  // Mutate in-place so all existing references stay valid
+export async function resetDecisionsState(): Promise<void> {
   inMemDecisions = []
   inMemModelStatuses = []
   inMemSelfHealing.monitorRunning = false
@@ -480,7 +530,17 @@ export function resetDecisionsState(): void {
   inMemSelfHealing.lastRemediationAt = null
   inMemSelfHealing.systemHealth = 'healthy'
   inMemSelfHealing.activeAlerts = []
+  dbSeeded = false
+
+  if (supabaseAdmin) {
+    await supabaseAdmin.from('ai_decisions').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+    await supabaseAdmin.from('ai_alerts').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+  }
+
+  // Re-seed in-memory for dev fallback
   seedDecisions()
+  // Also seed DB if configured
+  await seedDecisionsToDbIfEmpty()
 }
 
 function seedDecisions() {
@@ -505,6 +565,3 @@ function seedDecisions() {
     inMemDecisions.push(d)
   }
 }
-
-// Seed initial decisions on module load (in-memory only; DB gets seeded on first write)
-seedDecisions()

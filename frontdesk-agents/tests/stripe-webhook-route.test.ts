@@ -162,7 +162,9 @@ describe('POST /api/stripe/webhook — signature verification', () => {
   })
 
   it('returns 400 when constructEvent throws generic Error (not Stripe type)', async () => {
-    // Even a non-Stripe error in signature verification should result in 400
+    // Even a non-Stripe error in signature verification should result in 400.
+    // Mock console.error so Vitest doesn't report the catch-block's log as unhandled.
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
     mockConstructEvent.mockImplementation(() => { throw new Error('Unexpected error') })
 
     const req = createMockRequest({
@@ -175,6 +177,7 @@ describe('POST /api/stripe/webhook — signature verification', () => {
     expect(res.status).toBe(400)
     const data = await res.json()
     expect(data.error).toContain('Webhook handler failed')
+    consoleSpy.mockRestore()
   })
 
   it('calls constructEvent with raw body, signature, and webhook secret', async () => {

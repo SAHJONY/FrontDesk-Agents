@@ -123,15 +123,17 @@ describe('ToastProvider', () => {
     })
 
     it('throws useToast when called outside provider', () => {
+      // Suppress React's console.error (called before the re-throw) so Vitest's
+      // unhandled-error handler doesn't report this expected throw as a failure.
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-      const TestBad = () => {
-        useToast()
-        return null
+      const TestBad = () => { useToast(); return null }
+      try {
+        expect(() => render(<TestBad />)).toThrow(
+          'useToast must be used within <ToastProvider>'
+        )
+      } finally {
+        consoleSpy.mockRestore()
       }
-      expect(() => render(<TestBad />)).toThrow(
-        'useToast must be used within <ToastProvider>'
-      )
-      consoleSpy.mockRestore()
     })
   })
 

@@ -15,13 +15,13 @@ import {
 
 // ─── Setup / Teardown ──────────────────────────────────────────────────────
 
-beforeEach(() => {
-  resetDecisionsState()
+beforeEach(async () => {
+  await resetDecisionsState()
 })
 
-afterEach(() => {
+afterEach(async () => {
   // Ensure isolated state per test
-  resetDecisionsState()
+  await resetDecisionsState()
 })
 
 // ─── makeDecision ──────────────────────────────────────────────────────────

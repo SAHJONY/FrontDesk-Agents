@@ -557,6 +557,7 @@ export default function LandingPage() {
               className='inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-aurora-cyan/10 border border-aurora-cyan/20 text-sm text-aurora-cyan/80 mb-8'
             >
               <span className='w-2 h-2 rounded-full bg-emerald-400 animate-glow' />
+<<<<<<< HEAD
               {t('AI Receptionist Available Now')}
             </motion.div>
 

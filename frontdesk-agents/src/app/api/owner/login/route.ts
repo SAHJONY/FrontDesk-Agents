@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Use SHA-256 password verification (not plain-text comparison)
+    // Use bcrypt password verification via authService
     const passwordValid = await authService.verifyPassword(password)
     if (!passwordValid) {
       return NextResponse.json(

@@ -143,6 +143,18 @@ export default function ModelComparison() {
   const [selectedScenario, setSelectedScenario] = useState<TestScenario>('general')
   const [comparisonHistory, setComparisonHistory] = useState<SavedComparison[]>([])
   const [showHistory, setShowHistory] = useState(false)
+  const [nvidiaCategory, setNvidiaCategory] = useState<'ALL' | 'QUICK_TEST' | 'BALANCED' | 'ADVANCED'>('ALL')
+
+  // Auto-select first model when NVIDIA category changes and current model isn't in filtered set
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    const filtered = nvidiaCategory === 'ALL'
+      ? []  // don't auto-switch when showing all
+      : getModelsByCategory(nvidiaCategory)
+    if (filtered.length > 0 && !filtered.find(m => m.id === selectedModels.nvidia)) {
+      handleModelChange('nvidia', filtered[0].id)
+    }
+  }, [nvidiaCategory])
 
   useEffect(() => {
     loadHistory()
@@ -489,27 +501,49 @@ export default function ModelComparison() {
                 ))}
                 {provider === 'nvidia' && (
                   <>
-                    <optgroup label="⚡ Quick Test (Fast)">
-                      {getModelsByCategory('QUICK_TEST').map(m => (
-                        <option key={m.id} value={m.id}>
-                          {m.name} {m.verified ? '' : '(Untested)'}
-                        </option>
+                    {/* Category filter pills */}
+                    <div className="flex gap-1.5 mb-2 flex-wrap">
+                      {([
+                        { key: 'ALL' as const, label: 'All', icon: '🌐' },
+                        { key: 'QUICK_TEST' as const, label: '⚡ Quick', icon: '⚡' },
+                        { key: 'BALANCED' as const, label: '🌟 Balanced', icon: '🌟' },
+                        { key: 'ADVANCED' as const, label: '💪 Advanced', icon: '💪' },
+                      ]).map(btn => (
+                        <button
+                          key={btn.key}
+                          onClick={() => setNvidiaCategory(btn.key)}
+                          className={`text-xs px-2.5 py-1 rounded-lg border transition-all ${
+                            nvidiaCategory === btn.key
+                              ? 'bg-aurora-cyan/20 border-aurora-cyan/50 text-aurora-cyan'
+                              : 'bg-gray-800/50 border-gray-700/50 text-gray-400 hover:text-white hover:border-gray-600'
+                          }`}
+                        >
+                          {btn.icon} {btn.label}
+                        </button>
                       ))}
-                    </optgroup>
-                    <optgroup label="🌟 Balanced (Medium)">
-                      {getModelsByCategory('BALANCED').map(m => (
-                        <option key={m.id} value={m.id}>
-                          {m.name} {m.verified ? '' : '(Untested)'}
-                        </option>
-                      ))}
-                    </optgroup>
-                    <optgroup label="💪 Advanced (Larger/Slower)">
-                      {getModelsByCategory('ADVANCED').map(m => (
-                        <option key={m.id} value={m.id}>
-                          {m.name} {m.verified ? '' : '(Untested)'}
-                        </option>
-                      ))}
-                    </optgroup>
+                    </div>
+                    {/* Model count badge for filtered view */}
+                    {nvidiaCategory !== 'ALL' && (
+                      <div className="text-xs text-gray-500 mb-1.5">
+                        {getModelsByCategory(nvidiaCategory).length} models — auto-selects first if current model is out of category
+                      </div>
+                    )}
+                    {/* Model list filtered by category */}
+                    {(nvidiaCategory === 'ALL' ? [
+                      { label: '⚡ Quick Test (Fast)', models: getModelsByCategory('QUICK_TEST') },
+                      { label: '🌟 Balanced (Medium)', models: getModelsByCategory('BALANCED') },
+                      { label: '💪 Advanced (Larger)', models: getModelsByCategory('ADVANCED') },
+                    ] : [
+                      { label: nvidiaCategory === 'QUICK_TEST' ? '⚡ Quick Test' : nvidiaCategory === 'BALANCED' ? '🌟 Balanced' : '💪 Advanced', models: getModelsByCategory(nvidiaCategory) }
+                    ]).map(group => (
+                      <optgroup key={group.label} label={group.label}>
+                        {group.models.map(m => (
+                          <option key={m.id} value={m.id}>
+                            {m.name}{m.reasoning ? ' 🧠' : ''}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ))}
                   </>
                 )}
                 {provider === 'anthropic' && claudeModels.map(m => (
@@ -523,7 +557,7 @@ export default function ModelComparison() {
         <button
           onClick={runComparison}
           disabled={loading || !userPrompt.trim()}
-          className="w-full py-4 rounded-xl bg-gradient-to-r from-aurora-cyan to-purple-500 text-white font-semibold hover:shadow-lg hover:shadow-aurora-cyan/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full py-3 rounded-xl bg-gradient-to-r from-aurora-cyan to-purple-500 text-white font-semibold hover:opacity-90 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? (
             <span className="flex items-center justify-center gap-2">
@@ -534,7 +568,7 @@ export default function ModelComparison() {
               Running Comparison...
             </span>
           ) : (
-            'Compare All Providers'
+            <><span>⚡</span> Compare All Providers</>
           )}
         </button>
 

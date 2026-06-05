@@ -22,6 +22,7 @@ import type { BillingRecordWithCustomer } from "@/lib/supabase"
 import SendInvoiceDialog from "@/components/SendInvoiceDialog"
 import OwnerBillingContent from "@/components/OwnerBillingContent"
 import LanguagePreviewSwitcher from "@/components/LanguagePreviewSwitcher"
+import ModelComparison from "@/components/ModelComparison"
 
 interface DashboardData {
   metrics: {
@@ -1260,9 +1261,7 @@ export default function OwnerDashboard() {
               ) : (
                 <div className="text-center py-8 text-gray-500 text-sm">{t('No decision history available')}</div>
               )}
-              </div>
-
-              {/* Self-Healing Monitor */}
+              </div>              {/* Self-Healing Monitor */}
               <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
               <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
                 <Shield className="w-5 h-5 text-emerald-400" />
@@ -1315,9 +1314,25 @@ export default function OwnerDashboard() {
                       </div>
                     )}
                   </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500 text-sm">{t('Self-healing data not available')}</div>
-              )}
+                ) : (
+                  <div className="text-center py-8 text-gray-500 text-sm">{t('Self-healing data not available')}</div>
+                )}
+              </div>
+            </div>
+
+            {/* Model Comparison Lab */}
+            <div className="mt-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-cyan-500/20 rounded-xl">
+                  <Cpu className="w-5 h-5 text-cyan-400" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold">{t('Model Comparison Lab')}</h3>
+                  <p className="text-sm text-gray-400">Compare NVIDIA NGC models across categories — Quick Test, Balanced & Advanced</p>
+                </div>
+              </div>
+              <div className="rounded-2xl bg-white/5 border border-white/10 overflow-hidden">
+                <ModelComparison />
               </div>
             </div>
           </>

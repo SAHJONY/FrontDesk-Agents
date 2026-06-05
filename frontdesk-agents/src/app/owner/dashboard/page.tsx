@@ -1104,6 +1104,51 @@ export default function OwnerDashboard() {
         {/* ============ AI AGENTS TAB ============ */}
         {activeTab === 'ai' && (
           <>
+            {/* Hermes Desktop Link Card */}
+            <div className="mb-8">
+              <a
+                href="https://hermes-agent.nousresearch.com/desktop"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group block p-6 rounded-2xl bg-gradient-to-br from-cyan-500/10 via-blue-500/5 to-purple-500/10 border border-cyan-500/30 hover:border-cyan-500/60 hover:from-cyan-500/15 hover:via-blue-500/10 hover:to-purple-500/15 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99]"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="p-4 bg-cyan-500/20 rounded-2xl group-hover:bg-cyan-500/30 transition-colors">
+                      <svg className="w-8 h-8 text-cyan-400" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z" fill="currentColor" opacity="0.8"/>
+                        <path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="text-xl font-bold text-white">Hermes Desktop</h3>
+                        <span className="px-2 py-0.5 rounded-full text-xs bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                          Nous Research
+                        </span>
+                      </div>
+                      <p className="text-gray-400 text-sm max-w-lg">
+                        Open-source AI agent with long-horizon reasoning, computer use, and multimodal capabilities. Runs natively on macOS, Windows, and Linux.
+                      </p>
+                      <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                          Free &amp; Open Source
+                        </span>
+                        <span>Long-horizon reasoning</span>
+                        <span>Computer use</span>
+                        <span>Multimodal</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-cyan-400 group-hover:text-cyan-300 transition-colors">
+                    <span className="text-sm font-medium">Open</span>
+                    <ArrowUpRight className="w-4 h-4" />
+                  </div>
+                </div>
+              </a>
+            </div>
+
             {/* AI Metrics Overview */}
             {aiOverview?.metrics && (
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">

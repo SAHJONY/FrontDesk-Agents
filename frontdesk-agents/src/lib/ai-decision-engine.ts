@@ -6,6 +6,7 @@
 
 import { supabaseAdmin } from '@/lib/supabase'
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { sendAIAlertEmail } from '@/lib/email'
 
 export interface Decision {
   id: string
@@ -322,6 +323,16 @@ export async function makeDecision(params: {
     } else {
       inMemSelfHealing.activeAlerts.unshift(alert)
     }
+
+    // Send email alert to owner for critical/high decisions (fire-and-forget)
+    sendAIAlertEmail({
+      severity: params.severity,
+      title: `[${params.category.toUpperCase()}] ${params.trigger}`,
+      description: params.reasoning,
+      metadata: params.metadata,
+    }).catch(emailError => {
+      console.error('AI alert email error (non-fatal):', emailError)
+    })
 
     if (inMemSelfHealing.activeAlerts.length > 20) {
       inMemSelfHealing.activeAlerts = inMemSelfHealing.activeAlerts.slice(0, 20)

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { getCustomerSession } from '@/lib/customer-auth'
 import { getOwnerSession } from '@/lib/owner-session'
+import { sendInvoiceEmail } from '@/lib/email'
 import { cookies } from 'next/headers'
 import { authRateLimit, getClientIp } from '@/lib/rate-limit'
 export const dynamic = 'force-dynamic'
@@ -18,8 +19,6 @@ async function getCustomerSessionLocal(): Promise<CustomerSession | null> {
     const store = await cookies()
     const cookie = store.get(CUSTOMER_SESSION_COOKIE)
     if (!cookie) {
-      // No customer_session cookie — try the shared getCustomerSession which may
-      // use a different storage mechanism (e.g. server-side session, Supabase auth)
       return getCustomerSession()
     }
     const session: CustomerSession = JSON.parse(cookie.value)
@@ -28,7 +27,6 @@ async function getCustomerSessionLocal(): Promise<CustomerSession | null> {
 }
 
 export async function POST(request: NextRequest) {
-  // Rate limiting — outside try so throws propagate as 500, not misleading "Failed to send invoice"
   const clientIp = getClientIp(request)
   const rateLimitResult = authRateLimit(clientIp)
   if (!rateLimitResult.success) {
@@ -40,7 +38,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
-    const { invoiceId } = body
+    const { invoiceId, customerEmail, subject, html } = body
 
     if (!invoiceId || typeof invoiceId !== 'string') {
       return NextResponse.json(
@@ -49,7 +47,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Try owner session first, then customer session
+    // Auth — owner first, then customer
     let session: { authenticated: boolean } | null
     try {
       session = await getOwnerSession()
@@ -67,14 +65,23 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Send the invoice via Stripe
+    // Send via Stripe
     await stripe.client.invoices.sendInvoice(invoiceId)
+
+    // Also send a styled email via Resend — all three params must be present
+    if (customerEmail && subject && html) {
+      try {
+        await sendInvoiceEmail({ to: customerEmail, subject, html })
+      } catch (emailError) {
+        // Non-fatal: Stripe email already sent — log and continue
+        console.error('Resend email error (non-fatal):', emailError)
+      }
+    }
 
     return NextResponse.json({ success: true })
   } catch (error: any) {
     console.error('Send invoice API error:', error)
 
-    // Provide user-friendly error messages
     if (error?.type === 'StripeInvalidRequestError') {
       const msg = error.message || ''
       if (msg.includes('already been sent')) {

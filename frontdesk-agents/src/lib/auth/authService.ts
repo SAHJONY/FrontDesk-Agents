@@ -24,12 +24,15 @@ export class AuthService {
 
   public static getInstance(): AuthService {
     if (!AuthService.instance) {
-      // Detect legacy SHA-256 hashes at startup — fail loud rather than silent login failure
+      // Detect legacy SHA-256 hashes at startup — fail fast, do not start with broken config
       if (OWNER_PASSWORD_HASH && !OWNER_PASSWORD_HASH.startsWith('$2')) {
-        console.error('FATAL: OWNER_PASSWORD_HASH appears to be a SHA-256 hash (does not start with $2).')
-        console.error('The password hashing algorithm was upgraded to bcrypt. Migrate with:')
-        console.error('  node -e "const b=require(\'bcryptjs\'); console.log(b.hashSync(\'YOUR_PASSWORD\' + process.env.PASSWORD_SALT, 12))"')
-        console.error('Set PASSWORD_SALT first, then set the resulting hash as OWNER_PASSWORD_HASH.')
+        const msg = [
+          'FATAL: OWNER_PASSWORD_HASH appears to be a SHA-256 hash (does not start with $2).',
+          'The password hashing algorithm was upgraded to bcrypt. Migrate with:',
+          '  node -e "const b=require(\'bcryptjs\'); console.log(b.hashSync(\'YOUR_PASSWORD\' + process.env.PASSWORD_SALT, 12))"',
+          'Set PASSWORD_SALT first, then set the resulting hash as OWNER_PASSWORD_HASH.',
+        ].join('\n')
+        throw new Error(msg)
       }
       AuthService.instance = new AuthService()
     }

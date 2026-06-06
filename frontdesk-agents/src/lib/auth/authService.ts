@@ -4,8 +4,14 @@
 import { cookies } from 'next/headers'
 import bcrypt from 'bcryptjs'
 
-const OWNER_PASSWORD_HASH = process.env.OWNER_PASSWORD_HASH || ''
-const PASSWORD_SALT = process.env.PASSWORD_SALT || ''
+function getOwnerPasswordHash(): string {
+  return process.env.OWNER_PASSWORD_HASH || ''
+}
+
+function getPasswordSalt(): string {
+  return process.env.PASSWORD_SALT || ''
+}
+
 const SESSION_COOKIE_NAME = 'owner_session'
 const SESSION_DURATION = 60 * 60 * 24 * 7 // 7 days
 
@@ -27,16 +33,6 @@ export class AuthService {
 
   public static getInstance(): AuthService {
     if (!AuthService.instance) {
-      // Detect legacy SHA-256 hashes at startup — fail fast, do not start with broken config
-      if (OWNER_PASSWORD_HASH && !OWNER_PASSWORD_HASH.startsWith('$2')) {
-        const msg = [
-          'FATAL: OWNER_PASSWORD_HASH appears to be a SHA-256 hash (does not start with $2).',
-          'The password hashing algorithm was upgraded to bcrypt. Migrate with:',
-          '  node -e "const b=require(\'bcryptjs\'); console.log(b.hashSync(\'YOUR_PASSWORD\' + process.env.PASSWORD_SALT, 12))"',
-          'Set PASSWORD_SALT first, then set the resulting hash as OWNER_PASSWORD_HASH.',
-        ].join('\n')
-        throw new Error(msg)
-      }
       AuthService.instance = new AuthService()
     }
     return AuthService.instance
@@ -45,17 +41,33 @@ export class AuthService {
   // Verify owner password using bcrypt comparison
   // OWNER_PASSWORD_HASH must be set to a bcrypt hash of (password + PASSWORD_SALT)
   async verifyPassword(password: string): Promise<boolean> {
+    const ownerPasswordHash = getOwnerPasswordHash()
+    const passwordSalt = getPasswordSalt()
+
+    // Detect legacy SHA-256 hashes at point of use — not at import time
+    // so that next build can collect page data without crashing
+    if (ownerPasswordHash && !ownerPasswordHash.startsWith('$2')) {
+      const msg = [
+        'FATAL: OWNER_PASSWORD_HASH appears to be a SHA-256 hash (does not start with $2).',
+        'The password hashing algorithm was upgraded to bcrypt. Migrate with:',
+        '  node -e "const b=require(\'bcryptjs\'); console.log(b.hashSync(\'YOUR_PASSWORD\' + process.env.PASSWORD_SALT, 12))"',
+        'Set PASSWORD_SALT first, then set the resulting hash as OWNER_PASSWORD_HASH.',
+      ].join('\n')
+      console.error(msg)
+      return false
+    }
+
     // Fail secure: both env vars must be set in all environments
-    if (!OWNER_PASSWORD_HASH || !PASSWORD_SALT) {
+    if (!ownerPasswordHash || !passwordSalt) {
       console.error('FATAL: OWNER_PASSWORD_HASH or PASSWORD_SALT is not configured!')
       return false
     }
 
     // Combine password with salt exactly as was done when hashing for storage
-    const saltedPassword = password + PASSWORD_SALT
+    const saltedPassword = password + passwordSalt
 
     try {
-      const valid = await bcrypt.compare(saltedPassword, OWNER_PASSWORD_HASH)
+      const valid = await bcrypt.compare(saltedPassword, ownerPasswordHash)
       return valid
     } catch (err) {
       console.error('Password verification error:', err)

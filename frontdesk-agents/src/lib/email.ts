@@ -3,18 +3,26 @@ import { render } from '@react-email/render'
 import { InvoiceEmail } from './emails/InvoiceEmail'
 import { AIAlertEmail } from './emails/AIAlertEmail'
 
-if (!process.env.RESEND_API_KEY) {
-  throw new Error('RESEND_API_KEY environment variable is not set')
-}
+// Lazy-initialize so that importing this module doesn't require RESEND_API_KEY
+// (e.g. in test files that transitively pull in email.ts)
+let _resend: Resend | null = null
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+function getResend(): Resend {
+  if (!_resend) {
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error('RESEND_API_KEY environment variable is not set')
+    }
+    _resend = new Resend(process.env.RESEND_API_KEY)
+  }
+  return _resend
+}
 
 // Read per-call so tests can override EMAIL_FROM between calls
 function getFromAddress() {
   return process.env.EMAIL_FROM ?? 'noreply@frontdeskagents.com'
 }
 
-// ─── Invoice / Billing Emails ───────────────────────────────────────────────
+// --- Invoice / Billing Emails ------------------------------------------------
 
 // Supports two call patterns:
 //   1. Raw HTML (backward compat): sendInvoiceEmail({ to, subject, html })
@@ -47,7 +55,7 @@ export async function sendInvoiceEmail(params: {
         })
       )
 
-  const { data, error } = await resend.emails.send({
+  const { data, error } = await getResend().emails.send({
     from: getFromAddress(),
     to: [to],
     subject,
@@ -57,7 +65,7 @@ export async function sendInvoiceEmail(params: {
   return data
 }
 
-// ─── AI Decision Engine Alert Emails ───────────────────────────────────────
+// --- AI Decision Engine Alert Emails ------------------------------------------
 
 export async function sendAIAlertEmail({
   severity,
@@ -94,7 +102,7 @@ export async function sendAIAlertEmail({
     })
   )
 
-  const { data, error } = await resend.emails.send({
+  const { data, error } = await getResend().emails.send({
     from: getFromAddress(),
     to: [process.env.OWNER_EMAIL ?? 'admin@frontdeskagents.com'],
     subject: `[${severity.toUpperCase()}] ${title}`,
@@ -104,7 +112,7 @@ export async function sendAIAlertEmail({
   return data
 }
 
-// ─── Generic send ───────────────────────────────────────────────────────────
+// --- Generic send -------------------------------------------------------------
 
 export async function sendEmail({
   to,
@@ -117,7 +125,7 @@ export async function sendEmail({
   html: string
   replyTo?: string
 }) {
-  const { data, error } = await resend.emails.send({
+  const { data, error } = await getResend().emails.send({
     from: getFromAddress(),
     to: Array.isArray(to) ? to : [to],
     subject,

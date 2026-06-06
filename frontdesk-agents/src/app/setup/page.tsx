@@ -8,7 +8,7 @@ import {
   Building2, Globe, Zap, Shield, MessageSquare 
 } from 'lucide-react'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://btjscudzrtarfommgegw.supabase.co'
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 
 interface EnvVar {
@@ -20,7 +20,7 @@ interface EnvVar {
 }
 
 const defaultEnvVars: EnvVar[] = [
-  { key: 'NEXT_PUBLIC_SUPABASE_URL', value: 'https://btjscudzrtarfommgegw.supabase.co', description: 'Supabase project URL', category: 'supabase', required: true },
+  { key: 'NEXT_PUBLIC_SUPABASE_URL', value: '', description: 'Supabase project URL (e.g. https://your-project.supabase.co)', category: 'supabase', required: true },
   { key: 'NEXT_PUBLIC_SUPABASE_ANON_KEY', value: '', description: 'Supabase anonymous key', category: 'supabase', required: true },
   { key: 'BLANDAI_API_KEY', value: '', description: 'Bland.ai API key for AI voice calls', category: 'communication', required: false },
   { key: 'BLANDAI_PHONE_NUMBER', value: '', description: 'Bland.ai phone number', category: 'communication', required: false },

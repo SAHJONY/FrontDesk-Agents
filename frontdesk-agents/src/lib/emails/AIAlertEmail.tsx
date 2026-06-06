@@ -15,9 +15,9 @@ interface AIAlertEmailProps {
   severity: 'critical' | 'high' | 'medium' | 'low'
   title: string
   description: string
-  category: string
-  trigger: string
-  reasoning: string
+  category?: string
+  trigger?: string
+  reasoning?: string
   recommendedAction?: string
   metadata?: Record<string, unknown>
   timestamp?: string
@@ -54,9 +54,9 @@ export function AIAlertEmail({
   severity,
   title,
   description,
-  category,
-  trigger,
-  reasoning,
+  category = 'alert',
+  trigger = title,
+  reasoning = description,
   recommendedAction,
   metadata,
   timestamp,
@@ -96,7 +96,7 @@ export function AIAlertEmail({
               </Column>
               <Column>
                 <Text style={{ ...styles.bannerLabel, color: config.color }}>
-                  {config.label} ALERT
+                  {`${config.label} ALERT`}
                 </Text>
                 <Text style={styles.bannerSub}>
                   AI Decision Engine · {category.toUpperCase()}

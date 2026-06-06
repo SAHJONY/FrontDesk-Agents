@@ -22,11 +22,22 @@ interface OwnerSession {
 // POST /api/owner/login - Owner login
 export async function POST(request: NextRequest) {
   try {
-    // Validate production configuration
+    // Validate production configuration — fail fast if critical env vars are missing
     if (!OWNER_EMAIL) {
       console.error('OWNER_EMAIL env var is not configured')
       return NextResponse.json(
         { success: false, error: 'Server configuration error' },
+        { status: 500 }
+      )
+    }
+
+    const passwordSalt = process.env.PASSWORD_SALT
+    const ownerPasswordHash = process.env.OWNER_PASSWORD_HASH
+    if (!passwordSalt || !ownerPasswordHash) {
+      // Give a specific message so operators know it's a config problem, not a user problem
+      console.error('FATAL: PASSWORD_SALT or OWNER_PASSWORD_HASH is not configured. See PRODUCTION.md §Owner-Auth.')
+      return NextResponse.json(
+        { success: false, error: 'Server configuration error: owner credentials not set. See PRODUCTION.md.' },
         { status: 500 }
       )
     }
@@ -61,11 +72,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Owner name from env — must be configured
+    const ownerName = process.env.OWNER_NAME || 'Platform Owner'
+
     // Create session
     const session: OwnerSession = {
       id: crypto.randomUUID(),
       email: OWNER_EMAIL,
-      name: 'Juan Gonzalez',
+      name: ownerName,
       role: 'Platform Owner',
       authenticated: true,
       loginTime: new Date().toISOString()

@@ -266,11 +266,35 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     })
     if (!result) {
       console.error('Failed to update customer after checkout:', customerId)
-    } else {
-      console.log('Checkout completed - customer provisioned:', customerId, 'plan:', planId)
+      return
     }
+
+    // Create billing_history record for the initial checkout
+    // invoice_id is UNIQUE so this is idempotent — safe to call on every checkout.session.completed
+    const amountTotal = typeof session.amount_total === 'number' ? session.amount_total : 0
+    const record = await createBillingRecord({
+      customer_id: customerId,
+      invoice_id: session.id, // checkout session ID serves as the invoice ID for the first payment
+      subscription_id: subscriptionId as string,
+      amount: amountTotal,
+      currency: session.currency || 'usd',
+      status: 'succeeded',
+      description: `Initial subscription to ${planId} plan — FrontDesk Agents AI`,
+      billing_reason: 'initial',
+      invoice_pdf_url: (session as any).invoice_pdf || null,
+      period_start: null,
+      period_end: null
+    })
+
+    if (!record) {
+      console.error('Failed to create billing_history record for checkout session:', session.id)
+    } else {
+      console.log('Billing record created — customer:', customerId, 'invoice:', session.id, 'amount:', amountTotal)
+    }
+
+    console.log('Checkout completed - customer provisioned:', customerId, 'plan:', planId)
   } catch (error) {
-    console.error('Error updating customer after checkout:', error)
+    console.error('Error handling checkout complete:', error)
   }
 }
 

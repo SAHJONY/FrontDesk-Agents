@@ -11,6 +11,9 @@ const SESSION_DURATION = 60 * 60 * 24 * 7 // 7 days
 
 export interface OwnerSession {
   id: string
+  email: string
+  name: string
+  role: string
   authenticated: boolean
   loginTime: string
   lastActivity: string
@@ -62,12 +65,17 @@ export class AuthService {
 
   // Create session
   async createSession(): Promise<OwnerSession> {
+    const ownerEmail = process.env.OWNER_EMAIL || ''
+    const ownerName = process.env.OWNER_NAME || 'Platform Owner'
     const session: OwnerSession = {
       id: crypto.randomUUID(),
+      email: ownerEmail,
+      name: ownerName,
+      role: 'Platform Owner',
       authenticated: true,
       loginTime: new Date().toISOString(),
       lastActivity: new Date().toISOString(),
-      permissions: ['all']
+      permissions: ['all'],
     }
 
     const cookieStore = await cookies()

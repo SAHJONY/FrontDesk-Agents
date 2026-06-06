@@ -1,5 +1,8 @@
-// Simple in-memory rate limiter for API protection
-// For production, use Redis or a cloud rate limiting service
+// Rate limiter for API protection
+// Provides in-memory rate limiting for single-instance deployments.
+// For production serverless (Vercel) or multi-instance, replace with
+// Upstash Redis or Vercel's Edge Config rate limiting.
+// See PRODUCTION.md §Rate-Limiting for migration guide.
 
 import { NextRequest } from 'next/server'
 
@@ -21,7 +24,9 @@ export function getClientIp(request: NextRequest): string {
   }
 }
 
-export const rateLimitStore = new Map<string, RateLimitEntry>()
+// In-memory store — resets on every cold start on Vercel serverless.
+// For production with multiple instances, use a distributed store.
+const rateLimitStore = new Map<string, RateLimitEntry>()
 
 export interface RateLimitConfig {
   maxRequests: number
@@ -35,16 +40,10 @@ export function rateLimit(
   const now = Date.now()
   const entry = rateLimitStore.get(key)
 
-  // Clean up expired entries periodically
-  if (Math.random() < 0.01) {
-    cleanupExpiredEntries(now)
-  }
-
   if (!entry || now > entry.resetTime) {
-    // New window
     rateLimitStore.set(key, {
       count: 1,
-      resetTime: now + config.windowMs
+      resetTime: now + config.windowMs,
     })
     return { success: true, remaining: config.maxRequests - 1, resetIn: config.windowMs }
   }
@@ -53,7 +52,7 @@ export function rateLimit(
     return {
       success: false,
       remaining: 0,
-      resetIn: entry.resetTime - now
+      resetIn: entry.resetTime - now,
     }
   }
 
@@ -61,31 +60,53 @@ export function rateLimit(
   return {
     success: true,
     remaining: config.maxRequests - entry.count,
-    resetIn: entry.resetTime - now
+    resetIn: entry.resetTime - now,
   }
 }
 
-function cleanupExpiredEntries(now: number) {
-  for (const [key, entry] of rateLimitStore.entries()) {
-    if (now > entry.resetTime) {
-      rateLimitStore.delete(key)
-    }
-  }
-}
+// Auth-specific rate limiter: 5 attempts per minute per IP
+// Uses a separate namespace from general rate limiting
+const authRateLimitStore = new Map<string, RateLimitEntry>()
 
-// Resets the in-memory rate limit store — use only in tests
-export function resetRateLimitStore(): void {
-  rateLimitStore.clear()
-}
-
-// Auth-specific rate limiter (stricter)
 export function authRateLimit(ip: string): { success: boolean; retryAfter?: number } {
   const key = `auth:${ip}`
-  const config = { maxRequests: 5, windowMs: 60000 } // 5 attempts per minute
-  const result = rateLimit(key, config)
-  
-  if (!result.success) {
-    return { success: false, retryAfter: Math.ceil(result.resetIn / 1000) }
+  const windowMs = 60_000
+  const maxRequests = 5
+  const now = Date.now()
+  const entry = authRateLimitStore.get(key)
+
+  if (!entry || now > entry.resetTime) {
+    authRateLimitStore.set(key, {
+      count: 1,
+      resetTime: now + windowMs,
+    })
+    return { success: true }
   }
+
+  if (entry.count >= maxRequests) {
+    return {
+      success: false,
+      retryAfter: Math.ceil((entry.resetTime - now) / 1000),
+    }
+  }
+
+  entry.count++
   return { success: true }
 }
+
+// Resets the in-memory store — use ONLY in tests
+export function resetRateLimitStore(): void {
+  rateLimitStore.clear()
+  authRateLimitStore.clear()
+}
+
+// ─── Serverless-compatible note ─────────────────────────────────────────────
+// Vercel serverless functions are stateless — each cold start gets a fresh
+// in-memory Map. For production on Vercel:
+//   Option A: Upstash Redis (free tier: 10k req/day)
+//     import { Redis } from '@upstash/redis'
+//   Option B: Vercel Edge Config (rate limiting via KV store)
+//   Option C: Self-host on Railway/Render with persistent Redis
+//
+// To migrate: replace rateLimitStore.get/set with Redis.incr() and TTL.
+// See PRODUCTION.md §Rate-Limiting for step-by-step instructions.

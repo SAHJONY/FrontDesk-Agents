@@ -1,0 +1,13 @@
+  ▲ Next.js 14.2.3
+  - Local:        http://localhost:3000
+  - Environments: .env.local, .env
+
+ ✓ Starting...
+ ✓ Ready in 6.7s
+ ○ Compiling /api/health ...
+ ✓ Compiled /api/health in 1603ms (53 modules)
+ GET /api/health 200 in 1945ms
+ GET /api/health 200 in 59ms
+   Reload env: .env.local
+ ✓ Compiled in 8.6s (254 modules)
+[?25h

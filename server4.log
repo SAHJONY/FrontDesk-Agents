@@ -1,0 +1,86 @@
+  ▲ Next.js 14.2.3
+  - Local:        http://localhost:3000
+  - Environments: .env.local, .env
+
+ ✓ Starting...
+ ✓ Ready in 5.3s
+ ○ Compiling /api/health ...
+ ✓ Compiled /api/health in 1478ms (53 modules)
+ GET /api/health 200 in 1819ms
+ ○ Compiling /src/middleware ...
+ ✓ Compiled /src/middleware in 1360ms (73 modules)
+ ○ Compiling /api/customer/register ...
+ ✓ Compiled /api/customer/register in 7.6s (122 modules)
+TypeError: fetch failed
+    at node:internal/deps/undici/undici:16480:13
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async _handleRequest (webpack-internal:///(rsc)/./node_modules/@supabase/auth-js/dist/module/lib/fetch.js:122:18)
+    at async _request (webpack-internal:///(rsc)/./node_modules/@supabase/auth-js/dist/module/lib/fetch.js:112:18)
+    at async SupabaseAuthClient.signUp (webpack-internal:///(rsc)/./node_modules/@supabase/auth-js/dist/module/GoTrueClient.js:654:23)
+    at async signUpCustomer (webpack-internal:///(rsc)/./src/lib/customer-auth.ts:25:54)
+    at async POST (webpack-internal:///(rsc)/./src/app/api/customer/register/route.ts:55:24)
+    at async C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:53446
+    at async e_.execute (C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:44747)
+    at async e_.handle (C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:54700)
+    at async doRender (C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\server\base-server.js:1377:42)
+    at async cacheEntry.responseCache.get.routeKind (C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\server\base-server.js:1599:28)
+    at async DevServer.renderToResponseWithComponentsImpl (C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\server\base-server.js:1507:28)
+    at async DevServer.renderPageComponent (C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\server\base-server.js:1924:24)
+    at async DevServer.renderToResponseImpl (C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\server\base-server.js:1962:32)
+    at async DevServer.pipeImpl (C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\server\base-server.js:920:25)
+    at async NextNodeServer.handleCatchallRenderRequest (C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\server\next-server.js:272:17)
+    at async DevServer.handleRequestImpl (C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\server\base-server.js:816:17)
+    at async C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\server\dev\next-dev-server.js:339:20
+    at async Span.traceAsyncFn (C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\trace\trace.js:154:20)
+    at async DevServer.handleRequest (C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\server\dev\next-dev-server.js:336:24)
+    at async invokeRender (C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\server\lib\router-server.js:174:21)
+    at async handleRequest (C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\server\lib\router-server.js:353:24)
+    at async requestHandlerImpl (C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\server\lib\router-server.js:377:13)
+    at async Server.requestListener (C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\server\lib\start-server.js:141:13) {
+  [cause]: Error: getaddrinfo ENOTFOUND awzczbaarskqjgdatefv.supabase.co
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:121:26) {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'awzczbaarskqjgdatefv.supabase.co'
+  }
+}
+ POST /api/customer/register 400 in 8063ms
+ ✓ Compiled /api/customer/session in 263ms (124 modules)
+ GET /api/customer/session 401 in 363ms
+ ✓ Compiled /api/customer/login in 314ms (126 modules)
+TypeError: fetch failed
+    at node:internal/deps/undici/undici:16480:13
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async _handleRequest (webpack-internal:///(rsc)/./node_modules/@supabase/auth-js/dist/module/lib/fetch.js:122:18)
+    at async _request (webpack-internal:///(rsc)/./node_modules/@supabase/auth-js/dist/module/lib/fetch.js:112:18)
+    at async SupabaseAuthClient.signInWithPassword (webpack-internal:///(rsc)/./node_modules/@supabase/auth-js/dist/module/GoTrueClient.js:828:23)
+    at async signInCustomer (webpack-internal:///(rsc)/./src/lib/customer-auth.ts:104:54)
+    at async POST (webpack-internal:///(rsc)/./src/app/api/customer/login/route.ts:36:24)
+    at async C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:53446
+    at async e_.execute (C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:44747)
+    at async e_.handle (C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:54700)
+    at async doRender (C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\server\base-server.js:1377:42)
+    at async cacheEntry.responseCache.get.routeKind (C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\server\base-server.js:1599:28)
+    at async DevServer.renderToResponseWithComponentsImpl (C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\server\base-server.js:1507:28)
+    at async DevServer.renderPageComponent (C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\server\base-server.js:1924:24)
+    at async DevServer.renderToResponseImpl (C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\server\base-server.js:1962:32)
+    at async DevServer.pipeImpl (C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\server\base-server.js:920:25)
+    at async NextNodeServer.handleCatchallRenderRequest (C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\server\next-server.js:272:17)
+    at async DevServer.handleRequestImpl (C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\server\base-server.js:816:17)
+    at async C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\server\dev\next-dev-server.js:339:20
+    at async Span.traceAsyncFn (C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\trace\trace.js:154:20)
+    at async DevServer.handleRequest (C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\server\dev\next-dev-server.js:336:24)
+    at async invokeRender (C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\server\lib\router-server.js:174:21)
+    at async handleRequest (C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\server\lib\router-server.js:353:24)
+    at async requestHandlerImpl (C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\server\lib\router-server.js:377:13)
+    at async Server.requestListener (C:\Users\juani\frontdesk-agents\frontdesk-agents\node_modules\next\dist\server\lib\start-server.js:141:13) {
+  [cause]: Error: getaddrinfo ENOTFOUND awzczbaarskqjgdatefv.supabase.co
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:121:26) {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'awzczbaarskqjgdatefv.supabase.co'
+  }
+}
+ POST /api/customer/login 401 in 413ms

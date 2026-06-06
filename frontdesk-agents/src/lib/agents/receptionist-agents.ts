@@ -13,11 +13,47 @@ import { IndustryType, AgentType, AIResponse, InteractionContext } from './types
 import { aiOrchestrator } from '../ceo-brain/AIOpsOrchestrator'
 import { ceoBrain } from '../ceo-brain/CEOBrain'
 
+// ─── Case Outcome Tracking Types ────────────────────────────────────────────
+
+export type CallOutcomeType =
+  | 'greeting_sent'
+  | 'case_routed'
+  | 'scheduling_initiated'
+  | 'escalation_initiated'
+  | 'transfer_completed'
+  | 'voicemail_captured'
+  | 'message_taken'
+  | 'callback_scheduled'
+
+export interface VerticalOutcomeEntry {
+  vertical: IndustryType
+  outcome: CallOutcomeType
+  timestamp: string
+  duration: number
+  confidence: number
+  routedTo?: string
+  notes?: string
+}
+
+export interface VerticalCallOutcomes {
+  family_law: VerticalOutcomeEntry[]
+  immigration: VerticalOutcomeEntry[]
+  bankruptcy: VerticalOutcomeEntry[]
+  ip_law: VerticalOutcomeEntry[]
+  totalCalls: number
+  totalRouted: number
+  totalEscalated: number
+  totalScheduled: number
+  avgDuration: number
+  periodStart: string
+  periodEnd: string
+}
+
 // ============================================================================
 // BASE RECEPTIONIST AGENT
 // ============================================================================
 
-interface Task {
+export interface Task {
   id: string
   type: string
   description: string
@@ -33,13 +69,13 @@ interface Task {
   completedAt?: Date
 }
 
-interface TaskContext {
+export interface TaskContext {
   userRequest: string
   sessionId: string
   variables: Record<string, unknown>
 }
 
-interface TaskResult {
+export interface TaskResult {
   success: boolean
   output?: unknown
   error?: string
@@ -187,11 +223,183 @@ export abstract class BaseReceptionistAgent extends EventEmitter {
         (this.state.metrics.averageExecutionTime * (totalTasks - 1) + duration) / totalTasks
     }
   }
+
+  // ─── Case Outcome Tracking ─────────────────────────────────────────────────
+  private verticalOutcomes: VerticalOutcomeEntry[] = []
+  private readonly MAX_OUTCOMES_STORED = 500
+
+  /** Record a call outcome for a specific legal vertical */
+  protected recordVerticalOutcome(
+    vertical: IndustryType,
+    outcome: CallOutcomeType,
+    duration: number,
+    confidence: number,
+    routedTo?: string,
+    notes?: string
+  ): void {
+    if (!['family_law', 'immigration', 'bankruptcy', 'ip_law'].includes(vertical)) return
+    const entry: VerticalOutcomeEntry = {
+      vertical, outcome, timestamp: new Date().toISOString(),
+      duration, confidence, routedTo, notes
+    }
+    this.verticalOutcomes.push(entry)
+    if (this.verticalOutcomes.length > this.MAX_OUTCOMES_STORED) {
+      this.verticalOutcomes = this.verticalOutcomes.slice(-this.MAX_OUTCOMES_STORED)
+    }
+    this.emit('verticalOutcome', entry)
+  }
+
+  /** Get aggregated call outcomes for all 4 legal verticals */
+  public getVerticalCallOutcomes(): VerticalCallOutcomes {
+    const verticals: IndustryType[] = ['family_law', 'immigration', 'bankruptcy', 'ip_law']
+    const result: VerticalCallOutcomes = {
+      family_law: [], immigration: [], bankruptcy: [], ip_law: [],
+      totalCalls: 0, totalRouted: 0, totalEscalated: 0, totalScheduled: 0, avgDuration: 0,
+      periodStart: '', periodEnd: ''
+    }
+    const byVertical: Record<string, VerticalOutcomeEntry[]> = {
+      family_law: [], immigration: [], bankruptcy: [], ip_law: []
+    }
+    for (const entry of this.verticalOutcomes) {
+      if (byVertical[entry.vertical]) byVertical[entry.vertical].push(entry)
+    }
+    for (const v of verticals) {
+      const entry: VerticalOutcomeEntry[] = byVertical[v] || []
+      ;(result as unknown as Record<string, VerticalOutcomeEntry[]>)[v] = entry
+      result.totalCalls += entry.length
+      result.totalRouted += entry.filter((e: VerticalOutcomeEntry) =>
+        e.outcome === 'case_routed' || e.outcome === 'transfer_completed').length
+      result.totalEscalated += entry.filter((e: VerticalOutcomeEntry) => e.outcome === 'escalation_initiated').length
+      result.totalScheduled += entry.filter((e: VerticalOutcomeEntry) =>
+        e.outcome === 'scheduling_initiated' || e.outcome === 'callback_scheduled').length
+    }
+    const allDurations = this.verticalOutcomes.map((e: VerticalOutcomeEntry) => e.duration).filter((d: number) => d > 0)
+    result.avgDuration = allDurations.length > 0
+      ? allDurations.reduce((a: number, b: number) => a + b, 0) / allDurations.length : 0
+    if (this.verticalOutcomes.length > 0) {
+      result.periodStart = this.verticalOutcomes[0].timestamp
+      result.periodEnd = this.verticalOutcomes[this.verticalOutcomes.length - 1].timestamp
+    }
+    return result
+  }
+
+  /** Per-vertical performance summary for analytics dashboards */
+  public getVerticalPerformance(): Record<IndustryType, {
+    total: number; routed: number; escalated: number; scheduled: number
+    avgDuration: number; resolutionRate: number
+  }> {
+    const verticals: IndustryType[] = ['family_law', 'immigration', 'bankruptcy', 'ip_law']
+    const outcomes = this.getVerticalCallOutcomes()
+    const perf: Record<string, any> = {}
+    for (const v of verticals) {
+      const entries: VerticalOutcomeEntry[] = (outcomes as unknown as Record<string, VerticalOutcomeEntry[]>)[v] ?? []
+      const durations = entries.map((e: VerticalOutcomeEntry) => e.duration).filter((d: number) => d > 0)
+      const resolved = entries.filter((e: VerticalOutcomeEntry) =>
+        e.outcome !== 'escalation_initiated' && e.outcome !== 'voicemail_captured').length
+      perf[v] = {
+        total: entries.length,
+        routed: entries.filter((e: VerticalOutcomeEntry) => e.outcome === 'case_routed' || e.outcome === 'transfer_completed').length,
+        escalated: entries.filter((e: VerticalOutcomeEntry) => e.outcome === 'escalation_initiated').length,
+        scheduled: entries.filter((e: VerticalOutcomeEntry) => e.outcome === 'scheduling_initiated' || e.outcome === 'callback_scheduled').length,
+        avgDuration: durations.length > 0 ? durations.reduce((a: number, b: number) => a + b, 0) / durations.length : 0,
+        resolutionRate: entries.length > 0 ? Math.round((resolved / entries.length) * 100) : 0
+      }
+    }
+    return perf as Record<IndustryType, {
+      total: number; routed: number; escalated: number; scheduled: number
+      avgDuration: number; resolutionRate: number
+    }>
+  }
 }
 
 // ============================================================================
 // ARIA - VOICE AI RECEPTIONIST AGENT
 // ============================================================================
+
+// Case-type routing: maps keyword patterns to legal vertical departments
+export interface CaseRoute {
+  vertical: IndustryType
+  department: string
+  confidence: number
+  matchedKeywords: string[]
+}
+
+const CASE_TYPE_PATTERNS: {
+  vertical: IndustryType
+  department: string
+  keywords: string[]
+  phrases: string[]
+}[] = [
+  {
+    vertical: 'family_law',
+    department: 'Family Law',
+    keywords: ['divorce', 'custody', 'child', 'children', 'spousal', 'alimony', 'adoption', 'adopt', 'mediation', 'prenuptial', 'prenup', 'domestic', 'restraining', 'visitation', 'parenting', 'separation', 'marital'],
+    phrases: ['child support', 'spousal support', 'child custody', 'parenting plan', 'dissolution of marriage', 'marital settlement', 'domestic violence', 'emergency protective', ' restraining order', 'family court']
+  },
+  {
+    vertical: 'immigration',
+    department: 'Immigration',
+    keywords: ['visa', 'green card', 'citizen', 'citizenship', 'asylum', 'deportation', 'detention', 'immigrant', 'nonimmigrant', 'work permit', 'ead', 'uscis', 'h1b', 'l1', 'opt', 'naturalization', 'status', 'visa expired', 'renewal'],
+    phrases: ['work authorization', 'adjustment of status', 'family petition', 'employment based', 'consular processing', 'border patrol', 'ice raid', 'removal proceedings', 'bond hearing', 'appeal denied']
+  },
+  {
+    vertical: 'bankruptcy',
+    department: 'Bankruptcy',
+    keywords: ['debt', 'bankrupt', 'chapter 7', 'chapter 13', 'creditor', 'foreclosure', 'garnishment', 'levy', 'repossession', 'repossess', 'automatic stay', 'discharge', 'trustee', 'exemption', 'liquidation', 'reorganization'],
+    phrases: ['wage garnishment', 'bank levy', 'foreclosure sale', 'judgment creditor', 'collection agency', 'debt collector', 'notice to creditor', '341 meeting', 'proof of claim', 'reaffirmation agreement']
+  },
+  {
+    vertical: 'ip_law',
+    department: 'IP Law',
+    keywords: ['trademark', 'copyright', 'patent', 'intellectual property', 'infringement', 'pirated', 'pirate', 'counterfeit', 'licensing', 'trade secret', 'nda', 'confidential', ' cease and desist', 'cease desist', 'uspsto', 'trade dress'],
+    phrases: ['cease and desist', 'infringement notice', 'DMCA takedown', 'copyright infringement', 'trademark registration', 'patent application', 'IP license', 'royalty agreement', 'work for hire', 'nondisclosure agreement']
+  }
+]
+
+/**
+ * Analyze caller purpose text and route to the appropriate legal vertical.
+ * Returns the matched vertical, department, confidence score, and matched keywords.
+ */
+function routeCaseByPurpose(purposeText: string): CaseRoute | null {
+  const normalized = (purposeText || '').toLowerCase()
+  let bestMatch: CaseRoute | null = null
+  let highestScore = 0
+
+  for (const pattern of CASE_TYPE_PATTERNS) {
+    const matchedKeywords: string[] = []
+
+    // Check keyword matches
+    for (const kw of pattern.keywords) {
+      if (normalized.includes(kw)) {
+        matchedKeywords.push(kw)
+      }
+    }
+
+    // Check phrase matches (more specific, worth more)
+    for (const phrase of pattern.phrases) {
+      if (normalized.includes(phrase)) {
+        matchedKeywords.push(phrase)
+      }
+    }
+
+    if (matchedKeywords.length === 0) continue
+
+    // Score: phrase matches count 2x keyword matches
+    const score = matchedKeywords.filter(k => k.includes(' ')).length * 2 + matchedKeywords.filter(k => !k.includes(' ')).length
+
+    if (score > highestScore) {
+      highestScore = score
+      bestMatch = {
+        vertical: pattern.vertical,
+        department: pattern.department,
+        confidence: Math.min(score / 3, 1.0),
+        matchedKeywords
+      }
+    }
+  }
+
+  return bestMatch
+}
 
 export class VoiceReceptionistAgent extends BaseReceptionistAgent {
   private conversationHistory: Map<string, Array<{ role: string; content: string; timestamp: Date }>> = new Map()
@@ -204,7 +412,7 @@ export class VoiceReceptionistAgent extends BaseReceptionistAgent {
       capabilities: [{
         name: 'voice_receptionist',
         description: '24/7 Voice AI receptionist for phone calls and visitor interactions',
-        tools: ['greet_visitor', 'collect_info', 'transfer_call', 'take_message'],
+        tools: ['greet_visitor', 'collect_info', 'route_case', 'transfer_call', 'take_message', 'vertical_analytics'],
         maxConcurrentTasks: 10
       }]
     })
@@ -217,6 +425,10 @@ export class VoiceReceptionistAgent extends BaseReceptionistAgent {
         const greetings: Record<IndustryType, string> = {
           healthcare: 'Welcome to our medical facility. How may I assist you today?',
           legal: 'Welcome to our law office. How may I assist you with your legal matters?',
+          family_law: 'Welcome to our family law practice. How may I help you today?',
+          immigration: 'Welcome to our immigration law practice. We are here to help with your immigration matters.',
+          bankruptcy: 'Welcome to our bankruptcy law practice. How may I assist you with your financial relief options?',
+          ip_law: 'Welcome to our intellectual property law practice. How may I help protect your innovations?',
           realestate: 'Welcome to our real estate office. How may I help you find your dream property?',
           hospitality: 'Welcome to our hotel. How may I enhance your stay today?',
           corporate: 'Welcome to our corporate office. How may I assist you today?',
@@ -252,6 +464,35 @@ export class VoiceReceptionistAgent extends BaseReceptionistAgent {
           },
           duration: 0
         }
+      }
+    })
+
+    this.registerTool({
+      name: 'route_case',
+      description: 'Analyze caller purpose and route to the correct legal vertical department',
+      execute: async (params: unknown) => {
+        const p = params as { purpose: string; industry?: IndustryType }
+        // If industry is already set to a specific vertical, use it directly
+        if (p.industry && p.industry !== 'legal' && p.industry !== 'corporate' && p.industry !== 'healthcare' && p.industry !== 'realestate' && p.industry !== 'hospitality' && p.industry !== 'retail' && p.industry !== 'education' && p.industry !== 'government') {
+          const deptMap: Record<string, string> = {
+            family_law: 'Family Law', immigration: 'Immigration',
+            bankruptcy: 'Bankruptcy', ip_law: 'IP Law',
+            healthcare: 'Healthcare', realestate: 'Real Estate',
+            hospitality: 'Hospitality', retail: 'Retail',
+            education: 'Education', government: 'Government'
+          }
+          return {
+            success: true,
+            output: { vertical: p.industry, department: deptMap[p.industry] || 'General', confidence: 1.0, matchedKeywords: [] },
+            duration: 0
+          }
+        }
+        // Route by purpose keywords
+        const route = routeCaseByPurpose(p.purpose)
+        if (route) {
+          return { success: true, output: route, duration: 0 }
+        }
+        return { success: true, output: { vertical: 'legal', department: 'General', confidence: 0.5, matchedKeywords: [] }, duration: 0 }
       }
     })
 
@@ -292,43 +533,138 @@ export class VoiceReceptionistAgent extends BaseReceptionistAgent {
         }
       }
     })
+
+    this.registerTool({
+      name: 'vertical_analytics',
+      description: 'Get call handling performance analytics per legal vertical',
+      execute: async () => {
+        const outcomes = this.getVerticalCallOutcomes()
+        const perf = this.getVerticalPerformance()
+        return {
+          success: true,
+          output: { outcomes, performance: perf },
+          duration: 0
+        }
+      }
+    })
   }
 
   getCapabilities(): string[] {
-    return ['Phone Calls', 'Appointment Scheduling', 'Lead Capture', '24/7 Availability', 'Multi-language']
+    return ['Phone Calls', 'Appointment Scheduling', 'Lead Capture', 'Case Routing', '24/7 Availability', 'Multi-language']
   }
 
   async executeTask(task: Task): Promise<TaskResult> {
     const context = task.context.variables as { industry?: IndustryType; visitorName?: string; purpose?: string }
 
-    // Route based on purpose
+    // Route based on purpose using case-type routing
     const purpose = (context.purpose || '').toLowerCase()
 
-    if (purpose.includes('appointment') || purpose.includes('schedule')) {
+    // Step 1: Attempt case-type routing to a specific legal vertical
+    const routeResult = await this.executeTool('route_case', {
+      purpose: context.purpose,
+      industry: context.industry
+    })
+    const route = routeResult.output as CaseRoute | undefined
+
+    // High-confidence vertical match — route directly to that department
+    if (route && route.confidence >= 0.6 && route.vertical !== 'legal') {
+      const result = await this.executeTool('transfer_call', {
+        department: route.department,
+        reason: context.purpose || ''
+      })
+      const out = result.output as { transferTo?: string; reason?: string; estimatedWait?: string } | undefined
+      // Track case routing outcome for analytics
+      const v1: IndustryType = route.vertical as IndustryType
+      if (v1 === 'family_law' || v1 === 'immigration' || v1 === 'bankruptcy' || v1 === 'ip_law') {
+        this.recordVerticalOutcome(v1, 'case_routed', 0, route.confidence, route.department)
+      }
+      return {
+        success: true,
+        output: {
+          agent: 'ARIA',
+          action: 'case_routed',
+          routedTo: route.department,
+          vertical: route.vertical,
+          matchedKeywords: route.matchedKeywords,
+          confidence: route.confidence,
+          transferTo: out?.transferTo,
+          reason: out?.reason,
+          estimatedWait: out?.estimatedWait
+        }
+      }
+    }
+
+    // Step 2: Check for scheduling intent
+    if (purpose.includes('appointment') || purpose.includes('schedule') || purpose.includes('consultation')) {
+      // Route scheduling to the detected vertical, or to legal general
+      const dept = route?.department || 'Legal Intake'
       const result = await this.executeTool('collect_info', {
         visitorName: context.visitorName,
         purpose: context.purpose
       })
       const out = result.output as { visitorId?: string; name?: string; purpose?: string } | undefined
-      return { success: true, output: { agent: 'ARIA', action: 'scheduling_initiated', visitorId: out?.visitorId, name: out?.name, purpose: out?.purpose } }
+      const v2: IndustryType = (route?.vertical || 'legal') as IndustryType
+      if (v2 === 'family_law' || v2 === 'immigration' || v2 === 'bankruptcy' || v2 === 'ip_law') {
+        this.recordVerticalOutcome(v2, 'scheduling_initiated', 0, route?.confidence || 0, dept)
+      }
+      return {
+        success: true,
+        output: {
+          agent: 'ARIA',
+          action: 'scheduling_initiated',
+          routedTo: dept,
+          vertical: v2,
+          visitorId: out?.visitorId,
+          name: out?.name,
+          purpose: out?.purpose
+        }
+      }
     }
 
-    if (purpose.includes('speak') || purpose.includes('human') || purpose.includes('real')) {
+    // Step 3: Check for human/escalation intent
+    if (purpose.includes('speak') || purpose.includes('human') || purpose.includes('real') || purpose.includes('attorney') || purpose.includes('lawyer')) {
+      const dept = route?.department || 'Legal Intake'
       const result = await this.executeTool('transfer_call', {
-        department: 'escalation',
-        reason: context.purpose
+        department: dept,
+        reason: context.purpose || ''
       })
       const out = result.output as { transferTo?: string; reason?: string; estimatedWait?: string } | undefined
-      return { success: true, output: { agent: 'ARIA', action: 'escalation_initiated', transferTo: out?.transferTo, reason: out?.reason, estimatedWait: out?.estimatedWait } }
+      const v3: IndustryType = (route?.vertical || 'legal') as IndustryType
+      if (v3 === 'family_law' || v3 === 'immigration' || v3 === 'bankruptcy' || v3 === 'ip_law') {
+        this.recordVerticalOutcome(v3, 'escalation_initiated', 0, route?.confidence || 0, dept)
+      }
+      return {
+        success: true,
+        output: {
+          agent: 'ARIA',
+          action: 'escalation_initiated',
+          routedTo: dept,
+          vertical: v3,
+          transferTo: out?.transferTo,
+          reason: out?.reason,
+          estimatedWait: out?.estimatedWait
+        }
+      }
     }
 
-    // Default greeting
+    // Step 4: Default greeting with detected industry context
     const result = await this.executeTool('greet_visitor', {
       visitorName: context.visitorName,
-      industry: context.industry
+      industry: route?.vertical || context.industry
     })
     const out = result.output as { greeting?: string; visitorName?: string } | undefined
-    return { success: true, output: { agent: 'ARIA', action: 'greeting_sent', greeting: out?.greeting, visitorName: out?.visitorName } }
+    return {
+      success: true,
+      output: {
+        agent: 'ARIA',
+        action: 'greeting_sent',
+        routedTo: route?.department || context.industry || 'general',
+        vertical: route?.vertical,
+        confidence: route?.confidence || 0,
+        greeting: out?.greeting,
+        visitorName: out?.visitorName
+      }
+    }
   }
 
   // Voice-specific method
@@ -636,13 +972,52 @@ export class KnowledgeAgent extends BaseReceptionistAgent {
       { question: 'Pool hours?', answer: 'Pool is open 6am-10pm daily', keywords: ['pool', 'hours', 'time'], category: 'amenities' }
     ])
 
+    // Family Law
+    this.knowledgeBase.set('family_law', [
+      { question: 'How do I file for divorce?', answer: 'To file for divorce, you need to submit a petition to your local family court. Our attorneys can guide you through the process including serving papers and financial disclosures.', keywords: ['divorce', 'filing', 'petition', 'court'], category: 'divorce' },
+      { question: 'How is child custody determined?', answer: 'Courts determine custody based on the best interests of the child, considering each parent\'s relationship, stability, ability to provide, and the child\'s preferences where appropriate.', keywords: ['custody', 'children', 'parenting', 'visitiation'], category: 'custody' },
+      { question: 'What is spousal support?', answer: 'Spousal support (alimony) is financial assistance ordered by a court from one spouse to another during or after divorce proceedings, based on need, duration of marriage, and earning capacity.', keywords: ['alimony', 'support', 'spousal', 'maintenance'], category: 'support' },
+      { question: 'How do I modify a custody order?', answer: 'To modify a custody order, you must demonstrate a material change in circumstances affecting the child\'s welfare. File a motion with the original court and attend a hearing.', keywords: ['modify', 'change', 'custody order', 'modification'], category: 'custody' },
+      { question: 'What is the process for adoption?', answer: 'Adoption involves background checks, home studies, placement matching, and finalization hearings. Our team handles domestic, international, and stepparent adoptions.', keywords: ['adoption', 'child', 'parent', 'foster'], category: 'adoption' },
+      { question: 'How does mediation work?', answer: 'Mediation is a confidential process where a neutral mediator helps both parties reach agreement on custody, support, and property division without going to trial.', keywords: ['mediation', 'mediate', 'agreement', 'negotiate'], category: 'process' }
+    ])
+
+    // Immigration Law
+    this.knowledgeBase.set('immigration', [
+      { question: 'How long does visa processing take?', answer: 'Processing times vary by visa type and service center. Generally, work visas take 2-6 months and family petitions may take 12-24 months. You can check current times at USCIS.gov.', keywords: ['visa', 'processing time', 'wait', 'duration'], category: 'visas' },
+      { question: 'What documents do I need for a green card?', answer: 'Typical documents include passport photos, birth certificate, marriage certificate (if applicable), proof of lawful entry, and supporting documentation for your eligibility category.', keywords: ['green card', 'documents', 'evidence', 'documents required'], category: 'greencard' },
+      { question: 'How do I check my case status?', answer: 'You can check your case status online at USCIS.gov using your receipt number, or call our office and we can provide updates on your case progress.', keywords: ['status', 'check', 'case', 'track'], category: 'general' },
+      { question: 'What is the difference between asylum and refugee status?', answer: 'Refugee status is granted before entering the US based on past persecution. Asylum is applied for within one year of arrival in the US, based on fear of future persecution.', keywords: ['asylum', 'refugee', 'protection', 'fear'], category: 'asylum' },
+      { question: 'Can I work while waiting for a work permit?', answer: 'If you have a pending adjustment application that includes an EAD request, you may be eligible for a pending EAD. Contact our office to verify your specific situation.', keywords: ['work permit', 'ead', 'employment', 'authorization'], category: 'work' },
+      { question: 'What happens at an immigration interview?', answer: 'At your interview, an officer will review your case, ask questions about your application and background, and may request additional documentation. Our attorney can accompany you.', keywords: ['interview', 'appointment', 'uscis', 'hearing'], category: 'process' }
+    ])
+
+    // Bankruptcy Law
+    this.knowledgeBase.set('bankruptcy', [
+      { question: 'What is the difference between Chapter 7 and Chapter 13?', answer: 'Chapter 7 is liquidation — assets may be sold to pay creditors and remaining debts discharged. Chapter 13 is reorganization — you keep property and repay debts through a court-approved plan over 3-5 years.', keywords: ['chapter 7', 'chapter 13', 'liquidate', 'reorganize'], category: 'bankruptcy_types' },
+      { question: 'Will bankruptcy stop my wage garnishment?', answer: 'Yes, filing for bankruptcy triggers an automatic stay that immediately stops all collection actions including wage garnishment, bank levies, and creditor calls.', keywords: ['garnishment', 'wage', 'stop', 'automatic stay'], category: 'protection' },
+      { question: 'What property can I keep in bankruptcy?', answer: 'Exemptions allow you to keep essential property like a primary residence, vehicle, household goods, and tools of your trade. Federal and state exemptions vary.', keywords: ['exemptions', 'property', 'keep', 'assets'], category: 'exemptions' },
+      { question: 'How long does bankruptcy take?', answer: 'Chapter 7 typically concludes in 4-6 months after filing. Chapter 13 lasts 3-5 years as you complete your repayment plan before receiving a discharge.', keywords: ['duration', 'timeline', 'how long', 'complete'], category: 'process' },
+      { question: 'Can I file bankruptcy if I have a pending lawsuit?', answer: 'Yes. Filing stops all litigation and creditor actions through the automatic stay. Notify our office immediately if you are facing a lawsuit or judgment.', keywords: ['lawsuit', 'judgment', 'litigation', 'sued'], category: 'protection' },
+      { question: 'What is a 341 meeting?', answer: 'The 341 meeting (trustee meeting) is a short hearing where you testify under oath about your bankruptcy documents. Your attorney will prepare you for this proceeding.', keywords: ['341', 'trustee', 'meeting', 'hearing'], category: 'process' }
+    ])
+
+    // IP Law
+    this.knowledgeBase.set('ip_law', [
+      { question: 'How do I register a trademark?', answer: 'To register a trademark, we conduct a search for conflicts, prepare the application, file with the USPTO, and respond to any office actions. Registration takes 8-12 months.', keywords: ['trademark', 'register', 'USPTO', 'brand'], category: 'trademark' },
+      { question: 'What is the difference between a trademark and copyright?', answer: 'Trademarks protect brand identifiers (names, logos, slogans) used in commerce. Copyrights protect original creative works (writing, music, software, art) from unauthorized reproduction.', keywords: ['trademark', 'copyright', 'difference', 'protect'], category: 'general' },
+      { question: 'How do I protect my invention?', answer: 'For inventions, we recommend filing a provisional patent application to establish priority, then pursuing a full utility patent through the USPTO. Trade secrets may also be appropriate.', keywords: ['patent', 'invention', 'protect', 'utility'], category: 'patent' },
+      { question: 'What is a cease and desist letter?', answer: 'A cease and desist letter demands that another party stop alleged infringing activity. It can be effective for trademark infringement, copyright piracy, or trade secret misappropriation.', keywords: ['cease', 'desist', 'infringe', 'stop'], category: 'enforcement' },
+      { question: 'How long does copyright protection last?', answer: 'For works created after 1978, copyright lasts the author\'s life plus 70 years. Corporate works last 95 years from publication or 120 years from creation, whichever is shorter.', keywords: ['copyright', 'duration', 'term', 'life plus 70'], category: 'copyright' },
+      { question: 'Can I license my IP to others?', answer: 'Yes. We draft licensing agreements that define scope, territory, royalties, quality controls, and termination rights to protect your IP while generating revenue.', keywords: ['license', 'licensing', 'royalty', 'agreement'], category: 'licensing' }
+    ])
+
     // Default for other industries
     const defaultKB = [
       { question: 'How can I help you?', answer: 'I can assist with appointments, information, and general inquiries.', keywords: ['help', 'assist', 'info'], category: 'general' }
     ]
-    this.knowledgeBase.set('realestate', defaultKB)
-    this.knowledgeBase.set('legal', defaultKB)
     this.knowledgeBase.set('retail', defaultKB)
+    this.knowledgeBase.set('realestate', defaultKB)
     this.knowledgeBase.set('education', defaultKB)
     this.knowledgeBase.set('government', defaultKB)
   }
@@ -671,7 +1046,64 @@ export class KnowledgeAgent extends BaseReceptionistAgent {
 // ============================================================================
 
 export class EscalationAgent extends BaseReceptionistAgent {
-  private escalationQueue: Array<{ ticketId: string; reason: string; priority: string; createdAt: Date }> = []
+  private escalationQueue: Array<{
+    ticketId: string
+    reason: string
+    visitorName?: string
+    priority: 'low' | 'medium' | 'high' | 'critical'
+    createdAt: Date
+    status: 'open' | 'resolved'
+    industry?: IndustryType
+    department?: string
+  }> = []
+
+  // Industry-specific escalation policies
+  private escalationPolicies: Record<string, {
+    department: string
+    priority: 'low' | 'medium' | 'high' | 'critical'
+    timeout: number
+    urgentKeywords: string[]
+    criticalKeywords: string[]
+  }> = {
+    family_law: {
+      department: 'Family Law',
+      priority: 'high',
+      timeout: 30,
+      urgentKeywords: ['children', 'custody', 'abuse', 'emergency', 'safety', 'harm', 'restraining'],
+      criticalKeywords: ['abuse', 'danger', 'suicide', 'harm', 'emergency protective order', 'immediate']
+    },
+    immigration: {
+      department: 'Immigration',
+      priority: 'high',
+      timeout: 30,
+      urgentKeywords: ['deportation', 'detention', 'visa expired', 'deadline', 'court date', 'hearing'],
+      criticalKeywords: ['detained', 'deportation', 'removal', 'arrested', 'ice', 'urgent']
+    },
+    bankruptcy: {
+      department: 'Bankruptcy',
+      priority: 'medium',
+      timeout: 60,
+      urgentKeywords: ['garnishment', 'foreclosure', 'lawsuit', 'judgment', 'sheriff', 'levy'],
+      criticalKeywords: ['foreclosure sale', 'bank levy', 'wage garnishment', 'receiver', 'emergency']
+    },
+    ip_law: {
+      department: 'IP Law',
+      priority: 'medium',
+      timeout: 60,
+      urgentKeywords: ['infringement', 'stolen', 'pirated', 'unauthorized', 'cease', 'damages'],
+      criticalKeywords: ['counterfeit', 'piracy', 'trade secret theft', 'urgent injunction', 'emergency']
+    }
+  }
+
+  private getEscalationPolicy(industry: IndustryType) {
+    return this.escalationPolicies[industry] || {
+      department: 'General',
+      priority: 'medium' as const,
+      timeout: 60,
+      urgentKeywords: [],
+      criticalKeywords: []
+    }
+  }
 
   constructor() {
     super({
@@ -690,15 +1122,17 @@ export class EscalationAgent extends BaseReceptionistAgent {
       name: 'create_ticket',
       description: 'Create escalation ticket',
       execute: async (params: unknown) => {
-        const p = params as { reason: string; visitorName?: string; priority?: string }
+        const p = params as { reason: string; visitorName?: string; priority?: string; industry?: IndustryType; department?: string }
         const ticketId = `ESC-${uuid()}`
         const ticket = {
           ticketId,
           reason: p.reason || '',
           visitorName: p.visitorName || '',
-          priority: p.priority || 'medium',
+          priority: (p.priority as 'low' | 'medium' | 'high' | 'critical') || 'medium',
           createdAt: new Date(),
-          status: 'open'
+          status: 'open' as const,
+          industry: p.industry,
+          department: p.department
         }
         this.escalationQueue.push(ticket)
         return { success: true, output: ticket, duration: 0 }
@@ -758,12 +1192,24 @@ export class EscalationAgent extends BaseReceptionistAgent {
   }
 
   async executeTask(task: Task): Promise<TaskResult> {
-    const context = task.context.variables as { reason?: string; visitorName?: string; priority?: string }
+    const context = task.context.variables as { reason?: string; visitorName?: string; priority?: string; industry?: IndustryType }
+
+    // Get industry-specific escalation policy
+    const industry = context.industry || 'corporate'
+    const policy = this.getEscalationPolicy(industry)
+
+    // Determine priority from policy if not explicitly set
+    const reason = context.reason || ''
+    const isUrgent = policy.urgentKeywords.some(k => reason.toLowerCase().includes(k))
+    const isCritical = policy.criticalKeywords.some(k => reason.toLowerCase().includes(k))
+    const resolvedPriority = context.priority || (isCritical ? 'critical' : isUrgent ? 'high' : policy.priority)
 
     const result = await this.executeTool('create_ticket', {
       reason: context.reason,
       visitorName: context.visitorName,
-      priority: context.priority
+      priority: resolvedPriority,
+      industry,
+      department: policy.department
     })
 
     // Notify appropriate agent
@@ -778,7 +1224,9 @@ export class EscalationAgent extends BaseReceptionistAgent {
         agent: 'ESCALATION',
         action: 'ticket_created',
         ticketId: (result.output as any)?.ticketId,
-        estimatedWait: '2-5 minutes'
+        department: policy.department,
+        priority: resolvedPriority,
+        estimatedWait: isCritical ? 'immediate' : isUrgent ? '2-5 minutes' : `${policy.timeout} minutes`
       }
     }
   }

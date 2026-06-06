@@ -263,6 +263,38 @@ export const industryConfigs: Record<IndustryType, any> = {
     commonServices: ['Consultation Booking', 'Case Inquiries', 'Document Review', 'Legal Aid Information'],
     faqTopics: ['Consultation', 'Fees', 'Areas of Practice', 'Appointment Preparation']
   },
+  family_law: {
+    type: 'family_law',
+    name: 'Family Law',
+    icon: '👨‍👩‍👧‍👦',
+    greetingMessage: 'Welcome to our family law practice. How may I help you today?',
+    commonServices: ['Divorce Consultation', 'Child Custody', 'Spousal Support', 'Adoption', 'Prenuptial Agreements', 'Domestic Violence Resources'],
+    faqTopics: ['Filing Process', 'Custody Procedures', 'Support Guidelines', 'Mediation', 'Court Dates', 'Emergency Orders']
+  },
+  immigration: {
+    type: 'immigration',
+    name: 'Immigration Law',
+    icon: '🌍',
+    greetingMessage: 'Welcome to our immigration law practice. We are here to help with your immigration matters.',
+    commonServices: ['Visa Applications', 'Green Card Processing', 'Citizenship', 'Deportation Defense', 'Work Authorization', 'Asylum'],
+    faqTopics: ['Processing Times', 'Required Documents', 'Fee Schedules', 'Interview Preparation', 'Status Checks', 'Appeals']
+  },
+  bankruptcy: {
+    type: 'bankruptcy',
+    name: 'Bankruptcy Law',
+    icon: '📊',
+    greetingMessage: 'Welcome to our bankruptcy law practice. How may I assist you with your financial relief options?',
+    commonServices: ['Chapter 7 Filing', 'Chapter 13 Filing', 'Debt Counseling', 'Creditor Negotiations', 'Asset Protection', 'Discharge Verification'],
+    faqTopics: ['Eligibility', 'Filing Fees', 'Required Documents', 'Exemptions', 'Automatic Stay', 'Trustee Meeting']
+  },
+  ip_law: {
+    type: 'ip_law',
+    name: 'Intellectual Property Law',
+    icon: '💡',
+    greetingMessage: 'Welcome to our intellectual property law practice. How may I help protect your innovations?',
+    commonServices: ['Trademark Registration', 'Copyright Filing', 'Patent Search', 'IP Licensing', 'Trade Secret Protection', 'Cease & Desist'],
+    faqTopics: ['Search Process', 'Filing Requirements', 'Timeline', 'Costs', 'Enforcement', 'International Protection']
+  },
   realestate: {
     type: 'realestate',
     name: 'Real Estate',

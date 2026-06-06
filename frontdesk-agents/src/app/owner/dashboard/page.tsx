@@ -10,6 +10,7 @@ import {
   XCircle, ChevronRight, ChevronUp, ChevronDown, Star, Search, Filter,
   RefreshCw, Loader2, Mail, Receipt, Download, FileText, Clock, AlertCircle,
   Brain, Cpu, Shield, Radio, GitBranch, ArrowUpRight, Key, Eye, Bell, AlertOctagon,
+  Scale,
 } from 'lucide-react'
 import HermesChat from './HermesChat'
 import {
@@ -23,6 +24,7 @@ import SendInvoiceDialog from "@/components/SendInvoiceDialog"
 import OwnerBillingContent from "@/components/OwnerBillingContent"
 import LanguagePreviewSwitcher from "@/components/LanguagePreviewSwitcher"
 import ModelComparison from "@/components/ModelComparison"
+import LegalDocumentsContent from "@/components/LegalDocumentsContent"
 
 interface DashboardData {
   metrics: {
@@ -320,6 +322,7 @@ export default function OwnerDashboard() {
     { id: 'overview', label: t('Overview'), icon: LayoutDashboard },
     { id: 'analytics', label: t('Analytics'), icon: BarChart3 },
     { id: 'businesses', label: t('Businesses'), icon: Building2 },
+    { id: 'legal', label: t('Legal Docs'), icon: Scale },
     { id: 'languages', label: t('Languages'), icon: Languages },
     { id: 'ai', label: t('AI Agents'), icon: Brain },
     { id: 'billing', label: t('Billing'), icon: Receipt },
@@ -893,6 +896,11 @@ export default function OwnerDashboard() {
               </div>
             </div>
           </>
+        )}
+
+        {/* ============ LEGAL DOCUMENTS TAB ============ */}
+        {activeTab === 'legal' && (
+          <LegalDocumentsContent />
         )}
 
         {/* ============ BUSINESSES TAB ============ */}

@@ -9,10 +9,10 @@ if (!process.env.RESEND_API_KEY) {
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
-// Configure your verified sending domain in the Resend dashboard:
-// https://resend.com/domains
-// Override via EMAIL_FROM env var (e.g. EMAIL_FROM=alerts@yourdomain.com)
-const FROM = process.env.EMAIL_FROM ?? 'noreply@frontdeskagents.com'
+// Read per-call so tests can override EMAIL_FROM between calls
+function getFromAddress() {
+  return process.env.EMAIL_FROM ?? 'noreply@frontdeskagents.com'
+}
 
 // ─── Invoice / Billing Emails ───────────────────────────────────────────────
 
@@ -48,7 +48,7 @@ export async function sendInvoiceEmail(params: {
       )
 
   const { data, error } = await resend.emails.send({
-    from: FROM,
+    from: getFromAddress(),
     to: [to],
     subject,
     html,
@@ -95,7 +95,7 @@ export async function sendAIAlertEmail({
   )
 
   const { data, error } = await resend.emails.send({
-    from: FROM,
+    from: getFromAddress(),
     to: [process.env.OWNER_EMAIL ?? 'admin@frontdeskagents.com'],
     subject: `[${severity.toUpperCase()}] ${title}`,
     html,
@@ -118,7 +118,7 @@ export async function sendEmail({
   replyTo?: string
 }) {
   const { data, error } = await resend.emails.send({
-    from: FROM,
+    from: getFromAddress(),
     to: Array.isArray(to) ? to : [to],
     subject,
     html,

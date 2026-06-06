@@ -2,12 +2,9 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@supabase/supabase-js'
+
 import { Building2, Globe, Mail, Lock, ArrowRight, Loader2, AlertCircle } from 'lucide-react'
 import { motion } from 'framer-motion'
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://btjscudzrtarfommgegw.supabase.co'
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 
 export default function CustomerSignup() {
   const router = useRouter()
@@ -36,34 +33,25 @@ export default function CustomerSignup() {
     setLoading(true)
 
     try {
-      const supabase = createClient(supabaseUrl, supabaseAnonKey)
-      
-      // Create user
-      const { error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            business_name: formData.businessName,
-            website: formData.website,
-            industry: formData.industry,
-            role: 'customer'
-          }
-        }
+      // Use the server API route to properly set session cookie
+      // This ensures customer_session cookie is set for dashboard access
+      const response = await fetch('/api/customer/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          businessName: formData.businessName,
+          ownerName: formData.businessName.split(' ')[0] || formData.businessName,
+          industry: formData.industry
+        })
       })
 
-      if (authError) throw authError
+      const data = await response.json()
 
-      // Create customer record
-      await supabase.from('customers').insert([{
-        email: formData.email,
-        business_name: formData.businessName,
-        owner_name: formData.businessName.split(' ')[0],
-        website: formData.website,
-        industry: formData.industry,
-        plan: 'starter',
-        status: 'trial'
-      }])
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create account')
+      }
 
       router.push('/customer/dashboard?welcome=true')
     } catch (err: any) {

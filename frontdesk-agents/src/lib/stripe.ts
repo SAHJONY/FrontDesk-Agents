@@ -287,10 +287,11 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     })
 
     if (!record) {
-      console.error('Failed to create billing_history record for checkout session:', session.id)
-    } else {
-      console.log('Billing record created — customer:', customerId, 'invoice:', session.id, 'amount:', amountTotal)
+      // Throw so the webhook route returns 500 → Stripe retries
+      throw new Error(`CRITICAL: Failed to create billing_history record for checkout session: ${session.id}`)
     }
+
+    console.log('Billing record created — customer:', customerId, 'invoice:', session.id, 'amount:', amountTotal)
 
     console.log('Checkout completed - customer provisioned:', customerId, 'plan:', planId)
   } catch (error) {
@@ -369,9 +370,15 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 
 async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
   const stripeCustomerId = invoice.customer as string
-  // subscriptionId not available directly on Invoice type in this Stripe API version
 
-  console.log('Payment succeeded - invoice:', invoice.id, 'customer:', stripeCustomerId, 'amount:', invoice.amount_paid)
+  // Skip the initial subscription payment — checkout.session.completed already recorded it
+  // Stripe sets billing_reason to 'subscription_create' for the first invoice
+  if (invoice.billing_reason === 'subscription_create') {
+    console.log('Payment succeeded - skipping initial subscription_create invoice:', invoice.id)
+    return
+  }
+
+  console.log('Payment succeeded - invoice:', invoice.id, 'customer:', stripeCustomerId, 'amount:', invoice.amount_paid, 'reason:', invoice.billing_reason)
 
   try {
     // Find customer by Stripe customer ID
@@ -381,6 +388,14 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
       console.error('Payment succeeded - no customer found for Stripe customer:', stripeCustomerId)
       return
     }
+
+    // Guard against epoch-0 dates (Stripe returns 0, not null, for missing period dates)
+    const periodStart = invoice.period_start && invoice.period_start > 0
+      ? new Date(invoice.period_start * 1000).toISOString()
+      : null
+    const periodEnd = invoice.period_end && invoice.period_end > 0
+      ? new Date(invoice.period_end * 1000).toISOString()
+      : null
 
     // Record the payment in billing history
     const record = await createBillingRecord({
@@ -393,15 +408,16 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
       description: `Payment of ${(invoice.amount_paid / 100).toFixed(2)} ${(invoice.currency || 'usd').toUpperCase()} for ${invoice.billing_reason || 'subscription'}`,
       billing_reason: invoice.billing_reason || null,
       invoice_pdf_url: invoice.invoice_pdf || null,
-      period_start: invoice.period_start ? new Date(invoice.period_start * 1000).toISOString() : null,
-      period_end: invoice.period_end ? new Date(invoice.period_end * 1000).toISOString() : null
+      period_start: periodStart,
+      period_end: periodEnd
     })
 
     if (!record) {
-      console.error('Failed to create billing history record for invoice:', invoice.id)
-    } else {
-      console.log('Payment recorded in billing history:', record.id, 'customer:', customer.id, 'amount:', invoice.amount_paid)
+      // Throw so the webhook route returns 500 → Stripe retries
+      throw new Error(`CRITICAL: Failed to create billing history record for invoice: ${invoice.id}`)
     }
+
+    console.log('Payment recorded in billing history:', record.id, 'customer:', customer.id, 'amount:', invoice.amount_paid)
 
     // If customer was past_due, restore to active
     if (customer.status === 'past_due') {
@@ -410,6 +426,7 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
     }
   } catch (error) {
     console.error('Error handling payment success:', error)
+    throw error // Re-throw so webhook route returns 500 and Stripe retries
   }
 }
 

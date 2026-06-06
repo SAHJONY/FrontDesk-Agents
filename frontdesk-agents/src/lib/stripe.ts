@@ -296,6 +296,7 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     console.log('Checkout completed - customer provisioned:', customerId, 'plan:', planId)
   } catch (error) {
     console.error('Error handling checkout complete:', error)
+    throw error // propagate so webhook route returns 500 and Stripe retries
   }
 }
 

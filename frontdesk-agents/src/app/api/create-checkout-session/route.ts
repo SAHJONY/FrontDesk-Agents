@@ -39,7 +39,6 @@ export async function POST(request: NextRequest) {
         planId,
         planName: plan.name,
       },
-      customer_creation: 'always',
       success_url: `${origin}/pricing?success=true&plan=${planId}`,
       cancel_url: `${origin}/pricing?canceled=true`,
     })

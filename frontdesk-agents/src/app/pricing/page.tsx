@@ -142,29 +142,29 @@ const COMPETITOR_HIGHLIGHTS = [
 // UI-only metadata per plan — business data (id, name, price, features) comes from PLANS in stripe.ts
 const PLAN_UI: Record<string, { yearlyPrice: number; desc: string; cta: string; popular: boolean; gradient: string }> = {
   starter: {
-    yearlyPrice: 79,
-    desc: 'Perfect for small businesses getting started with AI receptionist.',
+    yearlyPrice: 95,
+    desc: 'For small businesses. Includes HIPAA-ready compliance as standard.',
     cta: 'Start Free Trial',
     popular: false,
     gradient: 'from-gray-500 to-gray-400',
   },
   professional: {
-    yearlyPrice: 239,
-    desc: 'For growing businesses that need more capacity and features.',
+    yearlyPrice: 279,
+    desc: 'For growing businesses. Adds Custom Voice and priority onboarding.',
     cta: 'Start Free Trial',
     popular: true,
     gradient: 'from-aurora-cyan to-blue-600',
   },
   enterprise: {
-    yearlyPrice: 639,
-    desc: 'For established businesses requiring advanced capabilities.',
+    yearlyPrice: 959,
+    desc: 'Unlimited calls, dedicated SLA, and optional on-prem deployment.',
     cta: 'Start Free Trial',
     popular: false,
     gradient: 'from-purple-500 to-pink-500',
   },
   ultimate: {
-    yearlyPrice: 1599,
-    desc: 'For high-volume businesses demanding the absolute best.',
+    yearlyPrice: 1279,
+    desc: 'Custom model training, 24/7 dedicated engineer, 12-month data retention.',
     cta: 'Contact Sales',
     popular: false,
     gradient: 'from-amber-500 to-orange-500',
@@ -924,9 +924,9 @@ export default function PricingPage() {
                 <tr className="border-b border-white/[0.06]">
                   <th className="text-left py-4 px-3 font-semibold text-gray-300">Feature</th>
                   <th className="text-center py-4 px-3 font-semibold text-gray-300">Starter</th>
-                  <th className="text-center py-4 px-3 font-semibold text-aurora-cyan bg-aurora-cyan/[0.03]">Professional</th>
-                  <th className="text-center py-4 px-3 font-semibold text-gray-300">Enterprise</th>
-                  <th className="text-center py-4 px-3 font-semibold text-gray-300">Ultimate</th>
+                  <th className="text-center py-4 px-3 font-semibold text-aurora-cyan bg-aurora-cyan/[0.03]">Growth</th>
+                  <th className="text-center py-4 px-3 font-semibold text-gray-300">Pro</th>
+                  <th className="text-center py-4 px-3 font-semibold text-gray-300">Premium</th>
                 </tr>
               </thead>
               <tbody>

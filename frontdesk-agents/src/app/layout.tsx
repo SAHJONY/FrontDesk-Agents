@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import { TranslationProvider } from '@/lib/useTranslation'
 import { ToastProvider } from '@/components/ToastProvider'
 import { MotionConfig } from 'framer-motion'
+import CookieBanner from '@/components/CookieBanner'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -46,6 +47,7 @@ export default function RootLayout({
           <ToastProvider>
             {children}
           </ToastProvider>
+          <CookieBanner />
           </MotionConfig>
         </TranslationProvider>
       </body>

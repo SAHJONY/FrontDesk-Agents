@@ -566,9 +566,30 @@ export default function ContactPage() {
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState('')
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setFormSubmitted(true)
+    setSubmitting(true)
+    setSubmitError('')
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setSubmitError(data.error || 'Failed to send message. Please try again.')
+        return
+      }
+      setFormSubmitted(true)
+    } catch {
+      setSubmitError('Network error. Please check your connection and try again.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const resetForm = () => {
@@ -864,12 +885,18 @@ export default function ContactPage() {
                         Next <ChevronRightIcon />
                       </button>
                     ) : (
-                      <button
-                        type="submit"
-                        className="px-6 py-2 rounded-xl bg-gradient-to-r from-aurora-cyan to-blue-600 text-white text-sm font-medium hover:shadow-lg hover:shadow-aurora-cyan/25 transition-all flex items-center gap-2"
-                      >
-                        <SendIcon /> Send Message
-                      </button>
+                      <>
+                        <button
+                          type="submit"
+                          disabled={submitting}
+                          className="px-6 py-2 rounded-xl bg-gradient-to-r from-aurora-cyan to-blue-600 text-white text-sm font-medium hover:shadow-lg hover:shadow-aurora-cyan/25 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+                        >
+                          {submitting ? 'Sending...' : <><SendIcon /> Send Message</>}
+                        </button>
+                        {submitError && (
+                          <p className="text-red-400 text-sm mt-2">{submitError}</p>
+                        )}
+                      </>
                     )}
                   </div>
                 </form>

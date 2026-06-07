@@ -63,7 +63,7 @@ const translations = {
     essentialDesc: 'Required for authentication and security. Cannot be disabled.',
     analyticsDesc: 'Help us understand how visitors use our platform to improve performance.',
     preferenceDesc: 'Remember your settings and preferences for future visits.',
-    cookieManage: 'You can manage cookie preferences in your browser settings. Disabling cookies may affect some functionality of our services.',
+    cookieManage: 'You can manage cookie preferences in your browser settings or by clicking the button below. Disabling cookies may affect some functionality of our services.',
     retentionDesc: 'We retain your data for as long as your account is active or as needed to provide services:',
     retentionNote: 'After account deletion, we retain certain data for an additional 30 days before permanent deletion, unless legal requirements dictate otherwise.',
     contactDesc: 'If you have any questions about this Privacy Policy or our data practices, please contact us:',
@@ -1498,6 +1498,15 @@ export default function PrivacyPolicyPage() {
               <p className="mt-4">
                 {t.cookieManage}
               </p>
+              <button
+                onClick={() => {
+                  localStorage.removeItem('cookie_consent')
+                  window.location.reload()
+                }}
+                className="mt-4 px-4 py-2 text-sm text-aurora-cyan border border-aurora-cyan/30 rounded-lg hover:bg-aurora-cyan/10 transition-colors"
+              >
+                Manage Cookie Preferences
+              </button>
             </div>
           </section>
 

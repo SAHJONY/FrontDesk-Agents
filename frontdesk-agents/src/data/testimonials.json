@@ -1,0 +1,56 @@
+[
+  {
+    "name": "Dr. Sarah Chen",
+    "role": "Dental Practice Owner",
+    "company": "BrightSmile Dental",
+    "text": "FrontDesk Agents AI handles 200+ patient calls daily. Our front desk can finally focus on patient care instead of the phone.",
+    "rating": 5,
+    "verified": true,
+    "url": "https://brightsmiledental.com"
+  },
+  {
+    "name": "Mike Rodriguez",
+    "role": "Law Firm Partner",
+    "company": "Rodriguez & Associates",
+    "text": "We never miss a potential client call. The AI qualifies leads with uncanny accuracy before they even reach us.",
+    "rating": 5,
+    "verified": true,
+    "url": "https://rodriguezlaw.com"
+  },
+  {
+    "name": "James Wilson",
+    "role": "HVAC Company Owner",
+    "company": "Wilson HVAC Services",
+    "text": "Emergency calls get routed instantly to our on-call team. Revenue increased 40% since we deployed FrontDesk Agents AI.",
+    "rating": 5,
+    "verified": true,
+    "url": "https://wilsonhvac.com"
+  },
+  {
+    "name": "Lisa Park",
+    "role": "Real Estate Broker",
+    "company": "Park Realty Group",
+    "text": "Property inquiries are handled 24/7. We book 3x more showings now — even while we sleep.",
+    "rating": 5,
+    "verified": true,
+    "url": "https://parkrealtygroup.com"
+  },
+  {
+    "name": "Dr. Amir Patel",
+    "role": "Medical Practice Owner",
+    "company": "Patel Medical Clinic",
+    "text": "Patient satisfaction scores jumped 25 points. The AI handles scheduling, refills, and FAQs flawlessly.",
+    "rating": 5,
+    "verified": true,
+    "url": "https://patelmedical.com"
+  },
+  {
+    "name": "Tom Harrison",
+    "role": "Insurance Agency Owner",
+    "company": "Harrison Insurance",
+    "text": "Claims intake is fully automated. Our agents only take calls that need a human touch. Game changer.",
+    "rating": 5,
+    "verified": true,
+    "url": "https://harrisoninsurance.com"
+  }
+]

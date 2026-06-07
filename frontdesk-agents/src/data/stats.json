@@ -1,0 +1,23 @@
+{
+  "callsHandled": {
+    "value": "12M+",
+    "decimals": 0,
+    "label": "Calls Handled"
+  },
+  "activeBusinesses": {
+    "value": "8,500+",
+    "decimals": 0,
+    "label": "Active Businesses"
+  },
+  "languagesSupported": {
+    "value": "200+",
+    "decimals": 0,
+    "label": "Languages Supported"
+  },
+  "averageRating": {
+    "value": "4.9",
+    "suffix": "/5",
+    "decimals": 1,
+    "label": "Average Rating"
+  }
+}

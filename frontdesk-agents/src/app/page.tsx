@@ -45,18 +45,13 @@ const PRICING_PLANS_DATA = [
   { name: 'Pro', price: '$299', features: ['Unlimited calls', '10 phone numbers', 'Real-time dashboard', 'API access', 'Dedicated support', 'Multi-language'], popular: false },
 ]
 
-const TESTIMONIALS = [
-  { name: 'Dr. Sarah Chen', role: 'Dental Practice Owner', text: 'FrontDesk Agents AI handles 200+ patient calls daily. Our front desk can finally focus on patient care instead of the phone.', rating: 5, company: 'BrightSmile Dental' },
-  { name: 'Mike Rodriguez', role: 'Law Firm Partner', text: 'We never miss a potential client call. The AI qualifies leads with uncanny accuracy before they even reach us.', rating: 5, company: 'Rodriguez & Associates' },
-  { name: 'James Wilson', role: 'HVAC Company Owner', text: 'Emergency calls get routed instantly to our on-call team. Revenue increased 40% since we deployed FrontDesk Agents AI.', rating: 5, company: 'Wilson HVAC Services' },
-  { name: 'Lisa Park', role: 'Real Estate Broker', text: 'Property inquiries are handled 24/7. We book 3x more showings now — even while we sleep.', rating: 5, company: 'Park Realty Group' },
-  { name: 'Dr. Amir Patel', role: 'Medical Practice Owner', text: 'Patient satisfaction scores jumped 25 points. The AI handles scheduling, refills, and FAQs flawlessly.', rating: 5, company: 'Patel Medical Clinic' },
-  { name: 'Tom Harrison', role: 'Insurance Agency Owner', text: 'Claims intake is fully automated. Our agents only take calls that need a human touch. Game changer.', rating: 5, company: 'Harrison Insurance' },
-]
+import testimonialsData from '@/data/testimonials.json'
+
+const TESTIMONIALS = testimonialsData
 
 const METRICS_DATA = [
-  { value: '25M+', decimals: 0 },
-  { value: '10K+', decimals: 0 },
+  { value: '12M+', decimals: 0 },
+  { value: '8,500+', decimals: 0 },
   { value: '200+', decimals: 0 },
   { value: '4.9', suffix: '/5', decimals: 1 },
 ]
@@ -240,7 +235,7 @@ function TestimonialCarousel() {
 
       {/* Navigation dots */}
       <div className='flex items-center justify-center gap-2 mt-6'>
-        {TESTIMONIALS.map((_, i) => (
+        {TESTIMONIALS.map((_: typeof TESTIMONIALS[number], i: number) => (
           <button
             key={i}
             onClick={() => setCurrent(i)}

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { sendEmail } from '@/lib/email'
 
 function escapeHtml(str: string | undefined): string {
-  if (!str) return '';
+  if (!str) return ''
   return str
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -45,16 +45,19 @@ export async function POST(request: NextRequest) {
       <p style="margin-top: 16px; color: #6b7280; font-size: 12px;">Submitted at ${new Date().toISOString()}</p>
     `
 
+    console.log(`[contact] Sending to ${salesEmail} from ${process.env.EMAIL_FROM || 'noreply@frontdeskagents.com'}`)
+
     await sendEmail({
       to: salesEmail,
-      subject: `[FrontDesk Agents] New inquiry from ${escapeHtml(name)} at ${escapeHtml(company)}`,
+      subject: `[FrontDesk Agents] New inquiry from ${name} at ${company}`,
       html,
       replyTo: email,
     })
 
     return NextResponse.json({ success: true, message: 'Your inquiry has been submitted. We will respond within 2 hours.' })
-  } catch (error) {
-    console.error('Contact form error:', error)
+  } catch (error: unknown) {
+    const err = error instanceof Error ? error : new Error(String(error))
+    console.error('[contact] Full error:', err.message, err.stack)
     return NextResponse.json({ error: 'Failed to send message. Please try again later.' }, { status: 500 })
   }
 }

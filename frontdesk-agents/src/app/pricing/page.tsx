@@ -921,7 +921,7 @@ export default function PricingPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-white/[0.06]">
-                  <th className="text-left py-4 px-4 font-semibold text-gray-300">Feature</th>
+                  <th className="text-left py-4 px-3 font-semibold text-gray-300">Feature</th>
                   <th className="text-center py-4 px-3 font-semibold text-gray-300">Starter</th>
                   <th className="text-center py-4 px-3 font-semibold text-aurora-cyan bg-aurora-cyan/[0.03]">Professional</th>
                   <th className="text-center py-4 px-3 font-semibold text-gray-300">Enterprise</th>

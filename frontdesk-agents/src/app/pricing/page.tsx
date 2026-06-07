@@ -529,11 +529,27 @@ export default function PricingPage() {
   const [countdownTime, setCountdownTime] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 })
   const [countdownMounted, setCountdownMounted] = useState(false)
   const [countdownExpired, setCountdownExpired] = useState(false)
+  const [showSuccess, setShowSuccess] = useState(false)
+  const [successPlan, setSuccessPlan] = useState<string | null>(null)
+  const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50)
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  // Success banner after checkout redirect
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('success') === 'true') {
+      setShowSuccess(true)
+      setSuccessPlan(params.get('plan'))
+      successTimerRef.current = setTimeout(() => setShowSuccess(false), 8000)
+      // Clean up URL query params without reload
+      window.history.replaceState({}, '', window.location.pathname)
+      return () => { if (successTimerRef.current) clearTimeout(successTimerRef.current) }
+    }
   }, [])
 
   // Early-bird countdown timer — expires July 7, 2026
@@ -675,6 +691,52 @@ export default function PricingPage() {
           )}
         </AnimatePresence>
       </nav>
+
+      {/* Success banner after checkout */}
+      <AnimatePresence>
+        {showSuccess && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.4 }}
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-50 w-full max-w-lg px-4"
+          >
+            <div
+              onMouseEnter={() => { if (successTimerRef.current) clearTimeout(successTimerRef.current) }}
+              onMouseLeave={() => {
+                if (successTimerRef.current) clearTimeout(successTimerRef.current)
+                successTimerRef.current = setTimeout(() => setShowSuccess(false), 8000)
+              }}
+              className="relative overflow-hidden rounded-2xl border border-green-500/30 bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-teal-500/10 p-5 shadow-2xl shadow-green-500/10 backdrop-blur-xl"
+            >
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 mt-0.5">
+                  <svg className="w-6 h-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-green-300">Subscription activated!</p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    Your {successPlan ? PLANS[successPlan as keyof typeof PLANS]?.name || 'plan' : 'plan'} subscription is now active. Welcome to FrontDesk Agents!
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowSuccess(false)}
+                  className="flex-shrink-0 text-gray-500 hover:text-gray-300 transition-colors"
+                  aria-label="Dismiss"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <div className="absolute -top-8 -right-8 w-32 h-32 bg-green-500/5 rounded-full blur-3xl" />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ─── HERO ─── */}
       <section className="relative pt-32 pb-20 px-4 overflow-hidden">

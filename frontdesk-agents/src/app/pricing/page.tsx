@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback, Fragment } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
+import { PLANS } from '@/lib/plans'
 
 // ─── SVG Icons ──────────────────────────────────────────
 
@@ -137,71 +138,44 @@ const COMPETITOR_HIGHLIGHTS = [
 
 // ─── Data Constants ─────────────────────────────────────
 
-const MONTHLY_PLANS = [
-  {
-    id: 'starter',
-    name: 'Starter',
-    price: 99,
+// UI-only metadata per plan — business data (id, name, price, features) comes from PLANS in stripe.ts
+const PLAN_UI: Record<string, { yearlyPrice: number; desc: string; cta: string; popular: boolean; gradient: string }> = {
+  starter: {
     yearlyPrice: 79,
     desc: 'Perfect for small businesses getting started with AI receptionist.',
-    features: [
-      'Up to 500 calls per month',
-      '1 Phone Number',
-      'Basic Call Analytics',
-      'Email Support',
-      'Standard Voice',
-      'Business Hours Coverage',
-      'Appointment Booking',
-    ],
     cta: 'Start Free Trial',
     popular: false,
     gradient: 'from-gray-500 to-gray-400',
   },
-  {
-    id: 'growth',
-    name: 'Growth',
-    price: 149,
-    yearlyPrice: 119,
+  professional: {
+    yearlyPrice: 239,
     desc: 'For growing businesses that need more capacity and features.',
-    features: [
-      'Up to 2,000 calls per month',
-      '3 Phone Numbers',
-      'Advanced Analytics Dashboard',
-      'Priority Email & Chat Support',
-      'Custom Voice Training',
-      '24/7 Coverage',
-      'Appointment Booking',
-      'SMS Integration',
-      'Multi-language Support (5)',
-    ],
     cta: 'Start Free Trial',
     popular: true,
     gradient: 'from-aurora-cyan to-blue-600',
   },
-  {
-    id: 'pro',
-    name: 'Pro',
-    price: 299,
-    yearlyPrice: 239,
-    desc: 'For high-volume businesses demanding the best.',
-    features: [
-      'Unlimited Calls',
-      '10 Phone Numbers',
-      'Real-time Dashboard',
-      'API Access & Webhooks',
-      'Dedicated Support Manager',
-      'Custom Voice & Personality',
-      '24/7 Coverage with Escalation',
-      'Full SMS & Email Integration',
-      'Multi-language Support (All)',
-      'CRM Integration',
-      'Custom Reports',
-    ],
+  enterprise: {
+    yearlyPrice: 639,
+    desc: 'For established businesses requiring advanced capabilities.',
     cta: 'Start Free Trial',
     popular: false,
     gradient: 'from-purple-500 to-pink-500',
   },
-]
+  ultimate: {
+    yearlyPrice: 1599,
+    desc: 'For high-volume businesses demanding the absolute best.',
+    cta: 'Contact Sales',
+    popular: false,
+    gradient: 'from-amber-500 to-orange-500',
+  },
+}
+
+// Derived from PLANS (single source of truth) + PLAN_UI (presentation only)
+const MONTHLY_PLANS = Object.entries(PLANS).map(([key, plan]) => ({
+  ...plan,
+  price: plan.price / 100,
+  ...PLAN_UI[key],
+}))
 
 const COMPARISON_ROWS = [
   ['Monthly Calls', '500', '2,000', 'Unlimited'],

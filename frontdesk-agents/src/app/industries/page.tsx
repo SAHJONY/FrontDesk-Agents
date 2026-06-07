@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
+import Footer from '@/components/Footer'
 
 // ─── Icons ─────────────────────────────────────────────────────────────────
 const BotIcon = () => (
@@ -299,49 +300,7 @@ export default function IndustriesPage() {
         </div>
       </section>
 
-      {/* ─── FOOTER ─── */}
-      <footer className="border-t border-white/[0.06] py-12 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-            <div>
-              <Link href="/" className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-aurora-cyan to-midnight-blue flex items-center justify-center">
-                  <BotIcon />
-                </div>
-                <span className="font-display text-lg font-bold text-white">FrontDesk Agents AI</span>
-              </Link>
-              <p className="text-gray-500 text-sm leading-relaxed">AI phone agents that handle calls, book appointments, and qualify leads — automatically.</p>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4">Product</h4>
-              <ul className="space-y-2 text-sm text-gray-500">
-                <li><Link href="/services" className="hover:text-white transition-colors">Features</Link></li>
-                <li><Link href="/industries" className="hover:text-white transition-colors">Industries</Link></li>
-                <li><Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
-                <li><Link href="/demo" className="hover:text-white transition-colors">Demo</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4">Company</h4>
-              <ul className="space-y-2 text-sm text-gray-500">
-                <li><Link href="/partners" className="hover:text-white transition-colors">Partners</Link></li>
-                <li><Link href="/blog" className="hover:text-white transition-colors">Blog</Link></li>
-                <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4">Legal</h4>
-              <ul className="space-y-2 text-sm text-gray-500">
-                <li><Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
-                <li><Link href="/terms-of-service" className="hover:text-white transition-colors">Terms of Service</Link></li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-white/[0.06] pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-600">
-            <p>&copy; {new Date().getFullYear()} FrontDesk Agents AI. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }

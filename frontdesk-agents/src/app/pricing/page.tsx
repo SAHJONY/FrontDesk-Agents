@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback, Fragment } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import { PLANS } from '@/lib/plans'
+import Footer from '@/components/Footer'
 
 // ─── SVG Icons ──────────────────────────────────────────
 
@@ -1217,62 +1218,7 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* ─── FOOTER ─── */}
-      <footer className="border-t border-white/[0.06] py-12 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-            <div>
-              <Link href="/" className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-aurora-cyan to-midnight-blue flex items-center justify-center">
-                  <BotIcon />
-                </div>
-                <span className="font-display text-lg font-bold text-white">FrontDesk Agents AI</span>
-              </Link>
-              <p className="text-gray-500 text-sm leading-relaxed">
-                AI phone agents that handle calls, book appointments, and qualify leads — automatically.
-              </p>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4">Product</h4>
-              <ul className="space-y-2 text-sm text-gray-500">
-                <li><a href="/services" className="hover:text-white transition-colors">Services</a></li>
-                <li><a href="/ai-receptionist" className="hover:text-white transition-colors">Legal AI</a></li>
-                <li><a href="/partners" className="hover:text-white transition-colors">Partners</a></li>
-                <li><a href="/industries" className="hover:text-white transition-colors">Industries</a></li>
-                <li><a href="/blog" className="hover:text-white transition-colors">Blog</a></li>
-                <li><a href="/pricing" className="hover:text-white transition-colors">Pricing</a></li>
-                <li><a href="/demo" className="hover:text-white transition-colors">Demo</a></li>
-                <li><a href="/contact" className="hover:text-white transition-colors">Contact</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4">Company</h4>
-              <ul className="space-y-2 text-sm text-gray-500">
-                <li><span className="hover:text-white transition-colors cursor-default">About Us</span></li>
-                <li><span className="hover:text-white transition-colors cursor-default">Blog</span></li>
-                <li><span className="hover:text-white transition-colors cursor-default">Careers</span></li>
-                <li><span className="hover:text-white transition-colors cursor-default">Partners</span></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4">Legal</h4>
-              <ul className="space-y-2 text-sm text-gray-500">
-                <li><a href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</a></li>
-                <li><a href="/terms-of-service" className="hover:text-white transition-colors">Terms of Service</a></li>
-                <li><span className="hover:text-white transition-colors cursor-default">Cookie Policy</span></li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-white/[0.06] pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-600">
-            <p>&copy; {new Date().getFullYear()} FrontDesk Agents AI. All rights reserved.</p>
-            <div className="flex items-center gap-6">
-              <span className="hover:text-white transition-colors cursor-default">Twitter</span>
-              <span className="hover:text-white transition-colors cursor-default">LinkedIn</span>
-              <span className="hover:text-white transition-colors cursor-default">GitHub</span>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
       {/* ─── LIVE CHAT PREVIEW ─── */}
       <LiveChatPreview />

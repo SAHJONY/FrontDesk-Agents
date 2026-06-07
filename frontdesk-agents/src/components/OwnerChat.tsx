@@ -69,7 +69,7 @@ export default function OwnerChat() {
 
     // AI Brain Command Processing
     if (lowerMessage.includes('revenue') || lowerMessage.includes('money') || lowerMessage.includes('earn')) {
-      response = `📊 **Current Revenue:**\n\n• Monthly Recurring Revenue: **$299.00**\n• Active Customers: **${metrics?.totalCustomers || 1}**\n• Projected Annual: **$3,588**\n\n**Pricing Tiers:**\n• Starter: $299/mo\n• Professional: $499/mo\n• Enterprise: Custom`
+      response = `📊 **Current Revenue:**\n\n• Monthly Recurring Revenue: **$349.00**\n• Active Customers: **${metrics?.totalCustomers || 1}**\n• Projected Annual: **$3,588**\n\n**Pricing Tiers:**\n• Starter: $349/mo\n• Professional: $499/mo\n• Enterprise: Custom`
     }
     else if (lowerMessage.includes('customer') && (lowerMessage.includes('list') || lowerMessage.includes('how many'))) {
       response = `👥 **Customers:**\n\n**Total:** ${metrics?.totalCustomers || 1}\n\n1. **SAHJONY CAPITAL LLC** - Enterprise\n2. **FrontDesk Demo** - Professional`

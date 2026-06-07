@@ -210,7 +210,7 @@ const LiveActivityFeed: React.FC = () => {
     const initial: ActivityItem[] = [
       { id: '1', type: 'decision', title: 'Upsell recommended', description: 'Enterprise customer qualified for premium upgrade', timestamp: new Date(), agent: 'buffy' },
       { id: '2', type: 'message', title: 'Message delivered', description: '147 messages successfully delivered in 0.3ms avg', timestamp: new Date(Date.now() - 10000), agent: 'hermes' },
-      { id: '3', type: 'sale', title: 'Conversion achieved', description: 'Pro tier subscription completed - $99/mo', timestamp: new Date(Date.now() - 25000) },
+      { id: '3', type: 'sale', title: 'Conversion achieved', description: 'Pro tier subscription completed - $119/mo', timestamp: new Date(Date.now() - 25000) },
       { id: '4', type: 'learning', title: 'Pattern learned', description: 'New escalation pattern identified and saved', timestamp: new Date(Date.now() - 40000), agent: 'buffy' },
       { id: '5', type: 'escalation', title: 'Escalation handled', description: 'Critical support request routed to specialist', timestamp: new Date(Date.now() - 60000) }
     ];

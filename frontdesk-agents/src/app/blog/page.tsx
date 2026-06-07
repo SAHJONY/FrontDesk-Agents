@@ -180,7 +180,7 @@ const ARTICLES = [
           'The ROI calculation is straightforward:',
         ],
         bullets: [
-          'AI receptionist cost: $149-$299/month (Growth or Pro plan)',
+          'AI receptionist cost: $149-$349/month (Growth or Pro plan)',
           'Recovered revenue: $29,000/month (based on capturing 27 additional calls per week at a 23% conversion rate and $4,200 average case value)',
           'Return on investment: 97x to 194x annually',
         ],

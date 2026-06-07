@@ -4,53 +4,58 @@ export const PLANS = {
   starter: {
     id: 'starter',
     name: 'Starter',
-    price: 9900, // $99/month
+    price: 11900, // $119/month
     features: [
-      'Basic AI Receptionist',
+      'AI Receptionist',
       '100 calls/month',
       'Email support',
-      'Basic analytics'
+      'Basic analytics',
+      'HIPAA-ready compliance'
     ]
   },
   professional: {
     id: 'professional',
-    name: 'Professional',
-    price: 29900, // $299/month
+    name: 'Growth',
+    price: 34900, // $349/month
     features: [
       'Unlimited AI Receptionist',
       '1,000 calls/month',
       'Priority support',
       'Advanced analytics',
+      'Custom Voice',
+      'Priority onboarding',
       'SMS integration',
       'Voice mail'
     ]
   },
   enterprise: {
     id: 'enterprise',
-    name: 'Enterprise',
-    price: 79900, // $799/month
+    name: 'Pro',
+    price: 119900, // $1,199/month
     features: [
-      'Everything in Professional',
+      'Everything in Growth',
       'Unlimited calls',
       '24/7 Support',
+      'Dedicated SLA',
       'Custom integrations',
       'White-label options',
-      'Dedicated account manager'
+      'Dedicated account manager',
+      'Optional on-prem / private-cloud'
     ]
   },
   ultimate: {
     id: 'ultimate',
-    name: 'Ultimate',
-    price: 199900, // $1,999/month
+    name: 'Premium',
+    price: 159900, // $1,599/month
     features: [
-      'Everything in Enterprise',
+      'Everything in Pro',
+      'Custom model training',
+      '24/7 dedicated engineer',
+      '12-month data retention',
       'Unlimited calls',
-      '24/7 phone support',
-      'Custom AI training',
-      'White-label options',
       'API access',
-      'Dedicated account manager',
-      'SLA guarantee'
+      'SLA guarantee',
+      'White-label options'
     ]
   }
 } as const

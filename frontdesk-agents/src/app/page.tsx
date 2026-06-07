@@ -40,9 +40,9 @@ const INDUSTRIES_DATA = [
 ]
 
 const PRICING_PLANS_DATA = [
-  { name: 'Starter', price: '$99', features: ['500 calls/month', '1 phone number', 'Basic analytics', 'Email support'], popular: false },
+  { name: 'Starter', price: '$119', features: ['500 calls/month', '1 phone number', 'Basic analytics', 'Email support'], popular: false },
   { name: 'Growth', price: '$149', features: ['2,000 calls/month', '3 phone numbers', 'Advanced analytics', 'Priority support', 'Custom voice'], popular: true },
-  { name: 'Pro', price: '$299', features: ['Unlimited calls', '10 phone numbers', 'Real-time dashboard', 'API access', 'Dedicated support', 'Multi-language'], popular: false },
+  { name: 'Growth', price: '$349', features: ['Unlimited calls', '10 phone numbers', 'Real-time dashboard', 'API access', 'Dedicated support', 'Multi-language'], popular: false },
 ]
 
 import testimonialsData from '@/data/testimonials.json'

@@ -1716,14 +1716,14 @@ export default function TermsOfServicePage() {
                 <div className="bg-white/5 border border-white/10 rounded-xl p-5">
                   <div className="flex justify-between items-center mb-2">
                     <h4 className="font-bold text-white">{t.starter}</h4>
-                    <span className="text-green-400 font-bold">$99{t.perMonth}</span>
+                    <span className="text-green-400 font-bold">$119{t.perMonth}</span>
                   </div>
                   <p className="text-sm">{t.starterDesc}</p>
                 </div>
                 <div className="bg-white/5 border border-green-500/30 rounded-xl p-5">
                   <div className="flex justify-between items-center mb-2">
                     <h4 className="font-bold text-white">{t.professional}</h4>
-                    <span className="text-green-400 font-bold">$299{t.perMonth}</span>
+                    <span className="text-green-400 font-bold">$349{t.perMonth}</span>
                   </div>
                   <p className="text-sm">{t.professionalDesc}</p>
                 </div>

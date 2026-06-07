@@ -89,7 +89,7 @@ const COMPETITOR_ROWS = [
   {
     category: 'Cost & Efficiency',
     rows: [
-      { feature: 'Monthly Cost', human: '$3,500–$4,500', otherAI: '$150–$500', frontDesk: '$99–$299' },
+      { feature: 'Monthly Cost', human: '$3,500–$4,500', otherAI: '$150–$500', frontDesk: '$119–$349' },
       { feature: 'Cost per Call', human: '$5–$8', otherAI: '$0.15–$0.50', frontDesk: '$0.05–$0.12' },
       { feature: 'Setup Time', human: '2–4 weeks', otherAI: '1–2 weeks', frontDesk: 'Hours' },
       { feature: 'Training Required', human: 'Extensive', otherAI: 'Moderate', frontDesk: 'Minimal' },

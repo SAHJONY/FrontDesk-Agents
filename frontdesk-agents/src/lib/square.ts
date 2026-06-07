@@ -194,8 +194,8 @@ export const SQUARE_PLANS = {
   starter: {
     id: 'starter',
     name: 'Starter',
-    price: 19900, // $199/month in cents
-    priceMoney: { amount: 19900, currency: 'USD' },
+    price: 11900, // $199/month in cents
+    priceMoney: { amount: 11900, currency: 'USD' },
     features: [
       'Basic AI Receptionist',
       '100 calls/month',
@@ -206,8 +206,8 @@ export const SQUARE_PLANS = {
   professional: {
     id: 'professional',
     name: 'Professional',
-    price: 39900, // $399/month in cents
-    priceMoney: { amount: 39900, currency: 'USD' },
+    price: 34900, // $399/month in cents
+    priceMoney: { amount: 34900, currency: 'USD' },
     features: [
       'Unlimited AI Receptionist',
       '1,000 calls/month',
@@ -220,8 +220,8 @@ export const SQUARE_PLANS = {
   enterprise: {
     id: 'enterprise',
     name: 'Enterprise',
-    price: 79900, // $799/month in cents
-    priceMoney: { amount: 79900, currency: 'USD' },
+    price: 119900, // $7,199/month in cents
+    priceMoney: { amount: 119900, currency: 'USD' },
     features: [
       'Everything in Professional',
       'Unlimited calls',

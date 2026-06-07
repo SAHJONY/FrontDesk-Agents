@@ -216,7 +216,7 @@ const SCENARIO_COMPARISON: VideoScenario = {
     },
     {
       id: 's4-cost-comparison',
-      visualPrompt: `Comparison matrix visual: "Monthly Cost" row — left side shows amber warning and "$4,500/month salary + training + benefits", right side shows emerald checkmark and "$299/month flat rate", clean cost comparison table, dark background with accent colors`,
+      visualPrompt: `Comparison matrix visual: "Monthly Cost" row — left side shows amber warning and "$4,500/month salary + training + benefits", right side shows emerald checkmark and "$349/month flat rate", clean cost comparison table, dark background with accent colors`,
       durationSec: 3,
       transition: 'dissolve',
     },

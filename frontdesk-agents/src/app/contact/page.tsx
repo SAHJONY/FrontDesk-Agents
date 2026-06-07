@@ -546,6 +546,7 @@ export default function ContactPage() {
     name: '', email: '', phone: '',
     company: '', companySize: '', industry: '',
     service: '', message: '',
+    website: '', // honeypot — must stay empty
   })
 
   const updateField = (field: string, value: string) => {
@@ -594,7 +595,7 @@ export default function ContactPage() {
   }
 
   const resetForm = () => {
-    setFormData({ name: '', email: '', phone: '', company: '', companySize: '', industry: '', service: '', message: '' })
+    setFormData({ name: '', email: '', phone: '', company: '', companySize: '', industry: '', service: '', message: '', website: '' })
     setFormStep(0)
     setFormSubmitted(false)
     setSelectedDate(null)
@@ -762,8 +763,21 @@ export default function ContactPage() {
                   <AnimatePresence mode="wait">
                     {/* Step 0: Contact Info */}
                     {formStep === 0 && (
-                      <motion.div key="step0" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-5">
+                      <motion.div key="step0" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-5 relative">
                         <div className="grid sm:grid-cols-2 gap-5">
+                {/* Honeypot field — invisible to real users, bots auto-fill */}
+                <div className="absolute opacity-0 pointer-events-none" aria-hidden="true" tabIndex={-1}>
+                  <label htmlFor="website">Website</label>
+                  <input
+                    id="website"
+                    name="website"
+                    type="text"
+                    autoComplete="off"
+                    tabIndex={-1}
+                    value={formData.website}
+                    onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                  />
+                </div>
                           <div>
                             <label className="block text-sm text-gray-400 mb-2">Full Name *</label>
                             <input type="text" value={formData.name} onChange={e => updateField('name', e.target.value)} required

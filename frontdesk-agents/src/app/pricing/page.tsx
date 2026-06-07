@@ -777,6 +777,21 @@ export default function PricingPage() {
 
       {/* ─── PRICING PLANS ─── */}
       <section id="plans" className="py-20 px-4 scroll-mt-24">
+            {/* Early-bird promo banner */}
+            <div className="max-w-6xl mx-auto mb-10">
+              <div className="relative overflow-hidden rounded-2xl border border-aurora-cyan/20 bg-gradient-to-r from-aurora-cyan/10 via-blue-600/10 to-purple-600/10 p-5 md:p-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold uppercase tracking-wider bg-aurora-cyan/20 text-aurora-cyan rounded-full shrink-0">
+                    Early Bird
+                  </span>
+                  <p className="text-sm md:text-base text-gray-200">
+                    <span className="font-semibold text-white">10% off for the first 3 months</span> — lock in launch pricing before rates adjust.
+                    No code needed, applied automatically at checkout.
+                  </p>
+                </div>
+                <div className="absolute -top-12 -right-12 w-40 h-40 bg-aurora-cyan/5 rounded-full blur-3xl" />
+              </div>
+            </div>
         <div className="max-w-7xl mx-auto">
           {/* Toggle */}
           <motion.div

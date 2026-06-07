@@ -15,7 +15,10 @@ export async function POST(request: NextRequest) {
     const displayPrice = plan.price / 100
     const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
-    const session = await stripe.checkout.sessions.create({
+    // Early-bird coupon: 10% off first 3 months
+    const earlyBirdCouponId = process.env.STRIPE_EARLYBIRD_COUPON_ID
+
+    const sessionConfig: Parameters<typeof stripe.checkout.sessions.create>[0] = {
       mode: 'subscription',
       line_items: [
         {
@@ -37,7 +40,14 @@ export async function POST(request: NextRequest) {
       },
       success_url: `${origin}/pricing?success=true&plan=${planId}`,
       cancel_url: `${origin}/pricing?canceled=true`,
-    })
+    }
+
+    // Apply early-bird coupon if configured
+    if (earlyBirdCouponId) {
+      sessionConfig.discounts = [{ coupon: earlyBirdCouponId }]
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionConfig)
 
     return NextResponse.json({ url: session.url })
   } catch (error) {

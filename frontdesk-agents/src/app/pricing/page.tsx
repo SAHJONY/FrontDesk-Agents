@@ -178,15 +178,15 @@ const MONTHLY_PLANS = Object.entries(PLANS).map(([key, plan]) => ({
 }))
 
 const COMPARISON_ROWS = [
-  ['Monthly Calls', '500', '2,000', 'Unlimited'],
-  ['Phone Numbers', '1', '3', '10'],
-  ['Languages', '1', '5', '200+'],
-  ['SMS Integration', '—', '✓', '✓'],
-  ['API Access', '—', '—', '✓'],
-  ['Custom Voice', '—', '✓', '✓'],
-  ['Dedicated Support', '—', '—', '✓'],
-  ['CRM Integration', '—', '—', '✓'],
-  ['Analytics', 'Basic', 'Advanced', 'Real-time'],
+  ['Monthly Calls', '100', '1,000', 'Unlimited', 'Unlimited'],
+  ['Phone Numbers', '1', '3', '10', '25+'],
+  ['Languages', '1', '5', '200+', 'All'],
+  ['SMS Integration', '—', '✓', '✓', '✓'],
+  ['API Access', '—', '—', '✓', '✓'],
+  ['Custom Voice', '—', '✓', '✓', '✓'],
+  ['Dedicated Support', '—', '—', '✓', '✓'],
+  ['CRM Integration', '—', '—', '✓', '✓'],
+  ['Analytics', 'Basic', 'Advanced', 'Advanced', 'Real-time'],
 ]
 
 const GUARANTEES = [
@@ -922,18 +922,20 @@ export default function PricingPage() {
               <thead>
                 <tr className="border-b border-white/[0.06]">
                   <th className="text-left py-4 px-4 font-semibold text-gray-300">Feature</th>
-                  <th className="text-center py-4 px-4 font-semibold text-gray-300">Starter</th>
-                  <th className="text-center py-4 px-4 font-semibold text-aurora-cyan bg-aurora-cyan/[0.03]">Growth</th>
-                  <th className="text-center py-4 px-4 font-semibold text-gray-300">Pro</th>
+                  <th className="text-center py-4 px-3 font-semibold text-gray-300">Starter</th>
+                  <th className="text-center py-4 px-3 font-semibold text-aurora-cyan bg-aurora-cyan/[0.03]">Professional</th>
+                  <th className="text-center py-4 px-3 font-semibold text-gray-300">Enterprise</th>
+                  <th className="text-center py-4 px-3 font-semibold text-gray-300">Ultimate</th>
                 </tr>
               </thead>
               <tbody>
                 {COMPARISON_ROWS.map((row, i) => (
                   <tr key={i} className={`border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors ${i % 2 === 0 ? 'bg-white/[0.01]' : ''}`}>
-                    <td className="py-3.5 px-4 font-medium text-gray-200">{row[0]}</td>
-                    <td className="text-center py-3.5 px-4 text-gray-400">{row[1]}</td>
-                    <td className="text-center py-3.5 px-4 text-gray-300 bg-aurora-cyan/[0.02]">{row[2]}</td>
-                    <td className="text-center py-3.5 px-4 text-gray-400">{row[3]}</td>
+                    <td className="py-3.5 px-3 font-medium text-gray-200">{row[0]}</td>
+                    <td className="text-center py-3.5 px-3 text-gray-400">{row[1]}</td>
+                    <td className="text-center py-3.5 px-3 text-gray-300 bg-aurora-cyan/[0.02]">{row[2]}</td>
+                    <td className="text-center py-3.5 px-3 text-gray-400">{row[3]}</td>
+                    <td className="text-center py-3.5 px-3 text-gray-400">{row[4]}</td>
                   </tr>
                 ))}
               </tbody>

@@ -1,22 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { stripe } from '@/lib/stripe'
-
-const PRICE_MAP: Record<string, { name: string; price: number; displayPrice: number }> = {
-  starter: { name: 'Starter', price: 9900, displayPrice: 99 },
-  growth: { name: 'Growth', price: 14900, displayPrice: 149 },
-  pro: { name: 'Pro', price: 29900, displayPrice: 299 },
-}
+import { stripe, PLANS } from '@/lib/stripe'
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const { planId } = body
 
-    if (!planId || !PRICE_MAP[planId]) {
+    if (!planId || !PLANS[planId as keyof typeof PLANS]) {
       return NextResponse.json({ error: 'Invalid plan ID' }, { status: 400 })
     }
 
-    const plan = PRICE_MAP[planId]
+    const plan = PLANS[planId as keyof typeof PLANS]
+    const displayPrice = plan.price / 100
     const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
     const session = await stripe.checkout.sessions.create({
@@ -27,7 +22,7 @@ export async function POST(request: NextRequest) {
             currency: 'usd',
             product_data: {
               name: `FrontDesk Agents AI - ${plan.name}`,
-              description: `$${plan.displayPrice}/mo - AI Receptionist ${plan.name} Plan`,
+              description: `$${displayPrice}/mo - AI Receptionist ${plan.name} Plan`,
             },
             unit_amount: plan.price,
             recurring: { interval: 'month' },

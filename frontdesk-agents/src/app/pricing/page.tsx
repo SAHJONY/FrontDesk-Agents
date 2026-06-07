@@ -526,11 +526,38 @@ export default function PricingPage() {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null)
   const [yearly, setYearly] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [countdownTime, setCountdownTime] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 })
+  const [countdownMounted, setCountdownMounted] = useState(false)
+  const [countdownExpired, setCountdownExpired] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50)
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  // Early-bird countdown timer — expires July 7, 2026
+  useEffect(() => {
+    const expiryDate = new Date('2026-07-07T23:59:59Z')
+    const updateCountdown = () => {
+      const now = new Date()
+      const diff = expiryDate.getTime() - now.getTime()
+      if (diff <= 0) {
+        setCountdownTime({ days: 0, hours: 0, minutes: 0, seconds: 0 })
+        setCountdownExpired(true)
+        return
+      }
+      setCountdownTime({
+        days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((diff / (1000 * 60)) % 60),
+        seconds: Math.floor((diff / 1000) % 60),
+      })
+    }
+    updateCountdown()
+    setCountdownMounted(true)
+    const interval = setInterval(updateCountdown, 1000)
+    return () => clearInterval(interval)
   }, [])
 
   const handleCheckout = async (planId: string) => {
@@ -739,7 +766,10 @@ export default function PricingPage() {
                       <span className="text-xs text-gray-500 ml-1">(2.4K+ reviews)</span>
                     </div>
                   )}
-                </div>
+ 
+                  {countdownExpired && (
+                    <span className="text-sm font-semibold text-aurora-cyan">Offer has ended</span>
+                  )}               </div>
               </motion.div>
             ))}
           </div>
@@ -777,18 +807,45 @@ export default function PricingPage() {
 
       {/* ─── PRICING PLANS ─── */}
       <section id="plans" className="py-20 px-4 scroll-mt-24">
-            {/* Early-bird promo banner */}
+            {/* Early-bird promo banner with countdown */}
             <div className="max-w-6xl mx-auto mb-10">
               <div className="relative overflow-hidden rounded-2xl border border-aurora-cyan/20 bg-gradient-to-r from-aurora-cyan/10 via-blue-600/10 to-purple-600/10 p-5 md:p-6">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold uppercase tracking-wider bg-aurora-cyan/20 text-aurora-cyan rounded-full shrink-0">
-                    Early Bird
-                  </span>
-                  <p className="text-sm md:text-base text-gray-200">
-                    <span className="font-semibold text-white">10% off for the first 3 months</span> — lock in launch pricing before rates adjust.
-                    No code needed, applied automatically at checkout.
-                  </p>
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold uppercase tracking-wider bg-aurora-cyan/20 text-aurora-cyan rounded-full shrink-0">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-aurora-cyan opacity-75" />
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-aurora-cyan" />
+                      </span>
+                      Early Bird
+                    </span>
+                    <p className="text-sm md:text-base text-gray-200">
+                      <span className="font-semibold text-white">10% off for the first 3 months</span> — lock in launch pricing before rates adjust.
+                    </p>
+                  </div>
+                  {countdownMounted && !countdownExpired && (
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    {[
+                      { value: countdownTime.days, label: 'Days' },
+                      { value: countdownTime.hours, label: 'Hrs' },
+                      { value: countdownTime.minutes, label: 'Min' },
+                      { value: countdownTime.seconds, label: 'Sec' },
+                    ].map((unit) => (
+                      <div key={unit.label} className="flex flex-col items-center">
+                        <div className="bg-white/10 backdrop-blur-sm border border-white/10 rounded-lg px-2.5 py-1.5 min-w-[44px] text-center">
+                          <span className="text-lg md:text-xl font-bold text-white tabular-nums">
+                            {String(unit.value).padStart(2, '0')}
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-gray-400 mt-1 uppercase tracking-wider">{unit.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                  )}
                 </div>
+                <p className="text-xs text-gray-400 mt-2 sm:mt-1">
+                  No code needed — discount applied automatically at checkout.
+                </p>
                 <div className="absolute -top-12 -right-12 w-40 h-40 bg-aurora-cyan/5 rounded-full blur-3xl" />
               </div>
             </div>

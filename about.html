@@ -1,28 +1,200 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8">
- <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <title>About — FrontDesk Agents</title>
- <meta name="description" content="Learn about FrontDesk Agents — our mission to provide AI-powered legal receptionist services for law firms.">
- <meta property="og:title" content="About — FrontDesk Agents">
- <meta property="og:description" content="Our mission is to provide AI-powered legal receptionist services for law firms.">
- <meta property="og:image" content="https://www.frontdeskagents.com/assets/og-image.svg">
- <meta name="twitter:card" content="summary_large_image">
- <meta name="twitter:title" content="About — FrontDesk Agents">
- <meta name="twitter:description" content="Our mission is to provide AI-powered legal receptionist services for law firms.">
- <meta name="twitter:image" content="https://www.frontdeskagents.com/assets/og-image.svg">
- <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
- <link rel="preconnect" href="https://fonts.googleapis.com">
- <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
- <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
- <link rel="canonical" href="https://www.frontdeskagents.com/about">
-    <link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About — FrontDesk Agents | AI Receptionist for Law Firms</title>
+    <meta name="description" content="Learn about FrontDesk Agents — our mission to provide AI-powered legal receptionist services for law firms across all 50 states.">
+    <meta property="og:title" content="About — FrontDesk Agents">
+    <meta property="og:description" content="Our mission is to provide AI-powered legal receptionist services for law firms across all 50 states.">
+    <meta property="og:image" content="https://www.frontdeskagents.com/assets/og-image.svg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="About — FrontDesk Agents">
+    <meta name="twitter:description" content="Our mission is to provide AI-powered legal receptionist services for law firms across all 50 states.">
+    <meta name="twitter:image" content="https://www.frontdeskagents.com/assets/og-image.svg">
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="canonical" href="https://www.frontdeskagents.com/about">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; font-size: 16px; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            color: #e2e8f0;
+            background: #0a0a0a;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+        .container.narrow { max-width: 800px; }
+
+        /* Skip link */
+        .skip-link {
+            position: absolute; top: -100%; left: 16px; z-index: 200;
+            padding: 12px 20px; background: #25D366; color: #fff;
+            font-weight: 600; border-radius: 0 8px 8px 0; text-decoration: none;
+        }
+        .skip-link:focus { top: 0; }
+
+        /* Navigation */
+        .navbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            background: rgba(10,10,10,0.92); backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .nav-container {
+            display: flex; align-items: center; justify-content: space-between;
+            height: 64px; max-width: 1100px; margin: 0 auto; padding: 0 24px;
+        }
+        .nav-logo {
+            display: flex; align-items: center; gap: 10px;
+            text-decoration: none; color: #fff; font-weight: 700; font-size: 1.125rem;
+        }
+        .nav-links { display: flex; align-items: center; gap: 6px; list-style: none; }
+        .nav-links a {
+            text-decoration: none; color: #94a3b8; font-weight: 500;
+            font-size: 0.9rem; padding: 8px 14px; border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        .nav-links a:hover, .nav-links a.active { color: #fff; background: rgba(255,255,255,0.06); }
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 8px; font-weight: 600; font-size: 0.95rem; border-radius: 8px;
+            text-decoration: none; cursor: pointer; transition: all 0.2s ease;
+            border: 2px solid transparent; white-space: nowrap;
+        }
+        .btn-sm { padding: 8px 16px; font-size: 0.85rem; }
+        .btn-lg { padding: 14px 32px; font-size: 1rem; }
+        .btn-primary { background: #25D366; color: #fff; border-color: #25D366; }
+        .btn-primary:hover { background: #1ebe57; border-color: #1ebe57; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(37,211,102,0.3); }
+        .btn-outline { background: transparent; color: #e2e8f0; border-color: rgba(255,255,255,0.1); }
+        .btn-outline:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.2); }
+        .btn-outline-light { background: transparent; color: #fff; border-color: rgba(255,255,255,0.3); }
+        .btn-outline-light:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.6); }
+
+        /* Mobile Menu */
+        .mobile-menu-btn {
+            display: none; flex-direction: column; gap: 4px;
+            background: none; border: none; cursor: pointer; padding: 8px;
+        }
+        .mobile-menu-btn span { display: block; width: 22px; height: 2px; background: #fff; border-radius: 2px; }
+
+        /* Page Hero */
+        .page-hero {
+            padding: 140px 0 60px;
+            background: linear-gradient(180deg, rgba(37,211,102,0.04) 0%, #0a0a0a 100%);
+            text-align: center;
+        }
+        .page-hero h1 { font-size: 2.8rem; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 12px; color: #fff; }
+        .page-subtitle { font-size: 1.2rem; color: #94a3b8; max-width: 600px; margin: 0 auto; }
+
+        /* Content Sections */
+        .about-story { padding: 60px 0; }
+        .about-story h2, .about-values h2, .about-team h2, .about-numbers h2 {
+            font-size: 1.8rem; font-weight: 700; margin-bottom: 24px; color: #fff;
+        }
+        .about-story p, .about-values p {
+            color: #94a3b8; font-size: 1.05rem; line-height: 1.7; margin-bottom: 16px;
+        }
+        .about-story strong { color: #e2e8f0; }
+
+        /* Values Grid */
+        .values-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+        .value-card {
+            padding: 28px; border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.06);
+            background: rgba(255,255,255,0.02);
+            transition: all 0.2s ease;
+        }
+        .value-card:hover { border-color: rgba(37,211,102,0.3); background: rgba(37,211,102,0.04); }
+        .value-card h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 8px; color: #fff; }
+        .value-card p { color: #94a3b8; font-size: 0.95rem; line-height: 1.5; }
+
+        /* Numbers Section */
+        .about-numbers { padding: 60px 0; background: rgba(255,255,255,0.02); border-top: 1px solid rgba(255,255,255,0.06); border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .numbers-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; text-align: center; }
+        .number-item h3 { font-size: 2.4rem; font-weight: 800; color: #25D366; margin-bottom: 4px; }
+        .number-item p { color: #94a3b8; font-size: 0.9rem; }
+
+        /* Team Section */
+        .about-team { padding: 60px 0; }
+        .team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        .team-card {
+            padding: 32px; border-radius: 12px; text-align: center;
+            border: 1px solid rgba(255,255,255,0.06);
+            background: rgba(255,255,255,0.02);
+            transition: all 0.2s ease;
+        }
+        .team-card:hover { border-color: rgba(37,211,102,0.3); }
+        .team-avatar {
+            width: 64px; height: 64px; border-radius: 50%;
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 16px; font-size: 1.4rem; font-weight: 700; color: #fff;
+        }
+        .team-card h3 { font-size: 1.1rem; font-weight: 600; color: #fff; margin-bottom: 4px; }
+        .team-card .role { color: #25D366; font-size: 0.85rem; font-weight: 500; margin-bottom: 12px; }
+        .team-card p { color: #94a3b8; font-size: 0.9rem; line-height: 1.5; }
+
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, #075e54, #128C7E);
+            color: #fff; text-align: center; padding: 80px 0;
+        }
+        .cta-section h2 { font-size: 2.2rem; font-weight: 800; margin-bottom: 12px; }
+        .cta-section p { font-size: 1.1rem; opacity: 0.9; margin-bottom: 32px; }
+        .cta-buttons { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+
+        /* Footer */
+        .footer {
+            background: #0d0d0d; border-top: 1px solid rgba(255,255,255,0.06);
+            padding: 60px 0 30px;
+        }
+        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 40px; }
+        .footer-brand .nav-logo { margin-bottom: 12px; }
+        .footer-tagline { color: #64748b; font-size: 0.9rem; }
+        .footer-links h4 {
+            font-size: 0.85rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.5px; color: #94a3b8; margin-bottom: 16px;
+        }
+        .footer-links a {
+            display: block; color: #64748b; text-decoration: none;
+            font-size: 0.9rem; padding: 4px 0; transition: all 0.2s ease;
+        }
+        .footer-links a:hover { color: #fff; }
+        .footer-bottom { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 20px; text-align: center; }
+        .footer-bottom p { color: #64748b; font-size: 0.85rem; }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .values-grid { grid-template-columns: 1fr; }
+            .numbers-grid { grid-template-columns: repeat(2, 1fr); }
+            .team-grid { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr 1fr; }
+            .page-hero h1 { font-size: 2rem; }
+        }
+        @media (max-width: 600px) {
+            .mobile-menu-btn { display: flex; }
+            .nav-links {
+                position: absolute; top: 64px; left: 0; right: 0;
+                background: #0a0a0a; flex-direction: column; padding: 16px;
+                gap: 4px; border-bottom: 1px solid rgba(255,255,255,0.06);
+                display: none;
+            }
+            .nav-links.open { display: flex; }
+            .nav-links a { width: 100%; padding: 12px 16px; }
+            .numbers-grid { grid-template-columns: 1fr 1fr; gap: 24px; }
+            .footer-grid { grid-template-columns: 1fr; gap: 24px; }
+            section { padding: 60px 0; }
+        }
+    </style>
 </head>
 <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
     <nav class="navbar" id="navbar">
-        <div class="container nav-container">
+        <div class="nav-container">
             <a href="/" class="nav-logo">
                 <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
                     <rect width="32" height="32" rx="8" fill="#25D366"/>
@@ -37,9 +209,9 @@
             <ul class="nav-links" id="navLinks">
                 <li><a href="/#features">Features</a></li>
                 <li><a href="/#how-it-works">How It Works</a></li>
-                <li><a href="pricing.html">Pricing</a></li>
-                <li><a href="about.html" class="active">About</a></li>
-                <li><a href="contact.html">Contact</a></li>
+                <li><a href="/pricing">Pricing</a></li>
+                <li><a href="/about" class="active">About</a></li>
+                <li><a href="/contact">Contact</a></li>
                 <li><a href="/login" class="btn btn-primary btn-sm">Sign In</a></li>
             </ul>
         </div>
@@ -56,8 +228,32 @@
         <section class="about-story">
             <div class="container narrow">
                 <h2>Our Story</h2>
-                <p>FrontDesk Agents was born from a simple frustration: too many law firms were losing potential clients after hours. Phone calls went to voicemail, intake forms were never completed, and there was no way to capture every lead.</p>
-                <p>We built FrontDesk Agents to solve that — an AI-powered receptionist designed specifically for law firms. 24/7 call handling. Smart case intake. Compliance-aware responses across all 50 states. All self-hosted so you maintain attorney-client privilege.</p>
+                <p>FrontDesk Agents was born from a simple frustration: <strong>too many law firms were losing potential clients after hours.</strong> Phone calls went to voicemail, intake forms were never completed, and there was no way to capture every lead.</p>
+                <p>We built FrontDesk Agents to solve that — <strong>an AI-powered receptionist designed specifically for law firms.</strong> 24/7 call handling. Smart case intake. Compliance-aware responses across all 50 states and 94 federal districts. All self-hosted so you maintain attorney-client privilege.</p>
+                <p>Today, FrontDesk Agents serves law firms ranging from solo practitioners to mid-size litigation groups, helping them capture every lead and deliver exceptional client experiences from the very first interaction.</p>
+            </div>
+        </section>
+
+        <section class="about-numbers">
+            <div class="container">
+                <div class="numbers-grid">
+                    <div class="number-item">
+                        <h3>50 States</h3>
+                        <p>Full jurisdictional coverage</p>
+                    </div>
+                    <div class="number-item">
+                        <h3>94 Districts</h3>
+                        <p>Federal court compliance</p>
+                    </div>
+                    <div class="number-item">
+                        <h3>24/7</h3>
+                        <p>Always-on availability</p>
+                    </div>
+                    <div class="number-item">
+                        <h3>&lt;1s</h3>
+                        <p>Average response time</p>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -67,19 +263,45 @@
                 <div class="values-grid">
                     <div class="value-card">
                         <h3>🔒 Data Privacy First</h3>
-                        <p>Your customer data belongs to you, not us. Self-hosting means complete control over privacy and compliance.</p>
+                        <p>Your client data belongs to you, not us. Self-hosting means complete control over privacy and compliance with HIPAA and attorney-client privilege.</p>
                     </div>
                     <div class="value-card">
                         <h3>⚡ Every Second Counts</h3>
-                        <p>Every missed call is a lost client. We build tools that help your team respond faster and capture every lead.</p>
+                        <p>Every missed call is a lost client. We build tools that help your team respond faster and capture every lead, 24/7.</p>
                     </div>
                     <div class="value-card">
                         <h3>🤝 Human-First Automation</h3>
-                        <p>Automation should enhance human connection, not replace it. We automate the busywork so you can focus on relationships.</p>
+                        <p>Automation should enhance human connection, not replace it. We automate the busywork so your attorneys can focus on practicing law.</p>
                     </div>
                     <div class="value-card">
-                        <h3>🌍 Accessible to All</h3>
-                        <p>Whether you're a solo practitioner or a large firm, our tools scale with you at a fair price.</p>
+                        <h3>⚖️ Legal-Grade Intelligence</h3>
+                        <p>Built by people who understand the legal industry. Our AI knows bar rules, filing procedures, and jurisdictional requirements.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="about-team">
+            <div class="container narrow">
+                <h2>Our Team</h2>
+                <div class="team-grid">
+                    <div class="team-card">
+                        <div class="team-avatar">JG</div>
+                        <h3>Juan Gonzales</h3>
+                        <p class="role">Founder & CEO</p>
+                        <p>Building AI-powered solutions for the legal industry. Passionate about making legal services more accessible through technology.</p>
+                    </div>
+                    <div class="team-card">
+                        <div class="team-avatar">AI</div>
+                        <h3>AI Agents</h3>
+                        <p class="role">Your Virtual Front Desk</p>
+                        <p>Trained on U.S. legal compliance, court rules, and client intake protocols. Available 24/7 across all 50 states.</p>
+                    </div>
+                    <div class="team-card">
+                        <div class="team-avatar">SC</div>
+                        <h3>Sahjony Capital</h3>
+                        <p class="role">Technology Partner</p>
+                        <p>Providing the infrastructure and AI capabilities that power FrontDesk Agents' autonomous receptionist platform.</p>
                     </div>
                 </div>
             </div>
@@ -91,7 +313,7 @@
                 <p>Try FrontDesk Agents free and see the difference an AI-powered legal receptionist makes.</p>
                 <div class="cta-buttons">
                     <a href="/login" class="btn btn-primary btn-lg">Get Started Free</a>
-                    <a href="contact.html" class="btn btn-outline-light btn-lg">Contact Us</a>
+                    <a href="/contact" class="btn btn-outline-light btn-lg">Contact Us</a>
                 </div>
             </div>
         </section>
@@ -113,19 +335,20 @@
                 </div>
                 <div class="footer-links">
                     <h4>Product</h4>
+                    <a href="/">Home</a>
                     <a href="/#features">Features</a>
-                    <a href="pricing.html">Pricing</a>
-                    <a href="/#how-it-works">How It Works</a>
+                    <a href="/pricing">Pricing</a>
+                    <a href="/login">Sign In</a>
                 </div>
                 <div class="footer-links">
                     <h4>Company</h4>
-                    <a href="about.html">About</a>
-                    <a href="contact.html">Contact</a>
+                    <a href="/about">About</a>
+                    <a href="/contact">Contact</a>
                 </div>
                 <div class="footer-links">
                     <h4>Legal</h4>
-                    <a href="privacy.html">Privacy Policy</a>
-                    <a href="terms.html">Terms of Service</a>
+                    <a href="/privacy-policy">Privacy Policy</a>
+                    <a href="/terms-of-service">Terms of Service</a>
                 </div>
             </div>
             <div class="footer-bottom">
@@ -134,6 +357,13 @@
         </div>
     </footer>
 
-    <script src="js/main.js"></script>
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+            const nav = document.getElementById('navLinks');
+            nav.classList.toggle('open');
+            this.setAttribute('aria-expanded', nav.classList.contains('open'));
+        });
+    </script>
 </body>
 </html>

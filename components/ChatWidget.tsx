@@ -117,7 +117,7 @@ export default function ChatWidget({ tall = false }: { tall?: boolean }) {
       <div className="flex items-center justify-between border-b border-teal-glow/10 px-5 py-3.5">
         <div className="flex items-center gap-3">
           <div className="relative">
-            <img src="/avatar.webp" alt="AVA" className="h-10 w-10 rounded-full border border-gold/40 object-cover" />
+            <img src="/avatar.jpg" alt="AVA" className="h-10 w-10 rounded-full border border-gold/40 object-cover" />
             <span className="animate-pulse-glow absolute -right-0.5 -bottom-0.5 h-3 w-3 rounded-full border-2 border-ink bg-emerald-400" />
           </div>
           <div>

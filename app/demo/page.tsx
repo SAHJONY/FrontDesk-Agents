@@ -35,9 +35,9 @@ export default function DemoPage() {
           </ul>
           <div className="mt-8">
             <img
-              src="/avatar.webp"
+              src="/avatar.jpg"
               alt="AVA, the FrontDesk Agents AI receptionist"
-              className="h-64 w-52 rounded-3xl border border-gold/25 object-cover object-top shadow-[0_30px_80px_-20px_rgba(45,212,191,0.25)]"
+              className="h-64 w-52 rounded-3xl border border-gold/25 object-cover object-top shadow-[0_30px_80px_-20px_rgba(212,168,67,0.25)]"
             />
           </div>
         </div>

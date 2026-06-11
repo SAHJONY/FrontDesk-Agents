@@ -15,6 +15,7 @@ const GREETING: Msg = {
 
 export default function ChatWidget({ tall = false }: { tall?: boolean }) {
   const [messages, setMessages] = useState<Msg[]>([GREETING]);
+  const [engine, setEngine] = useState("HERMES");
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [voiceOn, setVoiceOn] = useState(false);
@@ -27,6 +28,13 @@ export default function ChatWidget({ tall = false }: { tall?: boolean }) {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, busy]);
+
+  useEffect(() => {
+    fetch("/api/health")
+      .then((r) => r.json())
+      .then((d) => setEngine(`HERMES · ${d.primaryBrain ?? "agent core"}`))
+      .catch(() => {});
+  }, []);
 
   function speak(text: string) {
     if (!voiceOn || typeof window === "undefined" || !window.speechSynthesis) return;
@@ -122,7 +130,7 @@ export default function ChatWidget({ tall = false }: { tall?: boolean }) {
           </div>
           <div>
             <div className="text-sm font-semibold">AVA · AI Receptionist</div>
-            <div className="text-xs text-teal-glow">Online — answers in &lt;2s</div>
+            <div className="text-xs text-teal-glow">Online — powered by {engine}</div>
           </div>
         </div>
         <div className="flex items-center gap-2">

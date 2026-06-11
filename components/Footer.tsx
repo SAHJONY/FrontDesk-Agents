@@ -31,7 +31,7 @@ export default function Footer() {
             <li><a href="mailto:sahjonyllc@gmail.com" className="hover:text-teal-glow">Contact</a></li>
             <li><Link href="/#features" className="hover:text-teal-glow">Technology</Link></li>
             <li><Link href="/#industries" className="hover:text-teal-glow">Industries</Link></li>
-            <li><Link href="/admin" className="hover:text-gold">Owner Command Center</Link></li>
+            <li><Link href="/admin" className="hover:text-gold">Executive Suite</Link></li>
           </ul>
         </div>
       </div>

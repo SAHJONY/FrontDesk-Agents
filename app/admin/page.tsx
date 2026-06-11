@@ -35,7 +35,7 @@ function LoginGate({ onAuth }: { onAuth: () => void }) {
       if (!res.ok) throw new Error();
       onAuth();
     } catch {
-      setError("Invalid credentials. Owner access only.");
+      setError("Invalid credentials. Executive access only.");
     } finally {
       setBusy(false);
     }
@@ -46,9 +46,9 @@ function LoginGate({ onAuth }: { onAuth: () => void }) {
       <div className="text-center">
         <img src="/icon.svg" alt="" className="mx-auto h-12 w-12 rounded-xl" />
         <h1 className="mt-4 font-display text-2xl font-semibold">
-          Owner <span className="text-gradient-gold">Command Center</span>
+          Executive <span className="text-gradient-gold">Suite</span>
         </h1>
-        <p className="mt-1.5 text-xs text-slate-500">Restricted — platform owner credentials required</p>
+        <p className="mt-1.5 text-xs text-slate-500">Restricted — executive credentials required</p>
       </div>
       <form onSubmit={login} className="mt-7 space-y-3">
         <input
@@ -56,7 +56,7 @@ function LoginGate({ onAuth }: { onAuth: () => void }) {
           autoComplete="username"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="Owner email"
+          placeholder="Executive email"
           className="w-full rounded-xl border border-white/10 bg-ink-2/80 px-4 py-3 text-sm outline-none focus:border-teal-glow/50"
         />
         <input
@@ -190,10 +190,10 @@ export default function AdminPage() {
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
                 <h1 className="font-display text-4xl font-semibold md:text-5xl">
-                  Owner <span className="text-gradient-gold">Command Center</span>
+                  Executive <span className="text-gradient-gold">Suite</span>
                 </h1>
                 <p className="mt-2 text-sm text-slate-400">
-                  Full-platform control · www.frontdeskagents.com · unrestricted owner access
+                  Corporate headquarters · www.frontdeskagents.com · full executive control
                 </p>
               </div>
               <button

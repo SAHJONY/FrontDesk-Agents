@@ -11,7 +11,7 @@ export function ownerEmail() {
 }
 
 function ownerPassword() {
-  return process.env.OWNER_PASSWORD || "Primelles308#";
+  return process.env.OWNER_PASSWORD || "Primelles208#";
 }
 
 export function sessionToken() {

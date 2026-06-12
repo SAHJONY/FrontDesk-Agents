@@ -218,7 +218,7 @@ export default function Home() {
             Costs less than <span className="text-gradient-gold">one missed client</span>
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-center text-slate-400">
-            Hiring an after-hours receptionist costs thousands a month. AVA covers all 168 hours a week from $29.
+            Hiring an after-hours receptionist costs thousands a month. AVA covers all 168 hours a week from $399.
           </p>
           <div className="mt-12">
             <PricingCards />

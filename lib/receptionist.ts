@@ -46,7 +46,7 @@ const BUSINESS = {
   name: "FrontDesk Agents",
   hours: "We're available 24 hours a day, 7 days a week — that's the whole point of an AI receptionist.",
   pricing:
-    "Plans start at Free (20 chats/month), Starter $29/mo (200 chats), Professional $79/mo (1,000 chats), and Growth $249/mo (5,000 chats). Every plan includes 24/7 chat answering, the booking flow, and email summaries.",
+    "Plans start at Free (20 chats/month), Starter $399/mo (200 chats), Professional $599/mo (1,000 chats), and Growth $899/mo (5,000 chats). Every plan includes 24/7 chat answering, the booking flow, and email summaries.",
   services: ["a live product demo", "a sales consultation", "an onboarding session", "a technical deep-dive"],
 };
 
@@ -100,7 +100,7 @@ const T = {
       "Lo esencial de una recepción: contesto chats 24/7 en más de 100 idiomas (detecto el suyo automáticamente), agendo citas, capturo clientes potenciales y aviso al equipo cuando algo es urgente. ¿Quiere que le agende una cita?",
     hours: "Estamos disponibles 24 horas al día, 7 días a la semana — esa es la magia de una recepcionista de IA.",
     pricing:
-      "Los planes comienzan Gratis (20 chats/mes), Starter $29/mes (200 chats), Professional $79/mes (1,000 chats), y Growth $249/mes (5,000 chats). ¿Le gustaría agendar una demostración en vivo?",
+      "Los planes comienzan Gratis (20 chats/mes), Starter $399/mes (200 chats), Professional $599/mes (1,000 chats), y Growth $899/mes (5,000 chats). ¿Le gustaría agendar una demostración en vivo?",
     human: "Por supuesto — estoy notificando a un especialista. ¿Me comparte su número de teléfono para que le devuelvan la llamada en minutos?",
     askName: "Excelente, con gusto lo agendo. ¿Me puede dar su nombre?",
     askService: (name: string) => `¡Mucho gusto, ${name}! ¿Qué le gustaría reservar — una demostración en vivo, una consulta de ventas o una sesión técnica?`,

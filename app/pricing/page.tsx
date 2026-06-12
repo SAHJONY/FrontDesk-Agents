@@ -6,7 +6,7 @@ import RoiCalculator from "@/components/RoiCalculator";
 
 export const metadata: Metadata = {
   title: "Pricing & ROI Calculator | FrontDesk Agents",
-  description: "Plans from free to $249/mo. See exactly how much missed inquiries cost your business with the live ROI calculator.",
+  description: "Plans from free to $899/mo. See exactly how much missed inquiries cost your business with the live ROI calculator.",
 };
 
 export default function PricingPage() {

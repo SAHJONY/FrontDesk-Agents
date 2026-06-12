@@ -41,7 +41,7 @@ export const PLANS: Plan[] = [
   {
     id: "starter",
     name: "Starter",
-    price: 29,
+    price: 399,
     monthlyCallCap: 200,
     tagline: "For solo operators getting their first wins",
     features: [
@@ -61,7 +61,7 @@ export const PLANS: Plan[] = [
   {
     id: "professional",
     name: "Professional",
-    price: 79,
+    price: 599,
     monthlyCallCap: 1000,
     tagline: "For growing practices and busy teams",
     highlight: true,
@@ -82,7 +82,7 @@ export const PLANS: Plan[] = [
   {
     id: "growth",
     name: "Growth",
-    price: 249,
+    price: 899,
     monthlyCallCap: 5000,
     tagline: "For multi-location ops and agencies",
     features: [

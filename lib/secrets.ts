@@ -15,6 +15,7 @@ import { createCipheriv, createDecipheriv, createHash, randomBytes } from "crypt
 import { promises as fs } from "fs";
 import path from "path";
 import { put, head } from "@vercel/blob";
+import { recordEvent } from "@/lib/store";
 
 type SecretRecord = { name: string; value: string; updatedAt: string };
 
@@ -371,6 +372,7 @@ export async function setSecret(name: string, value: string): Promise<void> {
   await saveAll(all);
   process.env[trimmed] = value;
   invalidateOverrideCache();
+  recordEvent("env:updated", { name: trimmed });
 }
 
 export async function deleteSecret(name: string): Promise<void> {
@@ -382,4 +384,5 @@ export async function deleteSecret(name: string): Promise<void> {
   delete all[name];
   await saveAll(all);
   invalidateOverrideCache();
+  recordEvent("env:deleted", { name });
 }

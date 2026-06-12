@@ -33,6 +33,10 @@ export type EngineResult = {
   reply: string;
   state: SessionState;
   agent: string;
+  // Internal-only — full provider/model string for telemetry. Never sent
+  // to the public-facing API response; consumed by the event log only.
+  internalBrain?: string;
+  latencyMs?: number;
   action?: { type: "booking_confirmed"; booking: Required<BookingDraft> } | { type: "lead_captured"; phone: string };
 };
 
@@ -437,15 +441,29 @@ export async function runReceptionist(
   // Mid-booking: deterministic slot-filling is more reliable than an LLM.
   if (state.stage !== "idle") return runDeterministicAgent(message, state);
 
+  const t0 = Date.now();
   const llmReply = await runLLMBrain(history, message);
+  const latencyMs = Date.now() - t0;
   if (llmReply) {
     if (llmReply.text.includes("[START_BOOKING]")) {
       const lang = detectLang(message) === "es" || state.lang === "es" ? "es" : "en";
-      return { reply: T[lang].askName, state: { ...state, stage: "booking_name", lang }, agent: "Scheduling Agent" };
+      return {
+        reply: T[lang].askName,
+        state: { ...state, stage: "booking_name", lang },
+        agent: "Scheduling Agent",
+        internalBrain: llmReply.brain,
+        latencyMs,
+      };
     }
     // Public-facing agent label hides the underlying provider/model — the
     // detailed brain label is preserved on the server for logging/admin use.
-    return { reply: llmReply.text, state, agent: "HERMES" };
+    return {
+      reply: llmReply.text,
+      state,
+      agent: "HERMES",
+      internalBrain: llmReply.brain,
+      latencyMs,
+    };
   }
   return runDeterministicAgent(message, state);
 }

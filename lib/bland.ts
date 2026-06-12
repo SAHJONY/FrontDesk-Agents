@@ -1,5 +1,7 @@
-// Bland.ai telephony integration — the ARIA voice layer. Activates the moment
-// BLAND_API_KEY is set; the admin dashboard can place live outbound calls.
+// Bland.ai telephony integration. Activates the moment BLAND_API_KEY is set;
+// the admin dashboard can then place live outbound demo calls.
+import { recordEvent } from "@/lib/store";
+
 const BLAND_API = "https://api.bland.ai/v1";
 
 export function blandConfigured(): boolean {
@@ -9,7 +11,7 @@ export function blandConfigured(): boolean {
 export async function startOutboundCall(phone: string, task: string) {
   const apiKey = process.env.BLAND_API_KEY;
   if (!apiKey) {
-    return { ok: false as const, error: "Bland.ai is not configured yet — add BLAND_API_KEY in Vercel env settings to activate ARIA voice calls." };
+    return { ok: false as const, error: "Bland.ai is not configured yet — set BLAND_API_KEY in the Environment tab to activate." };
   }
   const res = await fetch(`${BLAND_API}/calls`, {
     method: "POST",
@@ -28,5 +30,6 @@ export async function startOutboundCall(phone: string, task: string) {
   if (!res.ok) {
     return { ok: false as const, error: data?.message || `Bland.ai returned ${res.status}` };
   }
+  recordEvent("voice_call:started", { callId: data?.call_id ?? null, phone: phone.replace(/\d(?=\d{4})/g, "•") });
   return { ok: true as const, callId: data?.call_id ?? null };
 }

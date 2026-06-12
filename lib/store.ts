@@ -87,6 +87,7 @@ export async function addBooking(b: Omit<Booking, "id" | "createdAt">): Promise<
   const booking: Booking = { ...b, id: crypto.randomUUID(), createdAt: new Date().toISOString() };
   bookings.unshift(booking);
   await writeJson("bookings.json", bookings.slice(0, 500));
+  recordEvent("booking:created", { id: booking.id, name: booking.name, service: booking.service, datetime: booking.datetime });
   return booking;
 }
 
@@ -116,6 +117,7 @@ export async function addLead(l: Omit<Lead, "id" | "createdAt">): Promise<Lead> 
   const lead: Lead = { ...l, id: crypto.randomUUID(), createdAt: new Date().toISOString() };
   leads.unshift(lead);
   await writeJson("leads.json", leads.slice(0, 1000));
+  recordEvent("lead:captured", { id: lead.id, business: lead.business, source: lead.source, plan: lead.plan });
   return lead;
 }
 
@@ -202,6 +204,7 @@ export async function upsertCustomerByEmail(input: {
   };
   customers.unshift(customer);
   await writeJson(CUSTOMERS_FILE, customers.slice(0, 5000));
+  recordEvent("customer:created", { id: customer.id, email: customer.email, business: customer.business });
   return customer;
 }
 
@@ -284,6 +287,7 @@ export async function upsertSubscription(input: {
     (s) => s.provider === input.provider && s.providerSubId === input.providerSubId
   );
   if (existing) {
+    const prevStatus = existing.status;
     existing.customerId = input.customerId;
     existing.planId = input.planId;
     existing.status = input.status;
@@ -291,6 +295,12 @@ export async function upsertSubscription(input: {
     existing.providerCustomerId = input.providerCustomerId ?? existing.providerCustomerId;
     existing.updatedAt = now;
     await writeJson(SUBSCRIPTIONS_FILE, subs);
+    if (prevStatus !== input.status) {
+      recordEvent(
+        input.status === "canceled" ? "subscription:canceled" : "subscription:updated",
+        { id: existing.id, planId: existing.planId, provider: existing.provider, status: input.status }
+      );
+    }
     return existing;
   }
   const sub: Subscription = {
@@ -307,6 +317,10 @@ export async function upsertSubscription(input: {
   };
   subs.unshift(sub);
   await writeJson(SUBSCRIPTIONS_FILE, subs.slice(0, 10000));
+  recordEvent(
+    input.status === "active" || input.status === "trialing" ? "subscription:active" : "subscription:updated",
+    { id: sub.id, planId: sub.planId, provider: sub.provider, status: sub.status }
+  );
   return sub;
 }
 
@@ -343,4 +357,61 @@ export async function getUsage(customerId: string): Promise<number> {
   const records = await readJson<UsageRecord[]>(USAGE_FILE, []);
   const key = currentPeriodKey();
   return records.find((r) => r.customerId === customerId && r.periodKey === key)?.count ?? 0;
+}
+
+// ---------- Real-time event log --------------------------------------------
+
+export type PlatformEventKind =
+  | "chat:incoming"
+  | "chat:reply"
+  | "booking:created"
+  | "lead:captured"
+  | "customer:created"
+  | "subscription:active"
+  | "subscription:updated"
+  | "subscription:canceled"
+  | "voice_call:started"
+  | "env:updated"
+  | "env:deleted";
+
+export type PlatformEvent = {
+  id: string;
+  kind: PlatformEventKind;
+  // Lightweight payload — no PII beyond first names / masked emails / etc.
+  payload: Record<string, unknown>;
+  createdAt: string;
+};
+
+const EVENTS_FILE = "events.json";
+const EVENT_BUFFER_SIZE = 500;
+
+export async function listRecentEvents(limit = 100): Promise<PlatformEvent[]> {
+  const events = await readJson<PlatformEvent[]>(EVENTS_FILE, []);
+  return events.slice(0, limit);
+}
+
+export async function listEventsSince(sinceIso: string, limit = 100): Promise<PlatformEvent[]> {
+  const events = await readJson<PlatformEvent[]>(EVENTS_FILE, []);
+  // Stored newest-first; return newest-first too, only those strictly newer.
+  return events.filter((e) => e.createdAt > sinceIso).slice(0, limit);
+}
+
+// Fire-and-forget event recorder. Never throws to the caller — telemetry must
+// not block the user-facing path. Trims the log to EVENT_BUFFER_SIZE entries.
+export function recordEvent(kind: PlatformEventKind, payload: Record<string, unknown> = {}): void {
+  void (async () => {
+    try {
+      const events = await readJson<PlatformEvent[]>(EVENTS_FILE, []);
+      const event: PlatformEvent = {
+        id: crypto.randomUUID(),
+        kind,
+        payload,
+        createdAt: new Date().toISOString(),
+      };
+      events.unshift(event);
+      await writeJson(EVENTS_FILE, events.slice(0, EVENT_BUFFER_SIZE));
+    } catch {
+      // swallow — events are best-effort
+    }
+  })();
 }

@@ -7,6 +7,7 @@ import {
   getActiveSubscriptionForCustomer,
   incrementUsage,
   getUsage,
+  recordEvent,
 } from "@/lib/store";
 import { getPlan } from "@/lib/plans";
 import { loadSecretOverrides } from "@/lib/secrets";
@@ -56,7 +57,17 @@ export async function POST(req: NextRequest) {
       await incrementUsage(customerId);
     }
 
+    recordEvent("chat:incoming", { customerId, language: state.lang });
+
     const result = await runReceptionist(message, history, state);
+
+    // Real-time telemetry — broadcast which brain answered and how fast.
+    recordEvent("chat:reply", {
+      agent: result.agent,
+      brain: result.internalBrain ?? "deterministic",
+      latencyMs: result.latencyMs,
+      customerId,
+    });
 
     if (result.action?.type === "booking_confirmed") {
       await addBooking(result.action.booking).catch(() => {});

@@ -1,9 +1,96 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import { PLANS } from "@/lib/plans";
+
+// ============================================================================
+// Real-time event types + hook
+// ============================================================================
+
+type PlatformEventKind =
+  | "chat:incoming"
+  | "chat:reply"
+  | "booking:created"
+  | "lead:captured"
+  | "customer:created"
+  | "subscription:active"
+  | "subscription:updated"
+  | "subscription:canceled"
+  | "voice_call:started"
+  | "env:updated"
+  | "env:deleted";
+
+type PlatformEvent = {
+  id: string;
+  kind: PlatformEventKind;
+  payload: Record<string, unknown>;
+  createdAt: string;
+};
+
+type StreamStatus = "connecting" | "live" | "reconnecting" | "closed";
+
+function useEventStream(authed: boolean): {
+  status: StreamStatus;
+  events: PlatformEvent[];
+  lastEventAt: string | null;
+} {
+  const [status, setStatus] = useState<StreamStatus>("connecting");
+  const [events, setEvents] = useState<PlatformEvent[]>([]);
+  const [lastEventAt, setLastEventAt] = useState<string | null>(null);
+  const esRef = useRef<EventSource | null>(null);
+  const sinceRef = useRef<string>(new Date(Date.now() - 5 * 60_000).toISOString());
+
+  useEffect(() => {
+    if (!authed) return;
+    let cancelled = false;
+
+    function connect() {
+      if (cancelled) return;
+      setStatus("connecting");
+      try {
+        const es = new EventSource(`/api/admin/stream?since=${encodeURIComponent(sinceRef.current)}`);
+        esRef.current = es;
+        es.addEventListener("ready", () => setStatus("live"));
+        es.addEventListener("event", (e: MessageEvent) => {
+          try {
+            const ev = JSON.parse(e.data) as PlatformEvent;
+            setEvents((prev) => [ev, ...prev].slice(0, 200));
+            setLastEventAt(ev.createdAt);
+            if (ev.createdAt > sinceRef.current) sinceRef.current = ev.createdAt;
+          } catch {
+            // ignore malformed
+          }
+        });
+        es.addEventListener("bye", () => {
+          es.close();
+          if (!cancelled) {
+            setStatus("reconnecting");
+            setTimeout(connect, 500);
+          }
+        });
+        es.onerror = () => {
+          es.close();
+          if (!cancelled) {
+            setStatus("reconnecting");
+            setTimeout(connect, 2000);
+          }
+        };
+      } catch {
+        setStatus("closed");
+      }
+    }
+
+    connect();
+    return () => {
+      cancelled = true;
+      esRef.current?.close();
+    };
+  }, [authed]);
+
+  return { status, events, lastEventAt };
+}
 
 // ============================================================================
 // Types
@@ -182,12 +269,86 @@ function fmtMoney(n: number) {
 
 function fmtAgo(iso: string) {
   const ms = Date.now() - new Date(iso).getTime();
-  const m = Math.floor(ms / 60000);
-  if (m < 1) return "just now";
+  if (ms < 5000) return "just now";
+  const s = Math.floor(ms / 1000);
+  if (s < 60) return `${s}s ago`;
+  const m = Math.floor(s / 60);
   if (m < 60) return `${m}m ago`;
   const h = Math.floor(m / 60);
   if (h < 24) return `${h}h ago`;
   return `${Math.floor(h / 24)}d ago`;
+}
+
+function eventBadge(kind: PlatformEventKind): { label: string; color: string } {
+  switch (kind) {
+    case "chat:incoming":
+      return { label: "chat in", color: "bg-teal-glow/15 text-teal-glow" };
+    case "chat:reply":
+      return { label: "chat reply", color: "bg-emerald-400/15 text-emerald-300" };
+    case "booking:created":
+      return { label: "booking", color: "bg-gold/20 text-gold" };
+    case "lead:captured":
+      return { label: "lead", color: "bg-amber-400/15 text-amber-300" };
+    case "customer:created":
+      return { label: "new customer", color: "bg-purple-400/15 text-purple-300" };
+    case "subscription:active":
+      return { label: "new paid", color: "bg-emerald-400/15 text-emerald-300" };
+    case "subscription:updated":
+      return { label: "sub update", color: "bg-teal-glow/15 text-teal-glow" };
+    case "subscription:canceled":
+      return { label: "sub canceled", color: "bg-red-400/15 text-red-300" };
+    case "voice_call:started":
+      return { label: "voice call", color: "bg-gold/20 text-gold" };
+    case "env:updated":
+      return { label: "env updated", color: "bg-slate-400/15 text-slate-300" };
+    case "env:deleted":
+      return { label: "env deleted", color: "bg-red-400/15 text-red-300" };
+  }
+}
+
+function eventTitle(e: PlatformEvent): string {
+  const p = e.payload;
+  switch (e.kind) {
+    case "chat:incoming":
+      return `Visitor sent a message · ${p.language ?? "en"}`;
+    case "chat:reply": {
+      const ms = Number(p.latencyMs ?? 0);
+      return `${p.agent ?? "HERMES"} replied${ms ? ` in ${ms}ms` : ""}${p.brain ? ` · ${p.brain}` : ""}`;
+    }
+    case "booking:created":
+      return `${p.name ?? "Visitor"} booked ${p.service ?? "an appointment"} (${p.datetime ?? "TBD"})`;
+    case "lead:captured":
+      return `Lead captured · ${p.business ?? p.source ?? "anonymous"}`;
+    case "customer:created":
+      return `New customer · ${p.email ?? "anonymous"}`;
+    case "subscription:active":
+      return `New paid subscription · ${p.planId} via ${p.provider}`;
+    case "subscription:updated":
+      return `Subscription updated · ${p.planId} · ${p.status}`;
+    case "subscription:canceled":
+      return `Subscription canceled · ${p.planId} via ${p.provider}`;
+    case "voice_call:started":
+      return `Outbound voice call dialing ${p.phone ?? "phone"}`;
+    case "env:updated":
+      return `Env updated · ${p.name}`;
+    case "env:deleted":
+      return `Env removed · ${p.name}`;
+  }
+}
+
+function LiveEventRow({ event }: { event: PlatformEvent }) {
+  const badge = eventBadge(event.kind);
+  return (
+    <li className="flex items-start gap-3 py-2.5">
+      <span className={`mt-0.5 shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${badge.color}`}>
+        {badge.label}
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="text-sm leading-snug text-slate-200">{eventTitle(event)}</div>
+        <div className="text-[10px] text-slate-500">{fmtAgo(event.createdAt)}</div>
+      </div>
+    </li>
+  );
 }
 
 // ============================================================================
@@ -562,6 +723,36 @@ export default function AdminPage() {
     return () => clearInterval(t);
   }, [load]);
 
+  // Real-time event stream — push-driven updates, no polling lag.
+  const stream = useEventStream(authed === true);
+
+  // Refetch overview immediately when a meaningful state-changing event arrives.
+  useEffect(() => {
+    if (stream.events.length === 0) return;
+    const latest = stream.events[0];
+    if (
+      latest.kind === "booking:created" ||
+      latest.kind === "lead:captured" ||
+      latest.kind === "subscription:active" ||
+      latest.kind === "subscription:canceled" ||
+      latest.kind === "customer:created"
+    ) {
+      load();
+    }
+  }, [stream.events, load]);
+
+  // Rolling stats from the chat:reply stream — latency + last model.
+  const chatStats = useMemo(() => {
+    const replies = stream.events.filter((e) => e.kind === "chat:reply").slice(0, 30);
+    if (replies.length === 0) return { count: 0, avgLatency: null as number | null, lastBrain: null as string | null };
+    const latencies = replies
+      .map((r) => Number(r.payload.latencyMs ?? 0))
+      .filter((n) => n > 0);
+    const avg = latencies.length ? latencies.reduce((a, b) => a + b, 0) / latencies.length : null;
+    const lastBrain = (replies[0].payload.brain as string) || null;
+    return { count: replies.length, avgLatency: avg, lastBrain };
+  }, [stream.events]);
+
   const autonomousChecks = useMemo(() => {
     if (!data) return [];
     return [
@@ -591,9 +782,30 @@ export default function AdminPage() {
                 <h1 className="font-display text-4xl font-semibold md:text-5xl">
                   Admin <span className="text-gradient-gold">console</span>
                 </h1>
-                <p className="mt-2 text-sm text-slate-400">
-                  Live data — auto-refreshing every 5 seconds. Last update: {lastUpdate ?? "—"}.
-                </p>
+                <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-slate-400">
+                  <span
+                    className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-wider ${
+                      stream.status === "live"
+                        ? "bg-emerald-400/15 text-emerald-300"
+                        : stream.status === "reconnecting"
+                          ? "bg-amber-400/15 text-amber-300"
+                          : "bg-white/5 text-slate-400"
+                    }`}
+                  >
+                    <span
+                      className={`h-1.5 w-1.5 rounded-full ${
+                        stream.status === "live" ? "bg-emerald-300 animate-pulse-glow" : "bg-slate-500"
+                      }`}
+                    />
+                    {stream.status === "live"
+                      ? "Live · streaming"
+                      : stream.status === "reconnecting"
+                        ? "Reconnecting…"
+                        : "Connecting…"}
+                  </span>
+                  <span>Snapshot {lastUpdate ?? "—"}</span>
+                  {stream.lastEventAt && <span>· last event {fmtAgo(stream.lastEventAt)}</span>}
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -657,6 +869,25 @@ export default function AdminPage() {
                   </div>
                 </div>
 
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <div className="glass rounded-2xl p-5">
+                    <div className="text-xs uppercase tracking-widest text-slate-500">Chats (last 30 replies)</div>
+                    <div className="mt-2 font-display text-3xl font-bold text-teal-glow">{chatStats.count}</div>
+                  </div>
+                  <div className="glass rounded-2xl p-5">
+                    <div className="text-xs uppercase tracking-widest text-slate-500">Avg reply latency</div>
+                    <div className="mt-2 font-display text-3xl font-bold text-gold">
+                      {chatStats.avgLatency ? `${Math.round(chatStats.avgLatency)} ms` : "—"}
+                    </div>
+                  </div>
+                  <div className="glass rounded-2xl p-5">
+                    <div className="text-xs uppercase tracking-widest text-slate-500">Last model in use</div>
+                    <div className="mt-2 font-display text-base font-semibold text-teal-glow truncate" title={chatStats.lastBrain ?? ""}>
+                      {chatStats.lastBrain ?? "—"}
+                    </div>
+                  </div>
+                </div>
+
                 <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
                   <div className="glass rounded-3xl p-6">
                     <h3 className="font-semibold">Activity — last 14 days</h3>
@@ -667,9 +898,29 @@ export default function AdminPage() {
                 </div>
 
                 <div className="glass rounded-3xl p-6">
-                  <h3 className="font-semibold">Live activity feed</h3>
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold">Live event stream</h3>
+                    <span className="text-[10px] uppercase tracking-wider text-slate-500">
+                      {stream.events.length} event{stream.events.length === 1 ? "" : "s"} buffered
+                    </span>
+                  </div>
+                  {stream.events.length === 0 ? (
+                    <p className="mt-3 text-xs text-slate-500">
+                      Waiting for activity… new conversations, bookings, subscriptions, and env changes will appear here the instant they happen.
+                    </p>
+                  ) : (
+                    <ul className="mt-4 max-h-[480px] overflow-y-auto divide-y divide-white/5 scrollbar-slim">
+                      {stream.events.slice(0, 60).map((e) => (
+                        <LiveEventRow key={e.id} event={e} />
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                <div className="glass rounded-3xl p-6">
+                  <h3 className="font-semibold">Aggregated activity feed</h3>
                   {data.activity.length === 0 ? (
-                    <p className="mt-3 text-xs text-slate-500">No activity yet. Conversations + signups appear here in real time.</p>
+                    <p className="mt-3 text-xs text-slate-500">No persisted activity yet.</p>
                   ) : (
                     <ul className="mt-4 divide-y divide-white/5">
                       {data.activity.slice(0, 12).map((a) => (

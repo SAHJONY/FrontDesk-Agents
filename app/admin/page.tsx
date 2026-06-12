@@ -520,6 +520,23 @@ function CallLauncher({ blandActive }: { blandActive: boolean }) {
       </div>
       {status && <p className="mt-3 text-xs text-slate-300">{status}</p>}
 
+      {blandActive && (
+        <details className="mt-3 rounded-xl border border-white/10 bg-ink-2/50 p-3 text-xs text-slate-400">
+          <summary className="cursor-pointer text-slate-300">🌐 Verify autonomous language switching</summary>
+          <ol className="mt-2 list-decimal space-y-1 pl-4">
+            <li>Answer in <strong>English</strong> — Ava greets in English.</li>
+            <li>Switch to <strong>Spanish</strong> mid-call — within ~4s she should reply in Spanish.</li>
+            <li>Switch again to a third language (e.g. <strong>French</strong> or <strong>Arabic</strong>) — she should follow.</li>
+            <li>Ask &ldquo;how many languages do you speak?&rdquo; — she must say &ldquo;over one hundred&hellip; including yours,&rdquo; never naming a limit.</li>
+            <li>Confirm she does <strong>not</strong> revert to the greeting&rsquo;s language after you&rsquo;ve switched.</li>
+          </ol>
+          <p className="mt-2">
+            Re-detects every <code className="text-gold">BLAND_LANG_DETECT_PERIOD</code>s (default 4). Inbound &amp; outbound
+            now share the same ~50-language set.
+          </p>
+        </details>
+      )}
+
       {config && <BlandConfigPanel config={config} />}
     </div>
   );

@@ -68,6 +68,11 @@ export async function startOutboundCall(opts: OutboundCallOptions | string, lega
   const fromNumber = o.from ?? persona.outboundNumber;
   if (fromNumber) body.from = fromNumber;
 
+  // Post-call payload (transcript, recording URL, duration) is shipped to
+  // this webhook URL by Bland after the call ends. Skipped if unset.
+  const webhook = process.env.BLAND_WEBHOOK_URL;
+  if (webhook) body.webhook = webhook;
+
   const res = await fetch(`${BLAND_API}/calls`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: apiKey },
@@ -100,6 +105,7 @@ export function getActiveScripts() {
     persona,
     inbound: inboundScript(persona),
     outboundDefault: outboundSalesScript({ persona }),
+    webhookUrl: process.env.BLAND_WEBHOOK_URL ?? null,
   };
 }
 
@@ -123,13 +129,15 @@ export async function configureInboundNumber(input: {
   if (!apiKey) return { ok: false, error: "BLAND_API_KEY not set" };
 
   const persona = getPersona();
-  const body = {
+  const body: Record<string, unknown> = {
     prompt: input.prompt,
     voice: input.voice ?? persona.voice,
     language: input.language ?? persona.language,
     record: true,
     wait_for_greeting: false,
   };
+  const webhook = process.env.BLAND_WEBHOOK_URL;
+  if (webhook) body.webhook = webhook;
 
   const candidates = [
     // Modern endpoint (path-parameterised by phone number)

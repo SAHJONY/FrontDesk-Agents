@@ -140,6 +140,16 @@ export const KNOWN_SECRETS: KnownSecret[] = [
     category: "Voice (Bland.ai)",
     description: "Default language code (en, es, fr, …). Default: en. Ava still auto-switches per call when the caller speaks another supported language.",
   },
+  {
+    name: "BLAND_WEBHOOK_URL",
+    category: "Voice (Bland.ai)",
+    description: "Per-call webhook URL. Overrides the org-level webhook for calls we initiate. Leave empty to fall back to Bland's org-level webhook.",
+  },
+  {
+    name: "BLAND_WEBHOOK_SECRET",
+    category: "Voice (Bland.ai)",
+    description: "Bland.ai webhook signing secret. When set, /api/bland/webhook verifies the HMAC signature on incoming Bland call events. Get this from Bland → Settings → Webhook Signing Secret.",
+  },
 
   // Stripe
   {

@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPlan } from "@/lib/plans";
 import { getStripe, stripeConfigured, appUrl } from "@/lib/billing/stripe";
+import { loadSecretOverrides } from "@/lib/secrets";
 
 export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
+  await loadSecretOverrides();
   if (!stripeConfigured()) {
     return NextResponse.json(
       { error: "Card checkout isn't configured yet. Try Square or PayPal, or contact support." },

@@ -3,10 +3,12 @@ import { getPlan } from "@/lib/plans";
 import { squareConfigured, findOrCreateCustomer, createSubscription, mapSquareStatus } from "@/lib/billing/square";
 import { upsertCustomerByEmail, upsertSubscription } from "@/lib/store";
 import { appUrl } from "@/lib/billing/stripe";
+import { loadSecretOverrides } from "@/lib/secrets";
 
 export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
+  await loadSecretOverrides();
   if (!squareConfigured()) {
     return NextResponse.json(
       { error: "Square checkout isn't configured yet. Try Stripe or PayPal." },

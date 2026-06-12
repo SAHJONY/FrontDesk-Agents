@@ -1,20 +1,76 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
-import { AGENTS, PLANS } from "@/lib/plans";
+import { PLANS } from "@/lib/plans";
 
-type Booking = { id?: string; name: string; service: string; datetime: string; phone: string; createdAt: string };
+// ============================================================================
+// Types
+// ============================================================================
+
+type Booking = { id: string; name: string; service: string; datetime: string; phone: string; createdAt: string };
 type Lead = { id: string; phone?: string; email?: string; business?: string; industry?: string; plan?: string; source: string; createdAt: string };
+type Customer = { id: string; email: string; name?: string; business?: string; createdAt: string };
+type Subscription = {
+  id: string;
+  customerId: string;
+  planId: string;
+  provider: "stripe" | "square" | "paypal";
+  providerSubId: string;
+  providerCustomerId?: string;
+  status: "active" | "trialing" | "past_due" | "canceled" | "incomplete";
+  currentPeriodEnd?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+type Activity = { id: string; type: "booking" | "lead" | "subscription"; title: string; subtitle: string; createdAt: string; badge?: string };
+
 type Overview = {
+  time: string;
   bookings: Booking[];
   leads: Lead[];
-  finances: { mrr: number; arr: number; pipeline: number };
-  integrations: { brains: string[]; bland: boolean };
+  subscriptions: Subscription[];
+  customers: number;
+  finances: {
+    mrr: number;
+    arr: number;
+    activeSubscribers: number;
+    subsByPlan: { planId: string; planName: string; price: number; count: number; mrr: number }[];
+    subsByProvider: { provider: string; count: number; mrr: number }[];
+  };
+  activity: Activity[];
+  sparkline: { day: string; count: number }[];
+  hermes: {
+    online: boolean;
+    totalModels: number;
+    providers: string[];
+    primary: string;
+    models: string[];
+    byProvider: { nim: string[]; anthropic: string[]; openai: string[] };
+  };
+  integrations: { bland: boolean; stripe: boolean; square: boolean; paypal: boolean };
 };
 
-const TABS = ["Overview", "Finances", "Agents", "Bookings", "Leads", "Integrations"] as const;
+type SecretListing = {
+  name: string;
+  category: string;
+  description?: string;
+  link?: string;
+  required?: boolean;
+  deployTimeOnly?: boolean;
+  hasValue: boolean;
+  masked: string;
+  source: "process.env" | "override" | "unset";
+  updatedAt?: string;
+};
+
+const TABS = ["Overview", "Financials", "HERMES", "Bookings", "Leads", "Subscriptions", "Customers", "Environment", "Settings"] as const;
+type Tab = (typeof TABS)[number];
+
+// ============================================================================
+// Login gate
+// ============================================================================
 
 function LoginGate({ onAuth }: { onAuth: () => void }) {
   const [email, setEmail] = useState("");
@@ -56,7 +112,7 @@ function LoginGate({ onAuth }: { onAuth: () => void }) {
           autoComplete="username"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="Executive email"
+          placeholder="Operator email"
           className="w-full rounded-xl border border-white/10 bg-ink-2/80 px-4 py-3 text-sm outline-none focus:border-teal-glow/50"
         />
         <input
@@ -69,21 +125,74 @@ function LoginGate({ onAuth }: { onAuth: () => void }) {
         />
         {error && <p className="text-xs text-red-300">{error}</p>}
         <button type="submit" disabled={busy || !email || !password} className="btn-gold w-full rounded-xl py-3 text-sm disabled:opacity-50">
-          {busy ? "Verifying…" : "Unlock the platform"}
+          {busy ? "Verifying…" : "Unlock"}
         </button>
       </form>
     </div>
   );
 }
 
-function Stat({ label, value, accent = "text-teal-glow" }: { label: string; value: string; accent?: string }) {
+// ============================================================================
+// Shared pieces
+// ============================================================================
+
+function StatCard({ label, value, accent = "text-teal-glow", hint }: { label: string; value: string; accent?: string; hint?: string }) {
   return (
     <div className="glass rounded-2xl p-5">
       <div className="text-xs uppercase tracking-widest text-slate-500">{label}</div>
       <div className={`mt-2 font-display text-3xl font-bold ${accent}`}>{value}</div>
+      {hint && <div className="mt-1 text-[11px] text-slate-500">{hint}</div>}
     </div>
   );
 }
+
+function StatusPill({ active, labelOn, labelOff }: { active: boolean; labelOn: string; labelOff: string }) {
+  return (
+    <span
+      className={`rounded-full px-2.5 py-1 text-[10px] uppercase tracking-wider ${
+        active ? "bg-emerald-400/15 text-emerald-300" : "bg-amber-400/10 text-amber-300"
+      }`}
+    >
+      {active ? `● ${labelOn}` : `○ ${labelOff}`}
+    </span>
+  );
+}
+
+function Sparkline({ data }: { data: { day: string; count: number }[] }) {
+  if (data.length === 0) return null;
+  const max = Math.max(1, ...data.map((d) => d.count));
+  const pts = data.map((d, i) => `${(i / Math.max(1, data.length - 1)) * 300},${80 - (d.count / max) * 70}`).join(" ");
+  return (
+    <svg viewBox="0 0 300 84" className="h-24 w-full">
+      <defs>
+        <linearGradient id="spark" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#2dd4bf" stopOpacity="0.35" />
+          <stop offset="1" stopColor="#2dd4bf" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <polygon points={`0,84 ${pts} 300,84`} fill="url(#spark)" />
+      <polyline points={pts} fill="none" stroke="#2dd4bf" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function fmtMoney(n: number) {
+  return `$${n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+}
+
+function fmtAgo(iso: string) {
+  const ms = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(ms / 60000);
+  if (m < 1) return "just now";
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
+
+// ============================================================================
+// Outbound Bland.ai call launcher
+// ============================================================================
 
 function CallLauncher({ blandActive }: { blandActive: boolean }) {
   const [phone, setPhone] = useState("");
@@ -112,13 +221,13 @@ function CallLauncher({ blandActive }: { blandActive: boolean }) {
   return (
     <div className="glass-gold rounded-3xl p-6">
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold">ARIA outbound call — Bland.ai</h3>
-        <span className={`rounded-full px-3 py-1 text-[10px] uppercase tracking-wider ${blandActive ? "bg-emerald-400/15 text-emerald-300" : "bg-amber-400/10 text-amber-300"}`}>
-          {blandActive ? "● Active" : "Awaiting BLAND_API_KEY"}
-        </span>
+        <h3 className="font-semibold">Outbound demo call — Bland.ai voice</h3>
+        <StatusPill active={blandActive} labelOn="Active" labelOff="Set BLAND_API_KEY" />
       </div>
       <p className="mt-2 text-xs text-slate-400">
-        Launch a live AI phone call from the platform. {blandActive ? "" : "Add your Bland.ai key in Vercel → Settings → Environment Variables to go live; the launcher activates automatically."}
+        {blandActive
+          ? "Place a real AI phone call from the platform — AVA dials, greets, and handles the conversation."
+          : "Add your Bland.ai key in the Environment tab to activate. The launcher goes live the moment it's saved."}
       </p>
       <div className="mt-4 flex flex-col gap-2.5 sm:flex-row">
         <input
@@ -130,7 +239,7 @@ function CallLauncher({ blandActive }: { blandActive: boolean }) {
         <input
           value={task}
           onChange={(e) => setTask(e.target.value)}
-          placeholder="Mission (optional) — e.g. follow up on yesterday's quote"
+          placeholder="Mission (optional)"
           className="flex-[2] rounded-xl border border-white/10 bg-ink-2/80 px-4 py-2.5 text-sm outline-none focus:border-gold/50"
         />
         <button onClick={launch} disabled={busy || !phone} className="btn-gold rounded-xl px-5 py-2.5 text-sm disabled:opacity-40">
@@ -142,37 +251,327 @@ function CallLauncher({ blandActive }: { blandActive: boolean }) {
   );
 }
 
-export default function AdminPage() {
-  const [authed, setAuthed] = useState<boolean | null>(null);
-  const [data, setData] = useState<Overview | null>(null);
-  const [tab, setTab] = useState<(typeof TABS)[number]>("Overview");
-  const [agentsOn, setAgentsOn] = useState<Record<string, boolean>>({});
+// ============================================================================
+// Environment tab
+// ============================================================================
+
+function EnvironmentTab() {
+  const [secrets, setSecrets] = useState<SecretListing[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const [editing, setEditing] = useState<Record<string, boolean>>({});
+  const [newName, setNewName] = useState("");
+  const [newValue, setNewValue] = useState("");
 
   async function load() {
-    const res = await fetch("/api/admin/overview");
-    if (res.status === 401) {
-      setAuthed(false);
-      return;
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/env");
+      if (!res.ok) throw new Error("load failed");
+      const data = await res.json();
+      setSecrets(data.secrets ?? []);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load");
+    } finally {
+      setLoading(false);
     }
-    const d = await res.json();
-    setData(d);
-    setAuthed(true);
   }
 
   useEffect(() => {
     load();
-    try {
-      setAgentsOn(JSON.parse(localStorage.getItem("fd_agents_on") || "{}"));
-    } catch {}
   }, []);
 
-  function toggleAgent(name: string) {
-    const next = { ...agentsOn, [name]: agentsOn[name] === false ? true : false };
-    setAgentsOn(next);
-    localStorage.setItem("fd_agents_on", JSON.stringify(next));
+  async function save(name: string) {
+    const value = drafts[name] ?? "";
+    setError(null);
+    try {
+      const res = await fetch("/api/admin/env", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, value }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Save failed");
+      setEditing((e) => ({ ...e, [name]: false }));
+      setDrafts((d) => ({ ...d, [name]: "" }));
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Save failed");
+    }
   }
 
-  const fmt = (n: number) => `$${n.toLocaleString()}`;
+  async function remove(name: string) {
+    if (!confirm(`Delete ${name}? The deploy-time value (if any) will take over again.`)) return;
+    try {
+      const res = await fetch(`/api/admin/env?name=${encodeURIComponent(name)}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Delete failed");
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Delete failed");
+    }
+  }
+
+  async function addCustom() {
+    if (!newName || !newValue) return;
+    try {
+      const res = await fetch("/api/admin/env", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newName.toUpperCase(), value: newValue }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Add failed");
+      setNewName("");
+      setNewValue("");
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Add failed");
+    }
+  }
+
+  const grouped = useMemo(() => {
+    const g: Record<string, SecretListing[]> = {};
+    for (const s of secrets) {
+      const cat = s.category || "Custom";
+      g[cat] = g[cat] || [];
+      g[cat].push(s);
+    }
+    return g;
+  }, [secrets]);
+
+  const order = ["Owner", "Storage", "Secrets", "LLM (HERMES)", "Voice (Bland.ai)", "Payments", "Deploy", "Custom"];
+
+  return (
+    <div className="mt-8 space-y-6">
+      <div className="rounded-2xl border border-amber-400/20 bg-amber-400/5 p-4 text-xs leading-relaxed text-amber-200/90">
+        Changes take effect within ~5 seconds — no redeploy required. Values are AES-256 encrypted
+        at rest using <code className="text-gold">SECRETS_ENCRYPTION_KEY</code> (or your Blob token
+        as fallback). Set <code className="text-gold">SECRETS_ENCRYPTION_KEY</code> in Vercel for
+        production-grade encryption.
+      </div>
+
+      {error && <p className="text-sm text-red-300">{error}</p>}
+      {loading && <p className="text-sm text-slate-500">Loading…</p>}
+
+      {!loading &&
+        order
+          .filter((cat) => grouped[cat]?.length)
+          .map((cat) => (
+            <div key={cat} className="glass rounded-3xl p-6">
+              <h3 className="font-semibold text-gold">{cat}</h3>
+              <div className="mt-4 space-y-3">
+                {grouped[cat].map((s) => {
+                  const isEditing = editing[s.name];
+                  return (
+                    <div key={s.name} className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <code className="font-mono text-sm text-teal-glow">{s.name}</code>
+                            {s.required && (
+                              <span className="rounded-full bg-red-400/15 px-2 py-0.5 text-[10px] uppercase tracking-wider text-red-300">required</span>
+                            )}
+                            {s.deployTimeOnly && (
+                              <span className="rounded-full bg-amber-400/15 px-2 py-0.5 text-[10px] uppercase tracking-wider text-amber-300">deploy-time</span>
+                            )}
+                            <span
+                              className={`rounded-full px-2 py-0.5 text-[10px] uppercase tracking-wider ${
+                                s.hasValue
+                                  ? s.source === "override"
+                                    ? "bg-emerald-400/15 text-emerald-300"
+                                    : "bg-teal-glow/15 text-teal-glow"
+                                  : "bg-white/5 text-slate-500"
+                              }`}
+                            >
+                              {s.hasValue ? (s.source === "override" ? "● set via UI" : "● set in vercel") : "○ unset"}
+                            </span>
+                          </div>
+                          {s.description && <p className="mt-1.5 text-xs leading-relaxed text-slate-400">{s.description}</p>}
+                          {s.link && (
+                            <a href={s.link} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block text-[11px] text-teal-glow underline">
+                              {s.link}
+                            </a>
+                          )}
+                          {s.hasValue && !isEditing && (
+                            <div className="mt-2 font-mono text-xs text-slate-300">{s.masked}</div>
+                          )}
+                          {isEditing && (
+                            <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+                              <input
+                                type="password"
+                                value={drafts[s.name] ?? ""}
+                                onChange={(e) => setDrafts((d) => ({ ...d, [s.name]: e.target.value }))}
+                                placeholder="New value (kept encrypted)"
+                                className="flex-1 rounded-lg border border-white/10 bg-ink-2/80 px-3 py-2 text-xs outline-none focus:border-teal-glow/50"
+                              />
+                              <button onClick={() => save(s.name)} className="btn-gold rounded-lg px-3 py-2 text-xs">Save</button>
+                              <button
+                                onClick={() => {
+                                  setEditing((e) => ({ ...e, [s.name]: false }));
+                                  setDrafts((d) => ({ ...d, [s.name]: "" }));
+                                }}
+                                className="btn-ghost rounded-lg px-3 py-2 text-xs"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                        {!isEditing && !s.deployTimeOnly && (
+                          <div className="flex shrink-0 gap-2">
+                            <button
+                              onClick={() => setEditing((e) => ({ ...e, [s.name]: true }))}
+                              className="rounded-lg border border-white/10 px-3 py-1.5 text-xs text-slate-300 hover:border-teal-glow/40"
+                            >
+                              {s.hasValue ? "Update" : "Set"}
+                            </button>
+                            {s.source === "override" && (
+                              <button
+                                onClick={() => remove(s.name)}
+                                className="rounded-lg border border-red-400/30 px-3 py-1.5 text-xs text-red-300 hover:bg-red-400/10"
+                              >
+                                Delete
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+
+      <div className="glass rounded-3xl p-6">
+        <h3 className="font-semibold">Add a custom env var</h3>
+        <div className="mt-4 flex flex-col gap-2.5 sm:flex-row">
+          <input
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder="MY_CUSTOM_VAR"
+            className="flex-1 rounded-xl border border-white/10 bg-ink-2/80 px-4 py-2.5 text-xs font-mono outline-none focus:border-teal-glow/50"
+          />
+          <input
+            type="password"
+            value={newValue}
+            onChange={(e) => setNewValue(e.target.value)}
+            placeholder="value"
+            className="flex-[2] rounded-xl border border-white/10 bg-ink-2/80 px-4 py-2.5 text-xs outline-none focus:border-teal-glow/50"
+          />
+          <button onClick={addCustom} disabled={!newName || !newValue} className="btn-gold rounded-xl px-5 py-2.5 text-xs disabled:opacity-40">
+            Add
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// Subscription grant form
+// ============================================================================
+
+function GrantForm({ onGranted }: { onGranted: () => void }) {
+  const [email, setEmail] = useState("");
+  const [planId, setPlanId] = useState<string>(PLANS.find((p) => p.price > 0)?.id ?? "starter");
+  const [provider, setProvider] = useState<"stripe" | "square" | "paypal">("stripe");
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+
+  async function grant() {
+    setBusy(true);
+    setMsg(null);
+    try {
+      const res = await fetch("/api/admin/subscriptions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, planId, provider, status: "active" }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Grant failed");
+      setMsg(`✅ Granted ${planId} to ${email}`);
+      setEmail("");
+      onGranted();
+    } catch (e) {
+      setMsg(`⚠️ ${e instanceof Error ? e.message : "Grant failed"}`);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="glass-gold rounded-3xl p-6">
+      <h3 className="font-semibold">Grant subscription (no charge)</h3>
+      <p className="mt-1 text-xs text-slate-400">Comp accounts, beta testers, internal use. No payment provider involved.</p>
+      <div className="mt-4 flex flex-col gap-2.5 sm:flex-row">
+        <input
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="customer@example.com"
+          className="flex-1 rounded-xl border border-white/10 bg-ink-2/80 px-4 py-2.5 text-sm outline-none focus:border-gold/50"
+        />
+        <select value={planId} onChange={(e) => setPlanId(e.target.value)} className="rounded-xl border border-white/10 bg-ink-2/80 px-4 py-2.5 text-sm">
+          {PLANS.map((p) => (
+            <option key={p.id} value={p.id}>{p.name} ${p.price}/mo</option>
+          ))}
+        </select>
+        <select value={provider} onChange={(e) => setProvider(e.target.value as "stripe" | "square" | "paypal")} className="rounded-xl border border-white/10 bg-ink-2/80 px-4 py-2.5 text-sm">
+          <option value="stripe">Stripe (tag)</option>
+          <option value="square">Square (tag)</option>
+          <option value="paypal">PayPal (tag)</option>
+        </select>
+        <button onClick={grant} disabled={busy || !email} className="btn-gold rounded-xl px-5 py-2.5 text-sm disabled:opacity-40">
+          {busy ? "Granting…" : "Grant"}
+        </button>
+      </div>
+      {msg && <p className="mt-3 text-xs text-slate-300">{msg}</p>}
+    </div>
+  );
+}
+
+// ============================================================================
+// Main page
+// ============================================================================
+
+export default function AdminPage() {
+  const [authed, setAuthed] = useState<boolean | null>(null);
+  const [data, setData] = useState<Overview | null>(null);
+  const [tab, setTab] = useState<Tab>("Overview");
+  const [lastUpdate, setLastUpdate] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    const res = await fetch("/api/admin/overview", { cache: "no-store" });
+    if (res.status === 401) {
+      setAuthed(false);
+      return;
+    }
+    if (!res.ok) return;
+    const d = (await res.json()) as Overview;
+    setData(d);
+    setAuthed(true);
+    setLastUpdate(new Date().toLocaleTimeString());
+  }, []);
+
+  // Initial load + 5s real-time polling.
+  useEffect(() => {
+    load();
+    const t = setInterval(load, 5000);
+    return () => clearInterval(t);
+  }, [load]);
+
+  const autonomousChecks = useMemo(() => {
+    if (!data) return [];
+    return [
+      { name: "HERMES brain", active: data.hermes.online, hint: data.hermes.online ? `${data.hermes.totalModels} model${data.hermes.totalModels === 1 ? "" : "s"} ready` : "Add NIM_API_KEY in Environment" },
+      { name: "Stripe checkout", active: data.integrations.stripe, hint: data.integrations.stripe ? "Card payments live" : "Add STRIPE_SECRET_KEY" },
+      { name: "Square checkout", active: data.integrations.square, hint: data.integrations.square ? "Square subscriptions live" : "Optional — add SQUARE_ACCESS_TOKEN" },
+      { name: "PayPal checkout", active: data.integrations.paypal, hint: data.integrations.paypal ? "PayPal subscriptions live" : "Optional — add PAYPAL_CLIENT_ID" },
+      { name: "Bland.ai voice", active: data.integrations.bland, hint: data.integrations.bland ? "Outbound calls armed" : "Optional — add BLAND_API_KEY" },
+    ];
+  }, [data]);
 
   return (
     <main>
@@ -193,18 +592,26 @@ export default function AdminPage() {
                   Admin <span className="text-gradient-gold">console</span>
                 </h1>
                 <p className="mt-2 text-sm text-slate-400">
-                  Operator view — bookings, leads, integrations, and outbound demo calls.
+                  Live data — auto-refreshing every 5 seconds. Last update: {lastUpdate ?? "—"}.
                 </p>
               </div>
-              <button
-                onClick={async () => {
-                  await fetch("/api/auth/login", { method: "DELETE" });
-                  setAuthed(false);
-                }}
-                className="btn-ghost rounded-xl px-4 py-2 text-xs"
-              >
-                Sign out
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => load()}
+                  className="rounded-xl border border-white/10 px-3 py-1.5 text-xs text-slate-300 hover:border-teal-glow/40"
+                >
+                  ↻ Refresh now
+                </button>
+                <button
+                  onClick={async () => {
+                    await fetch("/api/auth/login", { method: "DELETE" });
+                    setAuthed(false);
+                  }}
+                  className="btn-ghost rounded-xl px-4 py-2 text-xs"
+                >
+                  Sign out
+                </button>
+              </div>
             </div>
 
             <div className="mt-8 flex flex-wrap gap-2">
@@ -224,76 +631,131 @@ export default function AdminPage() {
             {tab === "Overview" && (
               <div className="mt-8 space-y-6">
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                  <Stat label="Monthly recurring revenue" value={fmt(data.finances.mrr)} accent="text-emerald-300" />
-                  <Stat label="Appointments captured" value={String(data.bookings.length)} accent="text-gold" />
-                  <Stat label="Leads in pipeline" value={String(data.leads.length)} />
-                  <Stat label="AI brains online" value={String(data.integrations.brains.length)} />
+                  <StatCard label="MRR" value={fmtMoney(data.finances.mrr)} accent="text-emerald-300" />
+                  <StatCard label="Active subscribers" value={String(data.finances.activeSubscribers)} accent="text-gold" />
+                  <StatCard label="Customers" value={String(data.customers)} />
+                  <StatCard label="Models online" value={String(data.hermes.totalModels)} accent="text-teal-glow" hint={data.hermes.online ? "HERMES armed" : "No LLM configured"} />
                 </div>
-                <CallLauncher blandActive={data.integrations.bland} />
+
                 <div className="glass rounded-3xl p-6">
-                  <h3 className="font-semibold">Platform status</h3>
-                  <div className="mt-4 grid gap-3 text-sm text-slate-300 sm:grid-cols-2">
-                    <div className="rounded-xl bg-white/[0.03] px-4 py-3">🧠 HERMES brains: {data.integrations.brains.join(" → ") || "deterministic core only"}</div>
-                    <div className="rounded-xl bg-white/[0.03] px-4 py-3">📞 Bland.ai voice: {data.integrations.bland ? "active" : "ready to activate"}</div>
-                    <div className="rounded-xl bg-white/[0.03] px-4 py-3">🤖 Agent fleet: {AGENTS.length} specialists deployed</div>
-                    <div className="rounded-xl bg-white/[0.03] px-4 py-3">🌐 Domain: www.frontdeskagents.com</div>
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold">Autonomous mode</h3>
+                    <span className="text-xs text-slate-500">
+                      {autonomousChecks.filter((c) => c.active).length}/{autonomousChecks.length} systems online
+                    </span>
                   </div>
+                  <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                    {autonomousChecks.map((c) => (
+                      <div key={c.name} className="flex items-center justify-between rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
+                        <div>
+                          <div className="text-sm font-medium">{c.name}</div>
+                          <div className="text-[11px] text-slate-500">{c.hint}</div>
+                        </div>
+                        <StatusPill active={c.active} labelOn="Online" labelOff="Pending" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+                  <div className="glass rounded-3xl p-6">
+                    <h3 className="font-semibold">Activity — last 14 days</h3>
+                    <Sparkline data={data.sparkline} />
+                    <p className="mt-2 text-[11px] text-slate-500">Bookings + leads + subscriptions, daily totals.</p>
+                  </div>
+                  <CallLauncher blandActive={data.integrations.bland} />
+                </div>
+
+                <div className="glass rounded-3xl p-6">
+                  <h3 className="font-semibold">Live activity feed</h3>
+                  {data.activity.length === 0 ? (
+                    <p className="mt-3 text-xs text-slate-500">No activity yet. Conversations + signups appear here in real time.</p>
+                  ) : (
+                    <ul className="mt-4 divide-y divide-white/5">
+                      {data.activity.slice(0, 12).map((a) => (
+                        <li key={a.id} className="flex items-center justify-between py-3">
+                          <div className="min-w-0">
+                            <div className="text-sm font-medium">{a.title}</div>
+                            <div className="text-[11px] text-slate-500">{a.subtitle}</div>
+                          </div>
+                          <div className="text-[11px] text-gold">{fmtAgo(a.createdAt)}</div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               </div>
             )}
 
-            {tab === "Finances" && (
+            {tab === "Financials" && (
               <div className="mt-8 space-y-6">
                 <div className="grid gap-4 sm:grid-cols-3">
-                  <Stat label="MRR" value={fmt(data.finances.mrr)} accent="text-emerald-300" />
-                  <Stat label="ARR (run-rate)" value={fmt(data.finances.arr)} accent="text-emerald-300" />
-                  <Stat label="Pipeline value" value={fmt(data.finances.pipeline)} accent="text-gold" />
+                  <StatCard label="MRR" value={fmtMoney(data.finances.mrr)} accent="text-emerald-300" />
+                  <StatCard label="ARR (run-rate)" value={fmtMoney(data.finances.arr)} accent="text-emerald-300" />
+                  <StatCard label="Active subscribers" value={String(data.finances.activeSubscribers)} accent="text-gold" />
                 </div>
+
                 <div className="glass rounded-3xl p-6">
                   <h3 className="font-semibold">Revenue by plan</h3>
                   <div className="mt-4 space-y-3">
-                    {PLANS.map((p) => {
-                      const count = data.leads.filter((l) => l.plan === p.id).length;
-                      const rev = count * p.price;
-                      const max = Math.max(1, ...PLANS.map((q) => data.leads.filter((l) => l.plan === q.id).length * q.price));
+                    {data.finances.subsByPlan.map((p) => {
+                      const max = Math.max(1, ...data.finances.subsByPlan.map((q) => q.mrr));
                       return (
-                        <div key={p.id}>
+                        <div key={p.planId}>
                           <div className="flex justify-between text-xs text-slate-400">
-                            <span>{p.name} · {count} signup{count === 1 ? "" : "s"}</span>
-                            <span className="text-slate-200">{fmt(rev)}/mo</span>
+                            <span>{p.planName} · {p.count} subscriber{p.count === 1 ? "" : "s"}</span>
+                            <span className="text-slate-200">{fmtMoney(p.mrr)}/mo</span>
                           </div>
                           <div className="mt-1 h-2 rounded-full bg-white/5">
-                            <div className="h-2 rounded-full bg-gradient-to-r from-[#2dd4bf] to-[#d4a843]" style={{ width: `${(rev / max) * 100}%` }} />
+                            <div className="h-2 rounded-full bg-gradient-to-r from-[#2dd4bf] to-[#d4a843]" style={{ width: `${(p.mrr / max) * 100}%` }} />
                           </div>
                         </div>
                       );
                     })}
                   </div>
                 </div>
+
+                <div className="glass rounded-3xl p-6">
+                  <h3 className="font-semibold">Revenue by processor</h3>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                    {data.finances.subsByProvider.map((p) => (
+                      <div key={p.provider} className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
+                        <div className="text-xs uppercase tracking-wider text-slate-500">{p.provider}</div>
+                        <div className="mt-1 font-display text-xl font-semibold">{fmtMoney(p.mrr)}/mo</div>
+                        <div className="text-[11px] text-slate-500">{p.count} sub{p.count === 1 ? "" : "s"}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
 
-            {tab === "Agents" && (
-              <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {AGENTS.map((a) => {
-                  const on = agentsOn[a.name] !== false;
+            {tab === "HERMES" && (
+              <div className="mt-8 space-y-6">
+                <div className="glass rounded-3xl p-6">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold">HERMES status</h3>
+                    <StatusPill active={data.hermes.online} labelOn="Armed" labelOff="No LLM configured" />
+                  </div>
+                  <p className="mt-1 text-xs text-slate-400">
+                    Primary: <span className="text-gold">{data.hermes.primary}</span> · {data.hermes.totalModels} total model{data.hermes.totalModels === 1 ? "" : "s"} across {data.hermes.providers.length} provider{data.hermes.providers.length === 1 ? "" : "s"}.
+                  </p>
+                </div>
+
+                {(["nim", "anthropic", "openai"] as const).map((provider) => {
+                  const models = data.hermes.byProvider[provider];
+                  if (!models.length) return null;
                   return (
-                    <div key={a.name} className={`glass rounded-2xl p-5 transition ${on ? "" : "opacity-50"}`}>
-                      <div className="flex items-center justify-between">
-                        <span className="font-display font-semibold text-gold">{a.name}</span>
-                        <button
-                          onClick={() => toggleAgent(a.name)}
-                          className={`relative h-6 w-11 rounded-full transition ${on ? "bg-teal-glow/70" : "bg-white/10"}`}
-                          aria-label={`Toggle ${a.name}`}
-                        >
-                          <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all ${on ? "left-[22px]" : "left-0.5"}`} />
-                        </button>
-                      </div>
-                      <div className="mt-0.5 text-[10px] uppercase tracking-widest text-slate-500">{a.role}</div>
-                      <p className="mt-2 text-xs leading-relaxed text-slate-400">{a.desc}</p>
-                      <div className={`mt-3 text-[10px] uppercase tracking-wider ${on ? "text-emerald-300" : "text-slate-600"}`}>
-                        {on ? "● Operational" : "○ Standby"}
-                      </div>
+                    <div key={provider} className="glass rounded-3xl p-6">
+                      <h3 className="font-semibold uppercase tracking-wide">{provider}</h3>
+                      <ul className="mt-3 space-y-1.5 font-mono text-xs">
+                        {models.map((m, i) => (
+                          <li key={m} className="flex items-center gap-2">
+                            <span className="text-[10px] text-slate-500">{String(i + 1).padStart(2, "0")}</span>
+                            <span className="text-teal-glow">{m}</span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                   );
                 })}
@@ -304,20 +766,32 @@ export default function AdminPage() {
               <div className="glass mt-8 overflow-x-auto rounded-3xl p-6">
                 <h3 className="font-semibold">All appointments ({data.bookings.length})</h3>
                 {data.bookings.length === 0 ? (
-                  <p className="mt-4 text-sm text-slate-500">No bookings yet — try the <a className="text-teal-glow underline" href="/demo">live demo</a>; AVA's bookings land here in real time.</p>
+                  <p className="mt-4 text-sm text-slate-500">No bookings yet — try the <a className="text-teal-glow underline" href="/demo">live demo</a>.</p>
                 ) : (
                   <table className="mt-4 w-full text-left text-sm">
                     <thead className="text-xs uppercase tracking-wider text-slate-500">
-                      <tr><th className="py-2 pr-4">Client</th><th className="py-2 pr-4">Service</th><th className="py-2 pr-4">When</th><th className="py-2 pr-4">Phone</th><th className="py-2">Captured</th></tr>
+                      <tr><th className="py-2 pr-4">Client</th><th className="py-2 pr-4">Service</th><th className="py-2 pr-4">When</th><th className="py-2 pr-4">Phone</th><th className="py-2 pr-4">Captured</th><th className="py-2"></th></tr>
                     </thead>
                     <tbody className="text-slate-300">
-                      {data.bookings.map((b, i) => (
-                        <tr key={b.id ?? i} className="border-t border-white/5">
+                      {data.bookings.map((b) => (
+                        <tr key={b.id} className="border-t border-white/5">
                           <td className="py-2.5 pr-4 font-medium">{b.name}</td>
                           <td className="py-2.5 pr-4">{b.service}</td>
                           <td className="py-2.5 pr-4 text-gold">{b.datetime}</td>
                           <td className="py-2.5 pr-4">{b.phone}</td>
-                          <td className="py-2.5 text-xs text-slate-500">{new Date(b.createdAt).toLocaleString()}</td>
+                          <td className="py-2.5 pr-4 text-xs text-slate-500">{fmtAgo(b.createdAt)}</td>
+                          <td className="py-2.5 text-right">
+                            <button
+                              onClick={async () => {
+                                if (!confirm(`Delete booking for ${b.name}?`)) return;
+                                await fetch(`/api/admin/bookings?id=${b.id}`, { method: "DELETE" });
+                                await load();
+                              }}
+                              className="text-xs text-red-300 hover:text-red-200"
+                            >
+                              Delete
+                            </button>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -330,11 +804,11 @@ export default function AdminPage() {
               <div className="glass mt-8 overflow-x-auto rounded-3xl p-6">
                 <h3 className="font-semibold">All leads ({data.leads.length})</h3>
                 {data.leads.length === 0 ? (
-                  <p className="mt-4 text-sm text-slate-500">No leads yet — the signup wizard and AVA's lead capture feed this table.</p>
+                  <p className="mt-4 text-sm text-slate-500">No leads yet.</p>
                 ) : (
                   <table className="mt-4 w-full text-left text-sm">
                     <thead className="text-xs uppercase tracking-wider text-slate-500">
-                      <tr><th className="py-2 pr-4">Business</th><th className="py-2 pr-4">Contact</th><th className="py-2 pr-4">Industry</th><th className="py-2 pr-4">Plan</th><th className="py-2">Source</th></tr>
+                      <tr><th className="py-2 pr-4">Business</th><th className="py-2 pr-4">Contact</th><th className="py-2 pr-4">Industry</th><th className="py-2 pr-4">Plan</th><th className="py-2 pr-4">Source</th><th className="py-2"></th></tr>
                     </thead>
                     <tbody className="text-slate-300">
                       {data.leads.map((l) => (
@@ -343,7 +817,19 @@ export default function AdminPage() {
                           <td className="py-2.5 pr-4">{l.email || l.phone || "—"}</td>
                           <td className="py-2.5 pr-4">{l.industry || "—"}</td>
                           <td className="py-2.5 pr-4 capitalize text-gold">{l.plan || "—"}</td>
-                          <td className="py-2.5 text-xs text-slate-500">{l.source}</td>
+                          <td className="py-2.5 pr-4 text-xs text-slate-500">{l.source}</td>
+                          <td className="py-2.5 text-right">
+                            <button
+                              onClick={async () => {
+                                if (!confirm(`Delete lead?`)) return;
+                                await fetch(`/api/admin/leads?id=${l.id}`, { method: "DELETE" });
+                                await load();
+                              }}
+                              className="text-xs text-red-300 hover:text-red-200"
+                            >
+                              Delete
+                            </button>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -352,25 +838,64 @@ export default function AdminPage() {
               </div>
             )}
 
-            {tab === "Integrations" && (
-              <div className="mt-8 space-y-4">
-                {[
-                  { name: "Claude (Anthropic)", active: data.integrations.brains.includes("Claude"), note: "Primary HERMES brain. Set ANTHROPIC_API_KEY to activate." },
-                  { name: "OpenAI", active: data.integrations.brains.includes("OpenAI"), note: "Secondary HERMES brain. Set OPENAI_API_KEY to activate." },
-                  { name: "NVIDIA NIM", active: data.integrations.brains.includes("NVIDIA NIM"), note: "Cloud inference fallback. Configured via NIM_BASE_URL / NIM_API_KEY / NIM_MODEL." },
-                  { name: "Bland.ai voice calls", active: data.integrations.bland, note: "Real phone calls with the ARIA voice layer. Set BLAND_API_KEY to activate." },
-                  { name: "Deterministic agent core", active: true, note: "Zero-dependency multi-agent engine — always on, the platform can never go dark." },
-                ].map((i) => (
-                  <div key={i.name} className="glass flex items-center justify-between rounded-2xl px-5 py-4">
-                    <div>
-                      <div className="text-sm font-semibold">{i.name}</div>
-                      <div className="mt-0.5 text-xs text-slate-500">{i.note}</div>
-                    </div>
-                    <span className={`rounded-full px-3 py-1 text-[10px] uppercase tracking-wider ${i.active ? "bg-emerald-400/15 text-emerald-300" : "bg-white/5 text-slate-500"}`}>
-                      {i.active ? "● Connected" : "○ Not configured"}
-                    </span>
-                  </div>
-                ))}
+            {tab === "Subscriptions" && (
+              <div className="mt-8 space-y-6">
+                <GrantForm onGranted={load} />
+                <div className="glass overflow-x-auto rounded-3xl p-6">
+                  <h3 className="font-semibold">All subscriptions ({data.subscriptions.length})</h3>
+                  {data.subscriptions.length === 0 ? (
+                    <p className="mt-4 text-sm text-slate-500">No subscriptions yet. Grant one above, or share the pricing page.</p>
+                  ) : (
+                    <table className="mt-4 w-full text-left text-sm">
+                      <thead className="text-xs uppercase tracking-wider text-slate-500">
+                        <tr><th className="py-2 pr-4">Plan</th><th className="py-2 pr-4">Provider</th><th className="py-2 pr-4">Status</th><th className="py-2 pr-4">Provider ID</th><th className="py-2 pr-4">Created</th><th className="py-2"></th></tr>
+                      </thead>
+                      <tbody className="text-slate-300">
+                        {data.subscriptions.map((s) => (
+                          <tr key={s.id} className="border-t border-white/5">
+                            <td className="py-2.5 pr-4 font-medium capitalize">{s.planId}</td>
+                            <td className="py-2.5 pr-4 uppercase text-gold">{s.provider}</td>
+                            <td className="py-2.5 pr-4">{s.status}</td>
+                            <td className="py-2.5 pr-4 font-mono text-[11px] text-slate-400">{s.providerSubId.slice(0, 18)}…</td>
+                            <td className="py-2.5 pr-4 text-xs text-slate-500">{fmtAgo(s.createdAt)}</td>
+                            <td className="py-2.5 text-right">
+                              <button
+                                onClick={async () => {
+                                  if (!confirm(`Delete subscription? This is local only — the actual provider subscription is not cancelled.`)) return;
+                                  await fetch(`/api/admin/subscriptions?id=${s.id}`, { method: "DELETE" });
+                                  await load();
+                                }}
+                                className="text-xs text-red-300 hover:text-red-200"
+                              >
+                                Delete
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {tab === "Customers" && <CustomersTab onChange={load} />}
+
+            {tab === "Environment" && <EnvironmentTab />}
+
+            {tab === "Settings" && (
+              <div className="mt-8 space-y-6">
+                <div className="glass rounded-3xl p-6">
+                  <h3 className="font-semibold">Data export</h3>
+                  <p className="mt-1 text-xs text-slate-400">Download a full JSON snapshot of all data (no raw secret values).</p>
+                  <a
+                    href="/api/admin/export"
+                    download
+                    className="btn-gold mt-4 inline-block rounded-xl px-5 py-2.5 text-sm"
+                  >
+                    ⬇ Download export
+                  </a>
+                </div>
               </div>
             )}
           </>
@@ -378,5 +903,68 @@ export default function AdminPage() {
       </section>
       <Footer />
     </main>
+  );
+}
+
+// ============================================================================
+// Customers tab — separate so it can fetch on demand
+// ============================================================================
+
+function CustomersTab({ onChange }: { onChange: () => void }) {
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  async function load() {
+    setLoading(true);
+    const res = await fetch("/api/admin/customers");
+    if (res.ok) {
+      const d = await res.json();
+      setCustomers(d.customers ?? []);
+    }
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  return (
+    <div className="glass mt-8 overflow-x-auto rounded-3xl p-6">
+      <h3 className="font-semibold">All customers ({customers.length})</h3>
+      {loading ? (
+        <p className="mt-4 text-sm text-slate-500">Loading…</p>
+      ) : customers.length === 0 ? (
+        <p className="mt-4 text-sm text-slate-500">No customers yet.</p>
+      ) : (
+        <table className="mt-4 w-full text-left text-sm">
+          <thead className="text-xs uppercase tracking-wider text-slate-500">
+            <tr><th className="py-2 pr-4">Email</th><th className="py-2 pr-4">Name</th><th className="py-2 pr-4">Business</th><th className="py-2 pr-4">Created</th><th className="py-2"></th></tr>
+          </thead>
+          <tbody className="text-slate-300">
+            {customers.map((c) => (
+              <tr key={c.id} className="border-t border-white/5">
+                <td className="py-2.5 pr-4 font-medium">{c.email}</td>
+                <td className="py-2.5 pr-4">{c.name || "—"}</td>
+                <td className="py-2.5 pr-4">{c.business || "—"}</td>
+                <td className="py-2.5 pr-4 text-xs text-slate-500">{fmtAgo(c.createdAt)}</td>
+                <td className="py-2.5 text-right">
+                  <button
+                    onClick={async () => {
+                      if (!confirm(`Delete customer ${c.email}? Their subscriptions stay but become orphaned.`)) return;
+                      await fetch(`/api/admin/customers?id=${c.id}`, { method: "DELETE" });
+                      await load();
+                      onChange();
+                    }}
+                    className="text-xs text-red-300 hover:text-red-200"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
   );
 }

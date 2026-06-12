@@ -7,6 +7,7 @@ import { stripeConfigured } from "@/lib/billing/stripe";
 import { squareConfigured } from "@/lib/billing/square";
 import { paypalConfigured } from "@/lib/billing/paypal";
 import { PLANS, getPlan } from "@/lib/plans";
+import { loadSecretOverrides } from "@/lib/secrets";
 
 export const runtime = "nodejs";
 
@@ -33,6 +34,7 @@ function isLiveSub(s: Subscription) {
 }
 
 export async function GET() {
+  await loadSecretOverrides();
   if (!(await isOwner())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

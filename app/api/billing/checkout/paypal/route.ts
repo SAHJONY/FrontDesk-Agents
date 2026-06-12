@@ -3,10 +3,12 @@ import { getPlan } from "@/lib/plans";
 import { paypalConfigured, createSubscription, approvalUrl, mapPaypalStatus } from "@/lib/billing/paypal";
 import { upsertSubscription, upsertCustomerByEmail } from "@/lib/store";
 import { appUrl } from "@/lib/billing/stripe";
+import { loadSecretOverrides } from "@/lib/secrets";
 
 export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
+  await loadSecretOverrides();
   if (!paypalConfigured()) {
     return NextResponse.json(
       { error: "PayPal checkout isn't configured yet. Try Stripe or Square." },

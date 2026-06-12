@@ -9,6 +9,7 @@ import {
   getUsage,
 } from "@/lib/store";
 import { getPlan } from "@/lib/plans";
+import { loadSecretOverrides } from "@/lib/secrets";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -18,6 +19,7 @@ export const maxDuration = 30;
 const DEMO_CAP = 50;
 
 export async function POST(req: NextRequest) {
+  await loadSecretOverrides();
   try {
     const body = await req.json();
     const message: string = String(body.message ?? "").slice(0, 2000);

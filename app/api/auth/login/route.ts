@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyCredentials, sessionToken } from "@/lib/auth";
+import { loadSecretOverrides } from "@/lib/secrets";
 
 export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
+  await loadSecretOverrides();
   try {
     const { email, password } = await req.json();
     if (!verifyCredentials(String(email ?? ""), String(password ?? ""))) {

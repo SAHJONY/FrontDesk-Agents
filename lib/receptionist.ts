@@ -443,7 +443,9 @@ export async function runReceptionist(
       const lang = detectLang(message) === "es" || state.lang === "es" ? "es" : "en";
       return { reply: T[lang].askName, state: { ...state, stage: "booking_name", lang }, agent: "Scheduling Agent" };
     }
-    return { reply: llmReply.text, state, agent: `HERMES · ${llmReply.brain}` };
+    // Public-facing agent label hides the underlying provider/model — the
+    // detailed brain label is preserved on the server for logging/admin use.
+    return { reply: llmReply.text, state, agent: "HERMES" };
   }
   return runDeterministicAgent(message, state);
 }

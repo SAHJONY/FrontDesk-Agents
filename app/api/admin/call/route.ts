@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isOwner } from "@/lib/auth";
 import { startOutboundCall } from "@/lib/bland";
+import { loadSecretOverrides } from "@/lib/secrets";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
 
 export async function POST(req: NextRequest) {
+  await loadSecretOverrides();
   if (!(await isOwner())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

@@ -90,6 +90,23 @@ export async function addBooking(b: Omit<Booking, "id" | "createdAt">): Promise<
   return booking;
 }
 
+export async function updateBooking(id: string, patch: Partial<Omit<Booking, "id" | "createdAt">>): Promise<Booking | null> {
+  const bookings = await listBookings();
+  const idx = bookings.findIndex((b) => b.id === id);
+  if (idx === -1) return null;
+  bookings[idx] = { ...bookings[idx], ...patch };
+  await writeJson("bookings.json", bookings);
+  return bookings[idx];
+}
+
+export async function deleteBooking(id: string): Promise<boolean> {
+  const bookings = await listBookings();
+  const next = bookings.filter((b) => b.id !== id);
+  if (next.length === bookings.length) return false;
+  await writeJson("bookings.json", next);
+  return true;
+}
+
 export async function listLeads(): Promise<Lead[]> {
   return readJson<Lead[]>("leads.json", []);
 }
@@ -100,6 +117,23 @@ export async function addLead(l: Omit<Lead, "id" | "createdAt">): Promise<Lead> 
   leads.unshift(lead);
   await writeJson("leads.json", leads.slice(0, 1000));
   return lead;
+}
+
+export async function updateLead(id: string, patch: Partial<Omit<Lead, "id" | "createdAt">>): Promise<Lead | null> {
+  const leads = await listLeads();
+  const idx = leads.findIndex((l) => l.id === id);
+  if (idx === -1) return null;
+  leads[idx] = { ...leads[idx], ...patch };
+  await writeJson("leads.json", leads);
+  return leads[idx];
+}
+
+export async function deleteLead(id: string): Promise<boolean> {
+  const leads = await listLeads();
+  const next = leads.filter((l) => l.id !== id);
+  if (next.length === leads.length) return false;
+  await writeJson("leads.json", next);
+  return true;
 }
 
 // ---------- Customers & subscriptions ---------------------------------------
@@ -188,6 +222,51 @@ export async function getActiveSubscriptionForCustomer(customerId: string): Prom
   return (
     subs.find((s) => s.customerId === customerId && (s.status === "active" || s.status === "trialing")) ?? null
   );
+}
+
+export async function deleteCustomer(id: string): Promise<boolean> {
+  const customers = await listCustomers();
+  const next = customers.filter((c) => c.id !== id);
+  if (next.length === customers.length) return false;
+  await writeJson(CUSTOMERS_FILE, next);
+  return true;
+}
+
+export async function updateCustomer(id: string, patch: Partial<Omit<Customer, "id" | "createdAt">>): Promise<Customer | null> {
+  const customers = await listCustomers();
+  const idx = customers.findIndex((c) => c.id === id);
+  if (idx === -1) return null;
+  customers[idx] = {
+    ...customers[idx],
+    ...patch,
+    email: patch.email ? normalizeEmail(patch.email) : customers[idx].email,
+  };
+  await writeJson(CUSTOMERS_FILE, customers);
+  return customers[idx];
+}
+
+export async function deleteSubscription(id: string): Promise<boolean> {
+  const subs = await listSubscriptions();
+  const next = subs.filter((s) => s.id !== id);
+  if (next.length === subs.length) return false;
+  await writeJson(SUBSCRIPTIONS_FILE, next);
+  return true;
+}
+
+export async function updateSubscription(id: string, patch: Partial<Omit<Subscription, "id" | "createdAt">>): Promise<Subscription | null> {
+  const subs = await listSubscriptions();
+  const idx = subs.findIndex((s) => s.id === id);
+  if (idx === -1) return null;
+  subs[idx] = { ...subs[idx], ...patch, updatedAt: new Date().toISOString() };
+  await writeJson(SUBSCRIPTIONS_FILE, subs);
+  return subs[idx];
+}
+
+export async function resetCustomerUsage(customerId: string): Promise<void> {
+  const records = await readJson<UsageRecord[]>(USAGE_FILE, []);
+  const key = currentPeriodKey();
+  const next = records.filter((r) => !(r.customerId === customerId && r.periodKey === key));
+  await writeJson(USAGE_FILE, next);
 }
 
 export async function upsertSubscription(input: {

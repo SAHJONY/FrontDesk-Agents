@@ -4,24 +4,26 @@ import { blandConfigured } from "@/lib/bland";
 import { stripeConfigured } from "@/lib/billing/stripe";
 import { squareConfigured } from "@/lib/billing/square";
 import { paypalConfigured } from "@/lib/billing/paypal";
+import { loadSecretOverrides } from "@/lib/secrets";
 
+// Public health endpoint. Returns *only* what is safe to expose externally:
+// engine identity, online flag, model count (no model names, no provider
+// names). The full HERMES diagnostic surface lives at /api/admin/overview
+// behind owner auth.
 export async function GET() {
+  await loadSecretOverrides();
   const hermes = hermesStatus();
   return NextResponse.json({
     ok: true,
     platform: "FrontDesk Agents",
     engine: "HERMES",
-    hermes,
-    // Back-compat fields consumed by older callers.
-    brains: hermes.providers,
-    primaryBrain: hermes.primary,
-    llmBrain: hermes.online,
-    integrations: {
-      bland: blandConfigured(),
-      stripe: stripeConfigured(),
-      square: squareConfigured(),
-      paypal: paypalConfigured(),
-      durableStorage: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
+    hermes: {
+      online: hermes.online,
+      modelCount: hermes.totalModels,
+    },
+    capabilities: {
+      voice: blandConfigured(),
+      payments: stripeConfigured() || squareConfigured() || paypalConfigured(),
     },
     time: new Date().toISOString(),
   });

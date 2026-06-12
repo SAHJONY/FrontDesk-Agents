@@ -118,38 +118,38 @@ export default function Home() {
       <section id="features" className="mx-auto max-w-6xl px-5 py-24">
         <p className="text-center text-xs font-semibold uppercase tracking-[0.25em] text-teal-glow">How the brain works</p>
         <h2 className="mt-3 text-center font-display text-4xl font-semibold md:text-5xl">
-          <span className="text-gradient-gold">HERMES</span> — the model that never fails.
+          <span className="text-gradient-gold">HERMES</span> — the brain that never fails.
         </h2>
         <p className="mx-auto mt-4 max-w-2xl text-center text-slate-400">
-          HERMES is the AI orchestrator behind AVA. It cascades through a fleet of frontier
-          language models — NVIDIA NIM as the primary brain, Anthropic Claude and OpenAI as
-          fallbacks — and automatically routes around any model that's slow, rate-limited, or
-          down. Layered underneath is a deterministic agent core, so booking flows work even
-          if every LLM goes dark at once.
+          HERMES is our proprietary AI orchestrator. It runs every conversation through a
+          cascade of frontier language models, automatically routing around any model that's
+          slow, rate-limited, or down. Underneath sits a deterministic agent core, so booking
+          flows work even when every external service goes dark at once.
         </p>
 
         <div className="mx-auto mt-10 grid max-w-4xl gap-4 sm:grid-cols-3">
           <div className="glass rounded-2xl p-5">
-            <div className="text-xs uppercase tracking-widest text-teal-glow">Primary</div>
-            <div className="mt-1.5 font-display text-base font-semibold text-gold">NVIDIA NIM</div>
+            <div className="text-xs uppercase tracking-widest text-teal-glow">Primary brain</div>
+            <div className="mt-1.5 font-display text-base font-semibold text-gold">Frontier model fleet</div>
             <p className="mt-1.5 text-xs leading-relaxed text-slate-400">
-              Cascades across Llama 3.3 70B, Nemotron 70B, Llama 3.1 405B, Mixtral, Qwen 2.5,
-              DeepSeek R1, Gemma 2 — and every other free NIM model HERMES can reach.
+              A curated pool of the strongest open-source models, refreshed continuously as
+              new state-of-the-art releases land.
             </p>
           </div>
           <div className="glass rounded-2xl p-5">
-            <div className="text-xs uppercase tracking-widest text-teal-glow">Fallback</div>
-            <div className="mt-1.5 font-display text-base font-semibold text-gold">Anthropic Claude</div>
+            <div className="text-xs uppercase tracking-widest text-teal-glow">Fallback layer</div>
+            <div className="mt-1.5 font-display text-base font-semibold text-gold">Closed-source backstops</div>
             <p className="mt-1.5 text-xs leading-relaxed text-slate-400">
-              Opus 4.7 → Sonnet 4.6 → Haiku 4.5 — used the moment NVIDIA goes quiet.
+              The top closed-source models join the cascade automatically the moment the
+              primary fleet hesitates — sub-second handover, no dropped conversations.
             </p>
           </div>
           <div className="glass rounded-2xl p-5">
             <div className="text-xs uppercase tracking-widest text-teal-glow">Last resort</div>
-            <div className="mt-1.5 font-display text-base font-semibold text-gold">OpenAI + agent core</div>
+            <div className="mt-1.5 font-display text-base font-semibold text-gold">Deterministic core</div>
             <p className="mt-1.5 text-xs leading-relaxed text-slate-400">
-              GPT-4o-mini → GPT-4o, then a zero-dependency deterministic engine that handles
-              booking flows without any LLM at all.
+              A zero-dependency rules engine handles booking flows even if every LLM goes
+              offline. The platform never goes dark.
             </p>
           </div>
         </div>

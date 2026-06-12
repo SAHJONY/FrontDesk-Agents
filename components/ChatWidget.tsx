@@ -13,15 +13,20 @@ const GREETING: Msg = {
     "Hello! I'm AVA, the FrontDesk Agents AI receptionist. Ask me anything — or try booking an appointment and watch me handle it end-to-end. I also speak Spanish. 🌎",
 };
 
-type HermesSummary = { primary: string; totalModels: number; online: boolean };
+type HermesSummary = { online: boolean; modelCount: number };
+
+// Map the message-level "agent" label coming from the API. The API may include
+// internal provider/model names (e.g. "HERMES · NVIDIA NIM · meta/llama-3.3-70b-instruct");
+// public surfaces show only the brand.
+function publicAgentLabel(raw: string | undefined): string {
+  if (!raw) return "AVA";
+  if (raw.startsWith("HERMES")) return "HERMES";
+  return raw;
+}
 
 export default function ChatWidget({ tall = false }: { tall?: boolean }) {
   const [messages, setMessages] = useState<Msg[]>([GREETING]);
-  const [hermes, setHermes] = useState<HermesSummary>({
-    primary: "deterministic core",
-    totalModels: 0,
-    online: false,
-  });
+  const [hermes, setHermes] = useState<HermesSummary>({ online: false, modelCount: 0 });
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [voiceOn, setVoiceOn] = useState(false);
@@ -39,17 +44,16 @@ export default function ChatWidget({ tall = false }: { tall?: boolean }) {
     fetch("/api/health")
       .then((r) => r.json())
       .then((d) => {
-        const h = d?.hermes;
-        if (h) {
-          setHermes({ primary: h.primary, totalModels: h.totalModels, online: h.online });
+        if (d?.hermes) {
+          setHermes({ online: Boolean(d.hermes.online), modelCount: Number(d.hermes.modelCount ?? 0) });
         }
       })
       .catch(() => {});
   }, []);
 
   const engineLabel = hermes.online
-    ? `HERMES · ${hermes.primary}${hermes.totalModels > 1 ? ` (+${hermes.totalModels - 1} fallback${hermes.totalModels - 1 === 1 ? "" : "s"})` : ""}`
-    : "HERMES · agent core";
+    ? `HERMES · ${hermes.modelCount} model${hermes.modelCount === 1 ? "" : "s"} online`
+    : "HERMES · ready";
 
   function speak(text: string) {
     if (!voiceOn || typeof window === "undefined" || !window.speechSynthesis) return;
@@ -165,7 +169,9 @@ export default function ChatWidget({ tall = false }: { tall?: boolean }) {
           <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
             <div className={`max-w-[85%] ${m.role === "user" ? "" : ""}`}>
               {m.role === "assistant" && m.agent && (
-                <div className="mb-1 text-[10px] font-medium uppercase tracking-widest text-gold/80">{m.agent}</div>
+                <div className="mb-1 text-[10px] font-medium uppercase tracking-widest text-gold/80">
+                  {publicAgentLabel(m.agent)}
+                </div>
               )}
               <div
                 className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${

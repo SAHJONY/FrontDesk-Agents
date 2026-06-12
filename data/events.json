@@ -1,0 +1,22 @@
+[
+  {
+    "id": "2a2e86aa-6a98-4376-8f5b-730773bf3950",
+    "kind": "email:failed",
+    "payload": {
+      "to": "sah…@outlook.com",
+      "subject": "📅 New booking: Email Test — now"
+    },
+    "createdAt": "2026-06-12T09:01:36.909Z"
+  },
+  {
+    "id": "db165832-1bb1-441f-b6ea-89a08e7ef3c5",
+    "kind": "booking:created",
+    "payload": {
+      "id": "1ef1a77b-edf5-43a8-ba8b-d3b4d2b35cd6",
+      "name": "Email Test",
+      "service": "transactional email verification",
+      "datetime": "now"
+    },
+    "createdAt": "2026-06-12T09:01:31.073Z"
+  }
+]

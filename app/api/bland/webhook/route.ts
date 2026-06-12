@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createHmac, createHash, timingSafeEqual } from "crypto";
 import { recordEvent } from "@/lib/store";
 import { loadSecretOverrides } from "@/lib/secrets";
+import { emailCallSummary } from "@/lib/email";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -88,6 +89,7 @@ export async function POST(req: NextRequest) {
       ? (payload.summary as string).slice(0, 280)
       : undefined;
 
+  emailCallSummary({ callId, summary, lengthSec, recordingUrl, from }).catch(() => {});
   recordEvent("voice_call:completed", {
     callId,
     lengthSec,

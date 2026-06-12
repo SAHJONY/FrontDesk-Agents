@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { addBooking, listBookings } from "@/lib/store";
+import { emailBookingConfirmation } from "@/lib/email";
 
 export const runtime = "nodejs";
 
@@ -20,6 +21,7 @@ export async function POST(req: NextRequest) {
       datetime: String(b.datetime).slice(0, 120),
       phone: String(b.phone ?? "").slice(0, 40),
     });
+    emailBookingConfirmation(booking).catch(() => {});
     return NextResponse.json({ booking }, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });

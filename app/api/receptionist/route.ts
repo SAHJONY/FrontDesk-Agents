@@ -11,6 +11,7 @@ import {
 } from "@/lib/store";
 import { getPlan } from "@/lib/plans";
 import { loadSecretOverrides } from "@/lib/secrets";
+import { emailBookingConfirmation, emailLeadAlert } from "@/lib/email";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -71,9 +72,11 @@ export async function POST(req: NextRequest) {
 
     if (result.action?.type === "booking_confirmed") {
       await addBooking(result.action.booking).catch(() => {});
+      emailBookingConfirmation(result.action.booking).catch(() => {});
     }
     if (result.action?.type === "lead_captured") {
       await addLead({ phone: result.action.phone, source: "receptionist-chat" }).catch(() => {});
+      emailLeadAlert({ phone: result.action.phone, source: "receptionist-chat" }).catch(() => {});
     }
 
     return NextResponse.json({

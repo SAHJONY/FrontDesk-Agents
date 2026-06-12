@@ -112,8 +112,33 @@ export const KNOWN_SECRETS: KnownSecret[] = [
   {
     name: "BLAND_API_KEY",
     category: "Voice (Bland.ai)",
-    description: "Bland.ai API key. Activates outbound demo calls from the admin console.",
+    description: "Bland.ai API key. Activates inbound + outbound phone calls.",
     link: "https://www.bland.ai",
+  },
+  {
+    name: "BLAND_INBOUND_NUMBER",
+    category: "Voice (Bland.ai)",
+    description: "The number callers dial to reach Ava (e.g. +12164804413). Configure the matching number in your Bland.ai dashboard with the inbound script from the admin Voice panel.",
+  },
+  {
+    name: "BLAND_OUTBOUND_NUMBER",
+    category: "Voice (Bland.ai)",
+    description: "Caller-ID number used for outbound calls (e.g. +13465214387). Must be a Bland-purchased or verified number.",
+  },
+  {
+    name: "BLAND_AGENT_NAME",
+    category: "Voice (Bland.ai)",
+    description: "The first name Ava uses when introducing herself. Default: Ava.",
+  },
+  {
+    name: "BLAND_VOICE",
+    category: "Voice (Bland.ai)",
+    description: "Bland.ai voice ID. Defaults to maya. See Bland's voice library for alternatives.",
+  },
+  {
+    name: "BLAND_DEFAULT_LANGUAGE",
+    category: "Voice (Bland.ai)",
+    description: "Default language code (en, es, fr, …). Default: en. Ava still auto-switches per call when the caller speaks another supported language.",
   },
 
   // Stripe

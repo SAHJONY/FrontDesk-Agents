@@ -355,11 +355,35 @@ function LiveEventRow({ event }: { event: PlatformEvent }) {
 // Outbound Bland.ai call launcher
 // ============================================================================
 
+type BlandConfig = {
+  configured: boolean;
+  persona: {
+    name: string;
+    businessName: string;
+    voice: string;
+    language: string;
+    inboundNumber?: string;
+    outboundNumber?: string;
+  };
+  inboundScript: string;
+  outboundSalesScript: string;
+};
+
 function CallLauncher({ blandActive }: { blandActive: boolean }) {
   const [phone, setPhone] = useState("");
-  const [task, setTask] = useState("");
+  const [contactName, setContactName] = useState("");
+  const [reason, setReason] = useState("");
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [config, setConfig] = useState<BlandConfig | null>(null);
+
+  useEffect(() => {
+    if (!blandActive) return;
+    fetch("/api/admin/bland")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => setConfig(d))
+      .catch(() => {});
+  }, [blandActive]);
 
   async function launch() {
     setBusy(true);
@@ -368,10 +392,19 @@ function CallLauncher({ blandActive }: { blandActive: boolean }) {
       const res = await fetch("/api/admin/call", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone, task }),
+        body: JSON.stringify({
+          phone,
+          contactName: contactName || undefined,
+          reason: reason || undefined,
+        }),
       });
       const data = await res.json();
       setStatus(res.ok ? `✅ Call launched (id: ${data.callId ?? "queued"})` : `⚠️ ${data.error}`);
+      if (res.ok) {
+        setPhone("");
+        setContactName("");
+        setReason("");
+      }
     } catch {
       setStatus("⚠️ Network error — try again.");
     } finally {
@@ -382,32 +415,68 @@ function CallLauncher({ blandActive }: { blandActive: boolean }) {
   return (
     <div className="glass-gold rounded-3xl p-6">
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold">Outbound demo call — Bland.ai voice</h3>
-        <StatusPill active={blandActive} labelOn="Active" labelOff="Set BLAND_API_KEY" />
+        <h3 className="font-semibold">Outbound voice call — {config?.persona?.name ?? "Ava"}</h3>
+        <StatusPill active={blandActive} labelOn="Live" labelOff="Set BLAND_API_KEY" />
       </div>
-      <p className="mt-2 text-xs text-slate-400">
-        {blandActive
-          ? "Place a real AI phone call from the platform — AVA dials, greets, and handles the conversation."
-          : "Add your Bland.ai key in the Environment tab to activate. The launcher goes live the moment it's saved."}
-      </p>
-      <div className="mt-4 flex flex-col gap-2.5 sm:flex-row">
+      {blandActive ? (
+        <p className="mt-2 text-xs text-slate-400">
+          {config?.persona?.outboundNumber ? (
+            <>Will dial from <span className="text-gold font-mono">{config.persona.outboundNumber}</span>{" "}</>
+          ) : (
+            <>Will dial from Bland's default number — set <code className="text-gold">BLAND_OUTBOUND_NUMBER</code> for your own caller ID.{" "}</>
+          )}
+          Using the production outbound sales script. Every call is logged in the event stream with a consent source.
+        </p>
+      ) : (
+        <p className="mt-2 text-xs text-slate-400">
+          Set <code className="text-gold">BLAND_API_KEY</code> in the Environment tab to activate.
+        </p>
+      )}
+      <div className="mt-4 grid gap-2.5 sm:grid-cols-[1.1fr_1fr_1.3fr_auto]">
         <input
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           placeholder="+1 (555) 123-4567"
-          className="flex-1 rounded-xl border border-white/10 bg-ink-2/80 px-4 py-2.5 text-sm outline-none focus:border-gold/50"
+          className="rounded-xl border border-white/10 bg-ink-2/80 px-4 py-2.5 text-sm outline-none focus:border-gold/50"
         />
         <input
-          value={task}
-          onChange={(e) => setTask(e.target.value)}
-          placeholder="Mission (optional)"
-          className="flex-[2] rounded-xl border border-white/10 bg-ink-2/80 px-4 py-2.5 text-sm outline-none focus:border-gold/50"
+          value={contactName}
+          onChange={(e) => setContactName(e.target.value)}
+          placeholder="Their name (optional)"
+          className="rounded-xl border border-white/10 bg-ink-2/80 px-4 py-2.5 text-sm outline-none focus:border-gold/50"
+        />
+        <input
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          placeholder="Reason for call (e.g. follow up on demo request)"
+          className="rounded-xl border border-white/10 bg-ink-2/80 px-4 py-2.5 text-sm outline-none focus:border-gold/50"
         />
         <button onClick={launch} disabled={busy || !phone} className="btn-gold rounded-xl px-5 py-2.5 text-sm disabled:opacity-40">
           {busy ? "Dialing…" : "📞 Call now"}
         </button>
       </div>
       {status && <p className="mt-3 text-xs text-slate-300">{status}</p>}
+
+      {config && (
+        <div className="mt-5 space-y-2 text-xs">
+          {config.persona.inboundNumber && (
+            <div className="flex items-center justify-between rounded-xl border border-white/5 bg-white/[0.02] px-4 py-2.5">
+              <span className="text-slate-400">
+                Inbound number — Ava answers calls here:
+              </span>
+              <span className="font-mono text-gold">{config.persona.inboundNumber}</span>
+            </div>
+          )}
+          <details className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-2.5">
+            <summary className="cursor-pointer text-slate-300">View inbound script (paste into Bland.ai dashboard for {config.persona.inboundNumber ?? "your inbound number"})</summary>
+            <pre className="mt-3 max-h-[360px] overflow-y-auto whitespace-pre-wrap rounded-lg bg-black/40 p-3 text-[11px] leading-relaxed text-slate-300">{config.inboundScript}</pre>
+          </details>
+          <details className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-2.5">
+            <summary className="cursor-pointer text-slate-300">View outbound sales script (used automatically when you press Call now)</summary>
+            <pre className="mt-3 max-h-[360px] overflow-y-auto whitespace-pre-wrap rounded-lg bg-black/40 p-3 text-[11px] leading-relaxed text-slate-300">{config.outboundSalesScript}</pre>
+          </details>
+        </div>
+      )}
     </div>
   );
 }

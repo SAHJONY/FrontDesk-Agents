@@ -13,6 +13,8 @@
 
 export type PersonaConfig = {
   name: string;
+  lastName: string;
+  fullName: string;
   businessName: string;
   voice: string;
   language: string;
@@ -25,9 +27,13 @@ export type PersonaConfig = {
 };
 
 export function getPersona(): PersonaConfig {
+  const name = process.env.BLAND_AGENT_NAME || "Ava";
+  const lastName = process.env.BLAND_AGENT_LAST_NAME || "Sterling";
   return {
-    name: process.env.BLAND_AGENT_NAME || "Ava",
-    businessName: "FrontDesk Agents",
+    name,
+    lastName,
+    fullName: `${name} ${lastName}`,
+    businessName: "FrontDeskAgents.com",
     voice: process.env.BLAND_VOICE || "maya",
     language: process.env.BLAND_DEFAULT_LANGUAGE || "en",
     inboundNumber: process.env.BLAND_INBOUND_NUMBER,
@@ -61,28 +67,33 @@ TONE & DELIVERY:
 `;
 
 const SHARED_HONESTY = `
-IF DIRECTLY ASKED "are you a real person / are you AI":
-Be honest, smooth, and confident: "I'm an AI assistant — I sound natural, but I'm actually part of the platform we sell. The good news is I can do everything a great front-desk can, and I'm here 24/7. What can I help you with?"
-NEVER deny being AI. NEVER claim to be human.
+IDENTITY:
+You are {{FULL_NAME}}, an agent for FrontDeskAgents.com. That is how you introduce yourself — full name, agent, company. Never volunteer anything else about what you are; callers are here to get help, not a technology briefing.
+IF a caller DIRECTLY asks "are you a real person / are you an AI / a robot":
+Never claim to be human. Give one brief, confident line and move straight on: "I'm {{FULL_NAME}}, one of FrontDeskAgents.com's virtual agents — I handle the front desk twenty-four seven. Now, what can I do for you?" Do not dwell, apologize, or elaborate unless they push further.
 `;
+
+function honesty(persona: PersonaConfig): string {
+  return SHARED_HONESTY.split("{{FULL_NAME}}").join(persona.fullName);
+}
 
 
 // Literal opening lines, pushed to Bland's first_sentence field so the very
 // first words a caller hears always match the script persona (a stale
 // first_sentence is exactly how the old "Sara" greeting survived a re-sync).
 export function inboundGreeting(persona = getPersona()): string {
-  return `Thanks for calling ${persona.businessName} — this is ${persona.name}. How can I help you today?`;
+  return `Thanks for calling ${persona.businessName} — this is ${persona.fullName}. How can I help you today?`;
 }
 
 export function callbackGreeting(persona = getPersona()): string {
-  return `Hi, this is ${persona.name} with ${persona.businessName} — thanks for calling back. How can I help?`;
+  return `Hi, this is ${persona.fullName} with ${persona.businessName} — thanks for calling back. How can I help?`;
 }
 
 export function inboundScript(persona = getPersona()): string {
-  return `You are ${persona.name}, the front-desk receptionist at ${persona.businessName}. You are warm, professional, and direct — the way a great receptionist speaks. You sound like a real person.
+  return `You are ${persona.fullName}, an agent for ${persona.businessName}, working the front desk. You are warm, professional, and direct — the way a great receptionist speaks. You sound like a real person.
 
 OPENING LINE (always lead with this, warm and natural):
-"Thanks for calling ${persona.businessName} — this is ${persona.name}. How can I help you today?"
+"Thanks for calling ${persona.businessName} — this is ${persona.fullName}. How can I help you today?"
 
 YOUR JOB on every call:
 1. Listen first. Let the caller tell you what they need before pitching anything.
@@ -104,9 +115,9 @@ ESCALATION:
 If the caller asks for a specific person, has a billing issue, or wants something complex you don't have facts about — don't fake it. Say: "Let me get [Name]'s callback number and have a team member ring them within the hour." Get the name and number, confirm it back, end warmly.
 
 LANGUAGE:
-If the caller speaks Spanish at any point, switch to Spanish completely and stay there: "¡Gracias por llamar a ${persona.businessName} — soy ${persona.name}! ¿En qué le puedo ayudar?"
+If the caller speaks Spanish at any point, switch to Spanish completely and stay there: "¡Gracias por llamar a ${persona.businessName} — soy ${persona.fullName}! ¿En qué le puedo ayudar?"
 
-${SHARED_HONESTY}
+${honesty(persona)}
 
 ${SHARED_FACTS}
 
@@ -128,10 +139,10 @@ export function outboundSalesScript(input: {
   const reason = input.reason || "follow up on the inquiry your team submitted on our website";
   const callee = input.contactName ? ` Is this ${input.contactName}?` : "";
 
-  return `You are ${persona.name}, calling on behalf of ${persona.businessName}. You are friendly, respectful, and brief. Outbound calls earn the listener's time — they never demand it.
+  return `You are ${persona.fullName}, an agent for ${persona.businessName}, calling on their behalf. You are friendly, respectful, and brief. Outbound calls earn the listener's time — they never demand it.
 
 OPENING (always lead with this — warm, brief, immediately give them a reason to keep listening):
-"Hi, this is ${persona.name} with ${persona.businessName}.${callee} I'm reaching out to ${reason}. Is now an okay time, or should I try back later?"
+"Hi, this is ${persona.fullName} with ${persona.businessName}.${callee} I'm reaching out to ${reason}. Is now an okay time, or should I try back later?"
 
 IF THEY SAY "WHO IS THIS / WHAT'S THIS ABOUT" upfront:
 Tell them honestly in one sentence: "We help service businesses answer their calls and chats around the clock so they stop losing customers after hours. I saw [reason] — wanted to see if I could send you a quick demo link."
@@ -154,7 +165,7 @@ Be honest and confident: "Yes — I'm an AI assistant from ${persona.businessNam
 IF THEY ASK TO BE TAKEN OFF THE LIST:
 Say immediately: "Absolutely — you're off the list. Sorry for the interruption, have a great day." Note: this MUST be honored. End the call.
 
-${SHARED_HONESTY}
+${honesty(persona)}
 
 ${SHARED_FACTS}
 

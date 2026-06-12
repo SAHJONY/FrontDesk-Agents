@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isOwner } from "@/lib/auth";
 import { configureInboundNumber, blandConfigured } from "@/lib/bland";
-import { getPersona, inboundScript, outboundSalesScript } from "@/lib/bland-scripts";
+import { getPersona, inboundScript, outboundSalesScript, inboundGreeting, callbackGreeting } from "@/lib/bland-scripts";
 import { loadSecretOverrides } from "@/lib/secrets";
 import { recordEvent } from "@/lib/store";
 
@@ -37,13 +37,14 @@ export async function POST(req: NextRequest) {
   const target: Target = body.target ?? "inbound";
 
   const persona = getPersona();
-  const jobs: Array<{ label: Target; phone: string | undefined; prompt: string }> = [];
+  const jobs: Array<{ label: Target; phone: string | undefined; prompt: string; firstSentence: string }> = [];
 
   if (target === "inbound" || target === "both") {
     jobs.push({
       label: "inbound",
       phone: body.phoneNumber || persona.inboundNumber,
       prompt: inboundScript(persona),
+      firstSentence: inboundGreeting(persona),
     });
   }
   if (target === "outbound" || target === "both") {
@@ -51,6 +52,7 @@ export async function POST(req: NextRequest) {
       label: "outbound",
       phone: body.phoneNumber || persona.outboundNumber,
       prompt: outboundSalesScript({ persona }),
+      firstSentence: callbackGreeting(persona),
     });
   }
 
@@ -81,6 +83,7 @@ export async function POST(req: NextRequest) {
       prompt: job.prompt,
       voice: persona.voice,
       language: persona.language,
+      firstSentence: job.firstSentence,
     });
     if (r.ok) {
       recordEvent("env:updated", {

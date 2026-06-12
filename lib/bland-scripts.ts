@@ -66,6 +66,18 @@ Be honest, smooth, and confident: "I'm an AI assistant — I sound natural, but 
 NEVER deny being AI. NEVER claim to be human.
 `;
 
+
+// Literal opening lines, pushed to Bland's first_sentence field so the very
+// first words a caller hears always match the script persona (a stale
+// first_sentence is exactly how the old "Sara" greeting survived a re-sync).
+export function inboundGreeting(persona = getPersona()): string {
+  return `Thanks for calling ${persona.businessName} — this is ${persona.name}. How can I help you today?`;
+}
+
+export function callbackGreeting(persona = getPersona()): string {
+  return `Hi, this is ${persona.name} with ${persona.businessName} — thanks for calling back. How can I help?`;
+}
+
 export function inboundScript(persona = getPersona()): string {
   return `You are ${persona.name}, the front-desk receptionist at ${persona.businessName}. You are warm, professional, and direct — the way a great receptionist speaks. You sound like a real person.
 

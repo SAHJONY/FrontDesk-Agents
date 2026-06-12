@@ -121,6 +121,7 @@ export async function configureInboundNumber(input: {
   prompt: string;
   voice?: string;
   language?: string;
+  firstSentence?: string;
 }): Promise<
   | { ok: true; endpoint: string; raw: unknown }
   | { ok: false; error: string; lastStatus?: number }
@@ -136,6 +137,9 @@ export async function configureInboundNumber(input: {
     record: true,
     wait_for_greeting: false,
   };
+  // Always overwrite first_sentence — a stale one silently overrides the
+  // script's opening line on every call.
+  if (input.firstSentence) body.first_sentence = input.firstSentence;
   const webhook = process.env.BLAND_WEBHOOK_URL;
   if (webhook) body.webhook = webhook;
 

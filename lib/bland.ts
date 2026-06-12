@@ -150,6 +150,16 @@ export async function configureInboundNumber(input: {
     language: input.language ?? persona.language,
     record: true,
     wait_for_greeting: false,
+    // Inbound-specific multilingual plumbing: Bland re-detects the spoken
+    // language every few seconds across this candidate set. Without these,
+    // inbound STT can stay anchored to the greeting's language.
+    language_detection_period: 10,
+    language_detection_options: [
+      "en", "es", "fr", "de", "it", "pt", "nl", "pl", "sv", "da", "no", "fi",
+      "ru", "uk", "tr", "cs", "ro", "hu", "el", "hi", "ja", "ko", "zh", "vi", "id", "ms",
+    ],
+    // Lower temperature → stricter adherence to the ABSOLUTE language rule.
+    temperature: 0.5,
   };
   // Always overwrite first_sentence — a stale one silently overrides the
   // script's opening line on every call.

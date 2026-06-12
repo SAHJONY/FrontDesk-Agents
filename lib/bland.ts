@@ -65,7 +65,7 @@ export async function startOutboundCall(opts: OutboundCallOptions | string, lega
 
   // Bland's `from` parameter requires a number purchased/verified in your
   // Bland account. Falls back gracefully if env not set — Bland uses default.
-  const fromNumber = o.from ?? persona.outboundNumber;
+  const fromNumber = o.from ?? persona.callerId ?? persona.outboundNumber;
   if (fromNumber) body.from = fromNumber;
 
   // Post-call payload (transcript, recording URL, duration) is shipped to

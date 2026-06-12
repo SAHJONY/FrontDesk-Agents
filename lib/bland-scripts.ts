@@ -18,6 +18,10 @@ export type PersonaConfig = {
   language: string;
   inboundNumber?: string;
   outboundNumber?: string;
+  // Number displayed to callees on outbound calls. May differ from
+  // outboundNumber: the operator wants the main (216) line shown as caller ID
+  // while the (346) sales line keeps its own script for callbacks.
+  callerId?: string;
 };
 
 export function getPersona(): PersonaConfig {
@@ -28,6 +32,7 @@ export function getPersona(): PersonaConfig {
     language: process.env.BLAND_DEFAULT_LANGUAGE || "en",
     inboundNumber: process.env.BLAND_INBOUND_NUMBER,
     outboundNumber: process.env.BLAND_OUTBOUND_NUMBER,
+    callerId: process.env.BLAND_CALLER_ID || process.env.BLAND_OUTBOUND_NUMBER,
   };
 }
 

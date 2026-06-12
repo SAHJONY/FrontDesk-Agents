@@ -21,6 +21,14 @@ export const CALL_ENGINE = {
   temperature: 0.6,
 } as const;
 
+// Brand pronunciation: the TTS must say "Front Desk Agents dot com" — the
+// dot is part of the brand. Applied to inbound numbers and outbound calls.
+export const PRONUNCIATION_GUIDE = [
+  { word: "FrontDeskAgents.com", pronunciation: "Front Desk Agents dot com", case_sensitive: false },
+  { word: "frontdeskagents.com", pronunciation: "front desk agents dot com", case_sensitive: false },
+  { word: "www.frontdeskagents.com", pronunciation: "www dot front desk agents dot com", case_sensitive: false },
+];
+
 
 // Webhook URL with an embedded auth key derived from the signing secret.
 // Bland's per-call webhooks don't reliably sign with a header we can verify,
@@ -84,6 +92,7 @@ export async function startOutboundCall(opts: OutboundCallOptions | string, lega
     language: o.language ?? persona.language,
     model: CALL_ENGINE.model,
     temperature: CALL_ENGINE.temperature,
+    pronunciation_guide: PRONUNCIATION_GUIDE,
     record: true,
     wait_for_greeting: o.waitForGreeting ?? true,
   };
@@ -161,6 +170,7 @@ export async function configureInboundNumber(input: {
     language: input.language ?? persona.language,
     model: CALL_ENGINE.model,
     temperature: CALL_ENGINE.temperature,
+    pronunciation_guide: PRONUNCIATION_GUIDE,
     record: true,
     wait_for_greeting: false,
     // Inbound-specific multilingual plumbing: Bland re-detects the spoken

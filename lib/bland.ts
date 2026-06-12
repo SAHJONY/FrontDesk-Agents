@@ -7,10 +7,24 @@
 //     run the inbound script — this file exposes the script so the operator
 //     can paste it into the Bland dashboard.
 
+import { createHash } from "crypto";
 import { recordEvent } from "@/lib/store";
 import { getPersona, inboundScript, outboundSalesScript } from "@/lib/bland-scripts";
 
 const BLAND_API = "https://api.bland.ai/v1";
+
+// Webhook URL with an embedded auth key derived from the signing secret.
+// Bland's per-call webhooks don't reliably sign with a header we can verify,
+// so the URL itself carries proof — we set this URL, nobody else knows it.
+export function webhookUrlWithKey(): string | undefined {
+  const base = process.env.BLAND_WEBHOOK_URL;
+  if (!base) return undefined;
+  const secret = process.env.BLAND_WEBHOOK_SECRET;
+  if (!secret) return base;
+  const key = createHash("sha256").update(`fd-wh:${secret}`).digest("hex").slice(0, 24);
+  return `${base}${base.includes("?") ? "&" : "?"}key=${key}`;
+}
+
 
 export function blandConfigured(): boolean {
   return Boolean(process.env.BLAND_API_KEY);
@@ -70,7 +84,7 @@ export async function startOutboundCall(opts: OutboundCallOptions | string, lega
 
   // Post-call payload (transcript, recording URL, duration) is shipped to
   // this webhook URL by Bland after the call ends. Skipped if unset.
-  const webhook = process.env.BLAND_WEBHOOK_URL;
+  const webhook = webhookUrlWithKey();
   if (webhook) body.webhook = webhook;
 
   const res = await fetch(`${BLAND_API}/calls`, {
@@ -140,7 +154,7 @@ export async function configureInboundNumber(input: {
   // Always overwrite first_sentence — a stale one silently overrides the
   // script's opening line on every call.
   if (input.firstSentence) body.first_sentence = input.firstSentence;
-  const webhook = process.env.BLAND_WEBHOOK_URL;
+  const webhook = webhookUrlWithKey();
   if (webhook) body.webhook = webhook;
 
   const candidates = [

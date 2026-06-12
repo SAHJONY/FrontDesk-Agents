@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createHmac, timingSafeEqual } from "crypto";
+import { createHmac, createHash, timingSafeEqual } from "crypto";
 import { recordEvent } from "@/lib/store";
 import { loadSecretOverrides } from "@/lib/secrets";
 
@@ -48,9 +48,21 @@ export async function POST(req: NextRequest) {
     req.headers.get("x-webhook-signature") ||
     req.headers.get("signature");
 
-  const verified = verify(raw, sig);
+  let verified = verify(raw, sig);
   if (!verified.ok) {
-    return NextResponse.json({ error: "Invalid signature", reason: verified.reason }, { status: 401 });
+    // Fallback: the webhook URL we hand to Bland embeds a key derived from
+    // the secret. Bland's per-call webhooks don't sign with a verifiable
+    // header, so possession of the exact URL is the proof of origin.
+    const secret = process.env.BLAND_WEBHOOK_SECRET;
+    const provided = req.nextUrl.searchParams.get("key");
+    const expected = secret
+      ? createHash("sha256").update(`fd-wh:${secret}`).digest("hex").slice(0, 24)
+      : null;
+    if (expected && provided === expected) {
+      verified = { ok: true, reason: "url-key" };
+    } else {
+      return NextResponse.json({ error: "Invalid signature", reason: verified.reason }, { status: 401 });
+    }
   }
 
   let payload: Record<string, unknown> = {};

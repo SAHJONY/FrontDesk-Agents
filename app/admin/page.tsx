@@ -19,6 +19,7 @@ type PlatformEventKind =
   | "subscription:updated"
   | "subscription:canceled"
   | "voice_call:started"
+  | "voice_call:completed"
   | "env:updated"
   | "env:deleted";
 
@@ -298,7 +299,9 @@ function eventBadge(kind: PlatformEventKind): { label: string; color: string } {
     case "subscription:canceled":
       return { label: "sub canceled", color: "bg-red-400/15 text-red-300" };
     case "voice_call:started":
-      return { label: "voice call", color: "bg-gold/20 text-gold" };
+      return { label: "call dialing", color: "bg-gold/20 text-gold" };
+    case "voice_call:completed":
+      return { label: "call ended", color: "bg-emerald-400/15 text-emerald-300" };
     case "env:updated":
       return { label: "env updated", color: "bg-slate-400/15 text-slate-300" };
     case "env:deleted":
@@ -328,7 +331,14 @@ function eventTitle(e: PlatformEvent): string {
     case "subscription:canceled":
       return `Subscription canceled · ${p.planId} via ${p.provider}`;
     case "voice_call:started":
-      return `Outbound voice call dialing ${p.phone ?? "phone"}`;
+      return `Outbound dialing ${p.phone ?? "phone"}${p.from ? ` from ${p.from}` : ""}`;
+    case "voice_call:completed": {
+      const len = Number(p.lengthSec ?? 0);
+      const dur = len > 0 ? ` · ${Math.floor(len / 60)}m ${Math.round(len % 60)}s` : "";
+      const who = p.from ? `from ${p.from}` : p.to ? `to ${p.to}` : "call";
+      const ans = p.answeredBy ? ` · answered by ${p.answeredBy}` : "";
+      return `Call ${p.completed === false ? "ended without completion" : "completed"} ${who}${dur}${ans}`;
+    }
     case "env:updated":
       return `Env updated · ${p.name}`;
     case "env:deleted":
@@ -336,15 +346,68 @@ function eventTitle(e: PlatformEvent): string {
   }
 }
 
+// Returns a copyable short call-id chip for voice events, or null.
+function callIdChip(event: PlatformEvent): { full: string; short: string } | null {
+  if (event.kind !== "voice_call:started" && event.kind !== "voice_call:completed") return null;
+  const id = event.payload?.callId;
+  if (typeof id !== "string" || !id) return null;
+  return { full: id, short: id.length > 12 ? `${id.slice(0, 8)}…${id.slice(-4)}` : id };
+}
+
+function CopyableId({ full, short }: { full: string; short: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        navigator.clipboard?.writeText(full).then(
+          () => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1500);
+          },
+          () => {
+            /* no-op */
+          }
+        );
+      }}
+      title={`Copy ${full}`}
+      className="inline-flex items-center gap-1 rounded border border-white/10 bg-white/[0.04] px-1.5 py-0.5 font-mono text-[10px] text-teal-glow hover:bg-white/[0.08]"
+    >
+      {copied ? "✓ copied" : `id ${short}`}
+    </button>
+  );
+}
+
 function LiveEventRow({ event }: { event: PlatformEvent }) {
   const badge = eventBadge(event.kind);
+  const cid = callIdChip(event);
+  const recordingUrl =
+    event.kind === "voice_call:completed" && typeof event.payload?.recordingUrl === "string"
+      ? (event.payload.recordingUrl as string)
+      : null;
   return (
     <li className="flex items-start gap-3 py-2.5">
       <span className={`mt-0.5 shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${badge.color}`}>
         {badge.label}
       </span>
       <div className="min-w-0 flex-1">
-        <div className="text-sm leading-snug text-slate-200">{eventTitle(event)}</div>
+        <div className="flex flex-wrap items-center gap-2 text-sm leading-snug text-slate-200">
+          <span>{eventTitle(event)}</span>
+          {cid && <CopyableId full={cid.full} short={cid.short} />}
+          {recordingUrl && (
+            <a
+              href={recordingUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded border border-gold/30 bg-gold/10 px-1.5 py-0.5 text-[10px] text-gold hover:bg-gold/15"
+              title={recordingUrl}
+              onClick={(e) => e.stopPropagation()}
+            >
+              ▶ recording
+            </a>
+          )}
+        </div>
         <div className="text-[10px] text-slate-500">{fmtAgo(event.createdAt)}</div>
       </div>
     </li>

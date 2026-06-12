@@ -371,6 +371,7 @@ export type PlatformEventKind =
   | "subscription:updated"
   | "subscription:canceled"
   | "voice_call:started"
+  | "voice_call:completed"
   | "env:updated"
   | "env:deleted";
 

@@ -76,12 +76,10 @@ export async function POST(req: NextRequest) {
       ? (payload.summary as string).slice(0, 280)
       : undefined;
 
-  recordEvent("voice_call:started", {
-    // Reuse the same event kind so the live stream highlights it; tagged with
-    // phase so the UI can distinguish "started" from "completed".
-    phase: completed ? "completed" : "update",
+  recordEvent("voice_call:completed", {
     callId,
     lengthSec,
+    completed,
     to,
     from,
     answeredBy,

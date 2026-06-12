@@ -35,7 +35,7 @@ function LoginGate({ onAuth }: { onAuth: () => void }) {
       if (!res.ok) throw new Error();
       onAuth();
     } catch {
-      setError("Invalid credentials. Executive access only.");
+      setError("Invalid credentials.");
     } finally {
       setBusy(false);
     }
@@ -46,9 +46,9 @@ function LoginGate({ onAuth }: { onAuth: () => void }) {
       <div className="text-center">
         <img src="/icon.svg" alt="" className="mx-auto h-12 w-12 rounded-xl" />
         <h1 className="mt-4 font-display text-2xl font-semibold">
-          Executive <span className="text-gradient-gold">Suite</span>
+          Admin <span className="text-gradient-gold">login</span>
         </h1>
-        <p className="mt-1.5 text-xs text-slate-500">Restricted — executive credentials required</p>
+        <p className="mt-1.5 text-xs text-slate-500">Restricted — operator credentials required</p>
       </div>
       <form onSubmit={login} className="mt-7 space-y-3">
         <input
@@ -190,10 +190,10 @@ export default function AdminPage() {
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
                 <h1 className="font-display text-4xl font-semibold md:text-5xl">
-                  Executive <span className="text-gradient-gold">Suite</span>
+                  Admin <span className="text-gradient-gold">console</span>
                 </h1>
                 <p className="mt-2 text-sm text-slate-400">
-                  Corporate headquarters · www.frontdeskagents.com · full executive control
+                  Operator view — bookings, leads, integrations, and outbound demo calls.
                 </p>
               </div>
               <button

@@ -1,10 +1,24 @@
+// Pricing reflects what the platform actually delivers today. Tiers are tied
+// to provider-side product IDs via env vars; create the product in Stripe /
+// Square / PayPal once, then paste the IDs into Vercel.
+
+export type PlanId = "free" | "starter" | "professional" | "growth";
+
+export type ProviderRefs = {
+  stripePriceId?: string;
+  squarePlanId?: string;
+  paypalPlanId?: string;
+};
+
 export type Plan = {
-  id: string;
+  id: PlanId;
   name: string;
   price: number;
+  monthlyCallCap: number;
   tagline: string;
   features: string[];
   highlight?: boolean;
+  providers: ProviderRefs;
 };
 
 export const PLANS: Plan[] = [
@@ -12,97 +26,123 @@ export const PLANS: Plan[] = [
     id: "free",
     name: "Free",
     price: 0,
-    tagline: "Try AVA on your own line, forever free",
+    monthlyCallCap: 20,
+    tagline: "Try AVA on your site, free forever",
     features: [
-      "20 AI-answered calls / month",
-      "24/7 instant answering",
+      "20 AI chats / month",
       "Web chat widget",
-      "Email summaries",
+      "Email summary on every conversation",
+      "English + Spanish",
+      "Booking flow with calendar export",
       "Community support",
     ],
+    providers: {},
   },
   {
     id: "starter",
     name: "Starter",
-    price: 99,
-    tagline: "For solo practices getting started",
+    price: 29,
+    monthlyCallCap: 200,
+    tagline: "For solo operators getting their first wins",
     features: [
-      "100 AI-answered calls / month",
-      "24/7 instant answering",
-      "Appointment booking",
-      "Email summaries & transcripts",
-      "1 business location",
+      "200 AI chats / month",
+      "Web chat widget",
+      "Email summary + full transcript",
+      "Lead capture form",
+      "Branded widget (your colors & logo)",
+      "Email support",
     ],
+    providers: {
+      stripePriceId: process.env.STRIPE_PRICE_STARTER,
+      squarePlanId: process.env.SQUARE_PLAN_STARTER,
+      paypalPlanId: process.env.PAYPAL_PLAN_STARTER,
+    },
   },
   {
     id: "professional",
     name: "Professional",
-    price: 299,
-    tagline: "The growth engine for busy teams",
+    price: 79,
+    monthlyCallCap: 1000,
+    tagline: "For growing practices and busy teams",
     highlight: true,
     features: [
-      "500 AI-answered calls / month",
-      "Full multi-agent AI suite",
-      "Lead qualification & CRM export",
-      "50+ languages",
-      "SMS confirmations",
-      "Priority support",
+      "1,000 AI chats / month",
+      "Everything in Starter",
+      "Outbound demo calls (powered by Bland.ai)",
+      "Lead-qualification scoring",
+      "Webhook export to your tools",
+      "Priority email + chat support",
     ],
+    providers: {
+      stripePriceId: process.env.STRIPE_PRICE_PROFESSIONAL,
+      squarePlanId: process.env.SQUARE_PLAN_PROFESSIONAL,
+      paypalPlanId: process.env.PAYPAL_PLAN_PROFESSIONAL,
+    },
   },
   {
-    id: "enterprise",
-    name: "Enterprise",
-    price: 799,
-    tagline: "Unlimited scale for multi-location ops",
+    id: "growth",
+    name: "Growth",
+    price: 249,
+    monthlyCallCap: 5000,
+    tagline: "For multi-location ops and agencies",
     features: [
-      "Unlimited calls",
-      "Custom AI training on your scripts",
-      "Multi-location routing",
-      "Dedicated account manager",
-      "Advanced analytics & API access",
+      "5,000 AI chats / month",
+      "Everything in Professional",
+      "White-label branding",
+      "API access (beta)",
+      "Dedicated onboarding session",
+      "SLA & priority support",
     ],
-  },
-  {
-    id: "ultimate",
-    name: "Ultimate",
-    price: 1999,
-    tagline: "White-label the platform as your own",
-    features: [
-      "Everything in Enterprise",
-      "Full white-label branding",
-      "Resell to your own clients",
-      "Commercial API license",
-      "SLA & onboarding concierge",
-    ],
+    providers: {
+      stripePriceId: process.env.STRIPE_PRICE_GROWTH,
+      squarePlanId: process.env.SQUARE_PLAN_GROWTH,
+      paypalPlanId: process.env.PAYPAL_PLAN_GROWTH,
+    },
   },
 ];
 
+export function getPlan(id: string): Plan | undefined {
+  return PLANS.find((p) => p.id === id);
+}
+
+export function paidPlans(): Plan[] {
+  return PLANS.filter((p) => p.price > 0);
+}
+
+// Industry blurbs reflect only what the platform can actually do today: chat
+// answering, booking, lead capture, EN/ES. No HIPAA / CRM / SMS claims.
 export const INDUSTRIES = [
-  { icon: "🏥", name: "Healthcare & Medical", blurb: "HIPAA-conscious intake, appointment scheduling, and after-hours triage routing." },
-  { icon: "⚖️", name: "Legal & Law Firms", blurb: "Client intake that captures case details and books consultations while you're in court." },
-  { icon: "🏠", name: "Real Estate", blurb: "Never miss a buyer — instant property answers and showing bookings, day or night." },
-  { icon: "🏨", name: "Hospitality & Hotels", blurb: "Reservations, concierge questions, and upsells handled in the guest's own language." },
-  { icon: "🦷", name: "Dental Practices", blurb: "Fill the schedule automatically: recalls, new-patient intake, and reminders." },
-  { icon: "🔧", name: "Home Services", blurb: "Emergency dispatch and job booking while your crews stay on the tools." },
-  { icon: "🚗", name: "Automotive", blurb: "Service appointments, parts questions, and status updates without hold music." },
-  { icon: "🏢", name: "Corporate & Enterprise", blurb: "A flawless front desk for every office, in every timezone, at once." },
+  { icon: "🦷", name: "Dental Practices", blurb: "After-hours chat that books recalls, new-patient intake, and consults." },
+  { icon: "⚖️", name: "Legal & Law Firms", blurb: "Capture case details and book consultations when the office is dark." },
+  { icon: "🏠", name: "Real Estate", blurb: "Instant property answers and showing requests, no matter the hour." },
+  { icon: "🔧", name: "Home Services", blurb: "Job intake, callback scheduling, and lead capture while crews are on jobs." },
+  { icon: "🏨", name: "Hospitality", blurb: "Reservation help and guest questions in English and Spanish." },
+  { icon: "🚗", name: "Automotive", blurb: "Service appointment requests and parts questions, 24/7." },
+  { icon: "🏥", name: "Medical Offices", blurb: "Non-PHI intake and appointment booking. (No HIPAA tier yet.)" },
+  { icon: "🏢", name: "Professional Services", blurb: "Consultation booking and lead qualification for any service business." },
 ];
 
+// The receptionist engine has four real specialists today. The site lists them
+// as such — no mythical agent roster.
 export const AGENTS = [
-  { name: "BUFFY", role: "Strategic Orchestrator", desc: "The mastermind. Routes every conversation to the right specialist agent and learns from each interaction." },
-  { name: "HERMES", role: "Communications Engine", desc: "The AI brain aggregator — drives Claude, OpenAI, and NVIDIA inference simultaneously with sub-2-second response times." },
-  { name: "Greeting Agent", role: "First Impressions", desc: "Warm, on-brand welcomes that make every caller feel like your only caller." },
-  { name: "Scheduling Agent", role: "Calendar Command", desc: "Books, reschedules, and confirms appointments straight into your calendar." },
-  { name: "Information Agent", role: "Instant Answers", desc: "Encyclopedic knowledge of your business: pricing, services, policies, FAQs." },
-  { name: "Escalation Agent", role: "Human Handoff", desc: "Detects urgency and routes VIPs or emergencies to your team in seconds." },
-  { name: "ARIA", role: "Voice Synthesis", desc: "Natural, human-grade voice on every phone call — powered by the Bland.ai telephony layer." },
-  { name: "ATLAS", role: "CRM Sync", desc: "Pushes every lead, transcript, and booking into your CRM the moment a call ends." },
-  { name: "NOVA", role: "Lead Qualifier", desc: "Scores intent, budget, and urgency in real time so your team calls the hottest leads first." },
-  { name: "SAGE", role: "Knowledge Base", desc: "Continuously learns your documents, menus, and policies to keep answers perfectly current." },
-  { name: "ECHO", role: "Follow-Up & SMS", desc: "Automatic confirmations, reminders, and re-engagement texts that slash no-shows." },
-  { name: "ORION", role: "Analytics Intelligence", desc: "Turns every conversation into dashboards: conversion rates, peak hours, revenue per call." },
-  { name: "LUNA", role: "Multilingual Mastery", desc: "Detects the caller's language mid-sentence and switches across 50+ languages flawlessly." },
-  { name: "TITAN", role: "Billing & Payments", desc: "Quotes prices, takes deposits, and reconciles payments without a human touching a keypad." },
-  { name: "IRIS", role: "Sentiment Radar", desc: "Reads caller emotion live and adapts tone — or escalates — before frustration ever builds." },
-  { name: "PULSE", role: "Emergency Dispatch", desc: "Recognizes true emergencies instantly and triggers your on-call protocol in seconds." },
+  {
+    name: "Greeting Agent",
+    role: "First impressions",
+    desc: "Warm, on-brand welcomes that route every visitor to the right place.",
+  },
+  {
+    name: "Information Agent",
+    role: "Instant answers",
+    desc: "Answers questions about your business — pricing, hours, services — in English and Spanish.",
+  },
+  {
+    name: "Scheduling Agent",
+    role: "Bookings",
+    desc: "Walks the visitor through a slot-filled booking flow and captures the appointment.",
+  },
+  {
+    name: "Escalation Agent",
+    role: "Human handoff",
+    desc: "Detects when a real person is needed and captures a callback number for your team.",
+  },
 ];

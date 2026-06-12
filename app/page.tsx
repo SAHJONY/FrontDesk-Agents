@@ -6,62 +6,41 @@ import Footer from "@/components/Footer";
 import { AGENTS, INDUSTRIES } from "@/lib/plans";
 
 const STATS = [
-  { value: "<2s", label: "Average answer time" },
+  { value: "<2s", label: "Avg. response time" },
   { value: "24/7", label: "Always-on coverage" },
-  { value: "50+", label: "Languages spoken" },
-  { value: "98%", label: "Caller satisfaction" },
+  { value: "EN+ES", label: "English & Spanish" },
+  { value: "0", label: "Calls missed at 3am" },
 ];
 
 const TICKER = [
-  "📞 Dental clinic in Austin booked 3 appointments overnight",
-  "🌎 Spanish caller routed & answered in 1.4s",
-  "⚖️ Law firm captured a $12k case intake at 2:07 AM",
-  "🏠 Realtor demo scheduled while the agent was showing a home",
-  "🔧 Emergency plumbing dispatch confirmed in 38 seconds",
-  "🏨 Hotel upsell accepted — suite upgrade booked by AVA",
-];
-
-const TESTIMONIALS = [
-  {
-    quote:
-      "We were losing 30+ calls a week after hours. FrontDesk Agents turned those into 11 booked appointments in the first month. It paid for itself in four days.",
-    name: "Dr. Maya Chen",
-    role: "Bright Smile Dental, Austin TX",
-  },
-  {
-    quote:
-      "Our clients call at midnight in three languages. AVA answers every single one like our best receptionist on her best day — and she never takes a sick day.",
-    name: "Carlos Rivera",
-    role: "Rivera & Associates Law",
-  },
-  {
-    quote:
-      "I white-labeled the Ultimate plan and now sell AI reception to my own agency clients. New revenue line, zero headcount.",
-    name: "Sophie Laurent",
-    role: "Atlas Digital Agency",
-  },
+  "💬 Web chat that answers in seconds — even at 3 AM",
+  "🗓 Appointments booked straight into your inbox",
+  "🌎 English and Spanish, switched automatically mid-chat",
+  "📥 Every conversation summarized and emailed to your team",
+  "📞 Outbound demo calls (Bland.ai voice) on Professional+",
+  "🔌 Embed AVA on your site in a single line of code",
 ];
 
 const FAQS = [
   {
     q: "How fast can I go live?",
-    a: "Most businesses are live in under 10 minutes: tell us your business name, hours, and services in the signup wizard, and AVA starts answering immediately.",
+    a: "Most businesses are live in under 10 minutes: tell us your business name, hours, and services in the signup wizard, and AVA starts answering chats on your site immediately.",
   },
   {
     q: "Does it really work for my industry?",
-    a: "Yes — the agent team is industry-agnostic and trains on your scripts. We serve healthcare, legal, real estate, hospitality, home services, dental, automotive, and more.",
+    a: "AVA works for any service business that takes appointments — dental, legal, real estate, home services, hospitality, automotive, and more. She uses your wording and your hours.",
   },
   {
-    q: "What happens when a caller needs a human?",
-    a: "The Escalation Agent detects urgency and intent, then routes the call or sends your team an instant alert with a full transcript — your callers never hit a dead end.",
+    q: "What happens when a visitor needs a human?",
+    a: "The Escalation Agent detects urgency, captures a callback number, and sends your team an instant alert with the full transcript — your visitors never hit a dead end.",
   },
   {
     q: "Which languages are supported?",
-    a: "50+ languages with automatic detection. Try the live demo above in Spanish — AVA switches mid-conversation.",
+    a: "English and Spanish today, with automatic detection mid-conversation. More languages are on the roadmap.",
   },
   {
     q: "Can I resell this to my own clients?",
-    a: "The Ultimate plan includes full white-label branding and a commercial API license, so agencies run FrontDesk Agents under their own name.",
+    a: "The Growth plan includes white-label branding and beta API access so agencies can offer FrontDesk Agents under their own name.",
   },
 ];
 
@@ -80,7 +59,7 @@ export default function Home() {
           <div>
             <p className="rise-in mb-5 inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-4 py-1.5 text-xs font-medium tracking-wide text-gold">
               <span className="h-1.5 w-1.5 rounded-full bg-teal-glow animate-pulse-glow" />
-              The world&apos;s most advanced agentic AI receptionist
+              The AI receptionist that pays for itself in a week
             </p>
             <h1 className="rise-in rise-in-1 font-display text-5xl font-semibold leading-[1.05] tracking-tight md:text-7xl">
               Never miss a call.
@@ -88,10 +67,9 @@ export default function Home() {
               <span className="text-gradient-gold">Never lose a client.</span>
             </h1>
             <p className="rise-in rise-in-2 mt-6 max-w-xl text-lg leading-relaxed text-slate-300">
-              FrontDesk Agents answers every call in under 2 seconds, books appointments, qualifies
-              leads, and speaks 50+ languages — 24 hours a day, for any business. Small businesses
-              lose <strong className="text-gold">$75&nbsp;billion a year</strong>{" "}to missed calls.
-              You won&apos;t be one of them.
+              FrontDesk Agents answers every web chat in seconds, books appointments,
+              and captures leads in English and Spanish — 24 hours a day, for any service business.
+              Every missed inquiry is a missed customer. <strong className="text-gold">Stop missing them.</strong>
             </p>
             <div className="rise-in rise-in-3 mt-8 flex flex-wrap gap-4">
               <Link href="/signup" className="btn-gold rounded-2xl px-7 py-3.5 text-base">
@@ -136,18 +114,50 @@ export default function Home() {
         <ChatWidget />
       </section>
 
-      {/* AGENT TEAM */}
+      {/* HERMES + AGENTS */}
       <section id="features" className="mx-auto max-w-6xl px-5 py-24">
-        <p className="text-center text-xs font-semibold uppercase tracking-[0.25em] text-teal-glow">The multi-agent brain</p>
+        <p className="text-center text-xs font-semibold uppercase tracking-[0.25em] text-teal-glow">How the brain works</p>
         <h2 className="mt-3 text-center font-display text-4xl font-semibold md:text-5xl">
-          Sixteen specialists. <span className="text-gradient-gold">One flawless front desk.</span>
+          <span className="text-gradient-gold">HERMES</span> — the model that never fails.
         </h2>
         <p className="mx-auto mt-4 max-w-2xl text-center text-slate-400">
-          Powered by the BUFFY &amp; HERMES dual-AI architecture — Claude, OpenAI, and NVIDIA
-          inference working as one brain. Every conversation is orchestrated, routed, and resolved
-          by the right specialist, instantly.
+          HERMES is the AI orchestrator behind AVA. It cascades through a fleet of frontier
+          language models — NVIDIA NIM as the primary brain, Anthropic Claude and OpenAI as
+          fallbacks — and automatically routes around any model that's slow, rate-limited, or
+          down. Layered underneath is a deterministic agent core, so booking flows work even
+          if every LLM goes dark at once.
         </p>
-        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+
+        <div className="mx-auto mt-10 grid max-w-4xl gap-4 sm:grid-cols-3">
+          <div className="glass rounded-2xl p-5">
+            <div className="text-xs uppercase tracking-widest text-teal-glow">Primary</div>
+            <div className="mt-1.5 font-display text-base font-semibold text-gold">NVIDIA NIM</div>
+            <p className="mt-1.5 text-xs leading-relaxed text-slate-400">
+              Cascades across Llama 3.3 70B, Nemotron 70B, Llama 3.1 405B, Mixtral, Qwen 2.5,
+              DeepSeek R1, Gemma 2 — and every other free NIM model HERMES can reach.
+            </p>
+          </div>
+          <div className="glass rounded-2xl p-5">
+            <div className="text-xs uppercase tracking-widest text-teal-glow">Fallback</div>
+            <div className="mt-1.5 font-display text-base font-semibold text-gold">Anthropic Claude</div>
+            <p className="mt-1.5 text-xs leading-relaxed text-slate-400">
+              Opus 4.7 → Sonnet 4.6 → Haiku 4.5 — used the moment NVIDIA goes quiet.
+            </p>
+          </div>
+          <div className="glass rounded-2xl p-5">
+            <div className="text-xs uppercase tracking-widest text-teal-glow">Last resort</div>
+            <div className="mt-1.5 font-display text-base font-semibold text-gold">OpenAI + agent core</div>
+            <p className="mt-1.5 text-xs leading-relaxed text-slate-400">
+              GPT-4o-mini → GPT-4o, then a zero-dependency deterministic engine that handles
+              booking flows without any LLM at all.
+            </p>
+          </div>
+        </div>
+
+        <h3 className="mt-16 text-center font-display text-2xl font-semibold">
+          Four specialists. <span className="text-gradient-gold">One front desk.</span>
+        </h3>
+        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {AGENTS.map((a, i) => (
             <div key={a.name} className="glass group rounded-3xl p-6 transition duration-300 hover:-translate-y-1 hover:border-gold/30">
               <div className="flex items-center justify-between">
@@ -171,9 +181,9 @@ export default function Home() {
           </h2>
           <div className="mt-14 grid gap-10 md:grid-cols-3">
             {[
-              { n: "1", t: "Tell AVA about your business", d: "Two-minute wizard: your services, hours, booking rules, and tone of voice. No code, no IT project." },
-              { n: "2", t: "Connect your number", d: "Forward your existing line or get a new one. Web chat and SMS channels activate instantly." },
-              { n: "3", t: "Watch revenue stop leaking", d: "Every call answered, every lead captured, every booking on your calendar — with transcripts and analytics." },
+              { n: "1", t: "Tell AVA about your business", d: "Two-minute wizard: your services, hours, and tone of voice. No code, no IT project." },
+              { n: "2", t: "Embed the chat widget", d: "One snippet on your site activates AVA. She answers visitors 24/7 in English and Spanish." },
+              { n: "3", t: "Watch bookings land in your inbox", d: "Every appointment AVA captures lands in your dashboard and email — with the full transcript attached." },
             ].map((s) => (
               <div key={s.n} className="relative">
                 <div className="font-display text-7xl font-bold text-white/5">{s.n}</div>
@@ -208,7 +218,7 @@ export default function Home() {
             Costs less than <span className="text-gradient-gold">one missed client</span>
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-center text-slate-400">
-            A human receptionist costs $35,000+/year for 40 hours a week. AVA covers all 168 hours from $99/month.
+            Hiring an after-hours receptionist costs thousands a month. AVA covers all 168 hours a week from $29.
           </p>
           <div className="mt-12">
             <PricingCards />
@@ -219,24 +229,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* TESTIMONIALS */}
-      <section className="mx-auto max-w-6xl px-5 py-24">
-        <h2 className="text-center font-display text-4xl font-semibold md:text-5xl">
-          Loved by <span className="text-gradient-gold">owners worldwide</span>
-        </h2>
-        <div className="mt-12 grid gap-5 md:grid-cols-3">
-          {TESTIMONIALS.map((t) => (
-            <figure key={t.name} className="glass rounded-3xl p-7">
-              <div className="text-gold">★★★★★</div>
-              <blockquote className="mt-4 text-sm leading-relaxed text-slate-300">“{t.quote}”</blockquote>
-              <figcaption className="mt-5">
-                <div className="text-sm font-semibold">{t.name}</div>
-                <div className="text-xs text-slate-500">{t.role}</div>
-              </figcaption>
-            </figure>
-          ))}
-        </div>
-      </section>
+      {/* SOCIAL PROOF — re-enable once real, named customers consent to be quoted */}
 
       {/* FAQ */}
       <section className="mx-auto max-w-3xl px-5 pb-24">

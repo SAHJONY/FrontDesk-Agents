@@ -1,8 +1,18 @@
 // FrontDesk Agents — agentic receptionist engine.
-// Hybrid architecture: an LLM brain (NVIDIA NIM, OpenAI-compatible) when
-// credentials are configured, layered over a deterministic multi-agent core
-// (intent routing + slot-filling) that runs with zero external dependencies,
-// so the live demo can never go down.
+//
+// Architecture:
+//   1. Deterministic multi-agent core (intent routing + slot-filling) — always
+//      on. Runs with zero external dependencies so the live demo can never go
+//      down, and mid-booking turns always use it (LLMs are too unreliable for
+//      strict slot filling).
+//
+//   2. HERMES — the LLM orchestrator. A configured cascade of (provider, model)
+//      pairs that runs free-form turns. Order:
+//          (a) NVIDIA NIM, across every model in NIM_MODELS  (primary brain)
+//          (b) Anthropic Claude, across every model in ANTHROPIC_MODELS
+//          (c) OpenAI, across every model in OPENAI_MODELS
+//      Any failure (HTTP error, timeout, empty body) falls through to the next
+//      (provider, model) pair, then ultimately to the deterministic core.
 
 export type ChatMessage = { role: "user" | "assistant"; content: string };
 
@@ -32,7 +42,7 @@ const BUSINESS = {
   name: "FrontDesk Agents",
   hours: "We're available 24 hours a day, 7 days a week — that's the whole point of an AI receptionist.",
   pricing:
-    "Plans start at $99/mo (Starter, 100 calls), $299/mo (Professional, 500 calls), $799/mo (Enterprise, unlimited calls), and $1,999/mo (Ultimate, white-label + API). Every plan includes 24/7 coverage, instant answer, and appointment booking.",
+    "Plans start at Free (20 chats/month), Starter $29/mo (200 chats), Professional $79/mo (1,000 chats), and Growth $249/mo (5,000 chats). Every plan includes 24/7 chat answering, the booking flow, and email summaries.",
   services: ["a live product demo", "a sales consultation", "an onboarding session", "a technical deep-dive"],
 };
 
@@ -64,9 +74,9 @@ const T = {
   en: {
     greet: "Hello! Welcome to FrontDesk Agents — I'm AVA, your AI receptionist. I can answer questions, share pricing, or book an appointment for you right now. How can I help?",
     capabilities:
-      "I handle everything a world-class front desk does: I answer calls and chats 24/7, book and reschedule appointments, answer pricing and FAQ questions in 50+ languages, qualify leads, and route urgent matters to a human instantly. Want to see me book an appointment?",
+      "I handle the heart of a front desk: I answer chats 24/7 in English and Spanish, book appointments, capture leads, and flag urgent matters so a human can follow up. Want to see me book an appointment?",
     hours: BUSINESS.hours,
-    pricing: BUSINESS.pricing + " Would you like me to book a live demo?",
+    pricing: BUSINESS.pricing + " Would you like me to book a live demo so you can see it in action?",
     human: "Of course — I'm flagging a specialist right now. Could you share your phone number so our team can call you back within minutes?",
     askName: "Wonderful, I'd love to set that up. May I have your name?",
     askService: (name: string) => `Great to meet you, ${name}! What would you like to book — ${BUSINESS.services.join(", ")}?`,
@@ -78,15 +88,15 @@ const T = {
     thanks: "You're very welcome! I'm here 24/7 whenever you need me.",
     leadThanks: (phone: string) => `Thank you! A specialist will call you at ${phone} shortly. Anything else I can help with meanwhile?`,
     fallback:
-      "Great question! FrontDesk Agents replaces missed calls with booked revenue: our AI answers every call in under 2 seconds, books appointments, and qualifies leads around the clock. I can share pricing, explain features, or book you a live demo — which would you like?",
+      "Great question! FrontDesk Agents turns missed inquiries into booked revenue: AVA answers chats 24/7, books appointments, and captures leads in English and Spanish. I can share pricing, explain features, or book you a live demo — which would you like?",
   },
   es: {
     greet: "¡Hola! Bienvenido a FrontDesk Agents — soy AVA, su recepcionista de IA. Puedo responder preguntas, compartir precios o agendar una cita ahora mismo. ¿Cómo puedo ayudarle?",
     capabilities:
-      "Hago todo lo que hace una recepción de clase mundial: contesto llamadas y chats 24/7, agendo citas, respondo preguntas en más de 50 idiomas, califico clientes potenciales y transfiero asuntos urgentes a un humano al instante. ¿Quiere que le agende una cita?",
+      "Lo esencial de una recepción: contesto chats 24/7 en inglés y español, agendo citas, capturo clientes potenciales y aviso al equipo cuando algo es urgente. ¿Quiere que le agende una cita?",
     hours: "Estamos disponibles 24 horas al día, 7 días a la semana — esa es la magia de una recepcionista de IA.",
     pricing:
-      "Los planes comienzan en $99/mes (Starter), $299/mes (Professional), $799/mes (Enterprise) y $1,999/mes (Ultimate con marca blanca y API). ¿Le gustaría agendar una demostración en vivo?",
+      "Los planes comienzan Gratis (20 chats/mes), Starter $29/mes (200 chats), Professional $79/mes (1,000 chats), y Growth $249/mes (5,000 chats). ¿Le gustaría agendar una demostración en vivo?",
     human: "Por supuesto — estoy notificando a un especialista. ¿Me comparte su número de teléfono para que le devuelvan la llamada en minutos?",
     askName: "Excelente, con gusto lo agendo. ¿Me puede dar su nombre?",
     askService: (name: string) => `¡Mucho gusto, ${name}! ¿Qué le gustaría reservar — una demostración en vivo, una consulta de ventas o una sesión técnica?`,
@@ -98,7 +108,7 @@ const T = {
     thanks: "¡Con mucho gusto! Estoy aquí 24/7 cuando me necesite.",
     leadThanks: (phone: string) => `¡Gracias! Un especialista le llamará al ${phone} en breve. ¿Algo más mientras tanto?`,
     fallback:
-      "¡Buena pregunta! FrontDesk Agents convierte llamadas perdidas en ingresos: nuestra IA contesta cada llamada en menos de 2 segundos, agenda citas y califica clientes 24/7. Puedo compartir precios o agendarle una demostración — ¿qué prefiere?",
+      "¡Buena pregunta! FrontDesk Agents convierte consultas perdidas en ingresos: AVA contesta chats 24/7 en inglés y español, agenda citas y captura clientes potenciales. Puedo compartir precios o agendarle una demostración — ¿qué prefiere?",
   },
 };
 
@@ -172,25 +182,150 @@ export function runDeterministicAgent(message: string, state: SessionState): Eng
   }
 }
 
-// ---------------------------------------------------------------------------
-// LLM brain (NVIDIA NIM, OpenAI-compatible). Used for free-form turns when the
-// deterministic core isn't mid-booking; falls back silently on any failure.
-// ---------------------------------------------------------------------------
+// ============================================================================
+// HERMES — the LLM orchestrator
+// ============================================================================
 
-const SYSTEM_PROMPT = `You are AVA, the flagship AI receptionist of FrontDesk Agents — the world's most advanced agentic AI receptionist platform. You are warm, concise (2-4 sentences), professional, and you always move the conversation toward helping the caller: answering questions, sharing pricing, or booking an appointment.
+const SYSTEM_PROMPT = `You are AVA, the AI receptionist of FrontDesk Agents. You are warm, concise (2-4 sentences), professional, and you always move the conversation toward helping the visitor: answering questions, sharing pricing, or booking an appointment.
 
 Facts you know:
 - ${BUSINESS.hours}
 - Pricing: ${BUSINESS.pricing}
-- The platform answers calls/chats in under 2 seconds, 24/7, in 50+ languages, books appointments, qualifies leads, and escalates to humans when needed.
-- It serves every industry: healthcare, legal, real estate, hospitality, home services, dental, automotive, and more.
+- The platform answers chats 24/7 in English and Spanish, books appointments, captures leads, and escalates to a human when needed.
+- It serves any service business: dental, legal, real estate, home services, hospitality, automotive, and more.
 
 Rules:
 - Reply in the same language the user writes in.
 - If the user wants to book an appointment or demo, reply with EXACTLY the token [START_BOOKING] and nothing else.
-- Never invent features or prices beyond the facts above.`;
+- Never invent features or prices beyond the facts above. Do not claim HIPAA compliance, SMS, CRM integration, or sentiment analysis.`;
 
-type Provider = { name: string; call: (history: ChatMessage[], message: string) => Promise<string | null> };
+// ----- Provider type & helpers ----------------------------------------------
+
+export type ProviderId = "nim" | "anthropic" | "openai";
+
+export type HermesModel = {
+  provider: ProviderId;
+  model: string;
+  label: string; // e.g. "NVIDIA NIM · meta/llama-3.3-70b-instruct"
+};
+
+// Default NIM model cascade — curated free-tier models hosted on
+// build.nvidia.com (OpenAI-compatible). Listed in roughly descending quality;
+// HERMES walks the list and uses whichever is reachable.
+const DEFAULT_NIM_MODELS = [
+  "meta/llama-3.3-70b-instruct",
+  "nvidia/llama-3.1-nemotron-70b-instruct",
+  "meta/llama-3.1-405b-instruct",
+  "mistralai/mixtral-8x22b-instruct-v0.1",
+  "qwen/qwen2.5-72b-instruct",
+  "deepseek-ai/deepseek-r1",
+  "google/gemma-2-27b-it",
+  "meta/llama-3.1-70b-instruct",
+  "microsoft/phi-3-medium-128k-instruct",
+];
+
+// Fallback Anthropic models — Opus 4.7 → Sonnet 4.6 → Haiku 4.5.
+const DEFAULT_ANTHROPIC_MODELS = [
+  "claude-opus-4-7",
+  "claude-sonnet-4-6",
+  "claude-haiku-4-5-20251001",
+];
+
+// OpenAI fallback — cheap to expensive.
+const DEFAULT_OPENAI_MODELS = ["gpt-4o-mini", "gpt-4o"];
+
+function parseList(raw: string | undefined): string[] {
+  if (!raw) return [];
+  return raw.split(",").map((s) => s.trim()).filter(Boolean);
+}
+
+function nimBaseUrl() {
+  return (process.env.NIM_BASE_URL || "https://integrate.api.nvidia.com/v1").replace(/\/$/, "");
+}
+
+function nimModels(): string[] {
+  const explicit = parseList(process.env.NIM_MODELS);
+  if (explicit.length) return explicit;
+  if (process.env.NIM_MODEL) return [process.env.NIM_MODEL];
+  return DEFAULT_NIM_MODELS;
+}
+
+function anthropicModels(): string[] {
+  const explicit = parseList(process.env.ANTHROPIC_MODELS);
+  if (explicit.length) return explicit;
+  if (process.env.ANTHROPIC_MODEL) return [process.env.ANTHROPIC_MODEL];
+  return DEFAULT_ANTHROPIC_MODELS;
+}
+
+function openaiModels(): string[] {
+  const explicit = parseList(process.env.OPENAI_MODELS);
+  if (explicit.length) return explicit;
+  if (process.env.OPENAI_MODEL) return [process.env.OPENAI_MODEL];
+  return DEFAULT_OPENAI_MODELS;
+}
+
+// configuredCascade returns the full ordered list of (provider, model) pairs
+// HERMES will walk through for each user turn.
+export function configuredCascade(): HermesModel[] {
+  const cascade: HermesModel[] = [];
+
+  // 1. NVIDIA NIM — primary HERMES brain.
+  if (process.env.NIM_API_KEY) {
+    for (const model of nimModels()) {
+      cascade.push({ provider: "nim", model, label: `NVIDIA NIM · ${model}` });
+    }
+  }
+
+  // 2. Anthropic Claude — fallback provider.
+  if (process.env.ANTHROPIC_API_KEY) {
+    for (const model of anthropicModels()) {
+      cascade.push({ provider: "anthropic", model, label: `Claude · ${model}` });
+    }
+  }
+
+  // 3. OpenAI — last-resort fallback.
+  if (process.env.OPENAI_API_KEY) {
+    for (const model of openaiModels()) {
+      cascade.push({ provider: "openai", model, label: `OpenAI · ${model}` });
+    }
+  }
+
+  return cascade;
+}
+
+// Back-compat: return the list of unique provider names (used by the health
+// endpoint and admin dashboard for human-readable summaries).
+export function availableBrains(): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const m of configuredCascade()) {
+    const label = m.provider === "nim" ? "NVIDIA NIM" : m.provider === "anthropic" ? "Claude" : "OpenAI";
+    if (!seen.has(label)) {
+      seen.add(label);
+      out.push(label);
+    }
+  }
+  return out;
+}
+
+// Detailed status surface for /api/health and the admin Integrations tab.
+export function hermesStatus() {
+  const cascade = configuredCascade();
+  return {
+    online: cascade.length > 0,
+    totalModels: cascade.length,
+    providers: availableBrains(),
+    primary: cascade[0]?.label ?? "deterministic core",
+    models: cascade.map((m) => m.label),
+    byProvider: {
+      nim: cascade.filter((m) => m.provider === "nim").map((m) => m.model),
+      anthropic: cascade.filter((m) => m.provider === "anthropic").map((m) => m.model),
+      openai: cascade.filter((m) => m.provider === "openai").map((m) => m.model),
+    },
+  };
+}
+
+// ----- Wire calls ------------------------------------------------------------
 
 function buildMessages(history: ChatMessage[], message: string) {
   return [
@@ -211,23 +346,32 @@ async function timedFetch(url: string, init: RequestInit, ms = 9000): Promise<Re
   }
 }
 
-async function callAnthropic(history: ChatMessage[], message: string): Promise<string | null> {
+function stripReasoningArtifacts(text: string): string {
+  return text
+    .replace(/<think>[\s\S]*?<\/think>/g, "")
+    .replace(/<reasoning>[\s\S]*?<\/reasoning>/g, "")
+    .trim();
+}
+
+async function callAnthropic(model: string, history: ChatMessage[], message: string): Promise<string | null> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return null;
   const res = await timedFetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
     body: JSON.stringify({
-      model: process.env.ANTHROPIC_MODEL || "claude-haiku-4-5-20251001",
+      model,
       max_tokens: 300,
       system: SYSTEM_PROMPT,
       messages: buildMessages(history, message),
     }),
   });
   if (!res?.ok) return null;
-  const data = await res.json();
+  const data = await res.json().catch(() => null);
   const text: string | undefined = data?.content?.[0]?.text;
-  return text?.trim() || null;
+  if (!text) return null;
+  const cleaned = stripReasoningArtifacts(text);
+  return cleaned || null;
 }
 
 async function callOpenAICompatible(
@@ -248,50 +392,39 @@ async function callOpenAICompatible(
     }),
   });
   if (!res?.ok) return null;
-  const data = await res.json();
+  const data = await res.json().catch(() => null);
   const text: string | undefined = data?.choices?.[0]?.message?.content;
   if (!text) return null;
-  // Strip reasoning traces some models emit.
-  return text.replace(/<think>[\s\S]*?<\/think>/g, "").trim() || null;
+  const cleaned = stripReasoningArtifacts(text);
+  return cleaned || null;
 }
 
-// HERMES aggregates every configured AI brain — Claude first, then OpenAI,
-// then NVIDIA NIM — and silently falls through to the next on any failure.
-export function availableBrains(): string[] {
-  const brains: string[] = [];
-  if (process.env.ANTHROPIC_API_KEY) brains.push("Claude");
-  if (process.env.OPENAI_API_KEY) brains.push("OpenAI");
-  if (process.env.NIM_BASE_URL && process.env.NIM_API_KEY && process.env.NIM_MODEL) brains.push("NVIDIA NIM");
-  return brains;
+async function callForModel(brain: HermesModel, history: ChatMessage[], message: string): Promise<string | null> {
+  switch (brain.provider) {
+    case "nim":
+      return callOpenAICompatible(nimBaseUrl(), process.env.NIM_API_KEY!, brain.model, history, message);
+    case "anthropic":
+      return callAnthropic(brain.model, history, message);
+    case "openai":
+      return callOpenAICompatible(
+        process.env.OPENAI_BASE_URL || "https://api.openai.com/v1",
+        process.env.OPENAI_API_KEY!,
+        brain.model,
+        history,
+        message
+      );
+  }
 }
 
-export async function runLLMBrain(history: ChatMessage[], message: string): Promise<{ text: string; brain: string } | null> {
-  const providers: Provider[] = [
-    { name: "Claude", call: callAnthropic },
-    {
-      name: "OpenAI",
-      call: (h, m) =>
-        process.env.OPENAI_API_KEY
-          ? callOpenAICompatible(
-              process.env.OPENAI_BASE_URL || "https://api.openai.com/v1",
-              process.env.OPENAI_API_KEY,
-              process.env.OPENAI_MODEL || "gpt-4o-mini",
-              h,
-              m
-            )
-          : Promise.resolve(null),
-    },
-    {
-      name: "NVIDIA NIM",
-      call: (h, m) =>
-        process.env.NIM_BASE_URL && process.env.NIM_API_KEY && process.env.NIM_MODEL
-          ? callOpenAICompatible(process.env.NIM_BASE_URL, process.env.NIM_API_KEY, process.env.NIM_MODEL, h, m)
-          : Promise.resolve(null),
-    },
-  ];
-  for (const p of providers) {
-    const text = await p.call(history, message);
-    if (text) return { text, brain: p.name };
+// runLLMBrain walks the entire (provider, model) cascade in order. The first
+// non-empty reply wins; everything else silently falls through.
+export async function runLLMBrain(
+  history: ChatMessage[],
+  message: string
+): Promise<{ text: string; brain: string } | null> {
+  for (const brain of configuredCascade()) {
+    const text = await callForModel(brain, history, message);
+    if (text) return { text, brain: brain.label };
   }
   return null;
 }

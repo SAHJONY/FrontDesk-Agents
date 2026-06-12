@@ -25,16 +25,39 @@ function SignupWizard() {
     setSubmitting(true);
     setError("");
     try {
-      const res = await fetch("/api/leads", {
+      // Always capture the lead so we have the business context, regardless
+      // of whether they ultimately pay.
+      const leadRes = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...form, source: "signup-wizard" }),
       });
-      if (!res.ok) throw new Error();
-      setDone(true);
+      if (!leadRes.ok) throw new Error("lead");
+
+      if (form.plan === "free") {
+        setDone(true);
+        return;
+      }
+
+      // Paid plan → start a real Stripe checkout. (Square/PayPal are available
+      // from the pricing page; this path defaults to Stripe.)
+      const coRes = await fetch("/api/billing/checkout/stripe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ planId: form.plan }),
+      });
+      const co = await coRes.json();
+      if (!coRes.ok || !co.url) {
+        setError(
+          co.error ||
+            "Couldn't start checkout. Your info is saved — try paying from the pricing page or contact support."
+        );
+        setSubmitting(false);
+        return;
+      }
+      window.location.href = co.url;
     } catch {
       setError("Something went wrong — please try again.");
-    } finally {
       setSubmitting(false);
     }
   }
@@ -47,11 +70,11 @@ function SignupWizard() {
           Welcome aboard, <span className="text-gradient-gold">{form.business || "friend"}!</span>
         </h2>
         <p className="mt-3 text-sm leading-relaxed text-slate-400">
-          Your AI receptionist is being prepared on the <strong className="text-gold capitalize">{form.plan}</strong> plan.
-          Our team will reach out at {form.email || form.phone} to connect your phone line — usually within the hour.
+          Your <strong className="text-gold capitalize">Free</strong> account is ready. We'll send
+          your widget snippet and onboarding link to {form.email || form.phone} shortly.
         </p>
         <div className="mt-7 flex justify-center gap-3">
-          <Link href="/demo" className="btn-gold rounded-xl px-5 py-2.5 text-sm">Meet AVA while you wait</Link>
+          <Link href="/demo" className="btn-gold rounded-xl px-5 py-2.5 text-sm">Meet AVA</Link>
           <Link href="/dashboard" className="btn-ghost rounded-xl px-5 py-2.5 text-sm">View dashboard</Link>
         </div>
       </div>
@@ -169,7 +192,7 @@ function SignupWizard() {
           </button>
         ) : (
           <button onClick={submit} disabled={submitting} className="btn-gold rounded-xl px-6 py-2.5 text-sm disabled:opacity-60">
-            {submitting ? "Creating…" : "Activate my receptionist"}
+            {submitting ? "Setting up…" : form.plan === "free" ? "Activate Free plan" : "Continue to checkout"}
           </button>
         )}
       </div>
@@ -186,7 +209,7 @@ export default function SignupPage() {
           <h1 className="font-display text-4xl font-semibold md:text-5xl">
             Go live in <span className="text-gradient-gold">10 minutes</span>
           </h1>
-          <p className="mt-3 text-slate-400">No credit card required. Cancel anytime.</p>
+          <p className="mt-3 text-slate-400">Free tier needs no card. Paid plans send you to a secure checkout. Cancel anytime.</p>
         </div>
         <Suspense>
           <SignupWizard />

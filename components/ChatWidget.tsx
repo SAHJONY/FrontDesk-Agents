@@ -13,9 +13,15 @@ const GREETING: Msg = {
     "Hello! I'm AVA, the FrontDesk Agents AI receptionist. Ask me anything — or try booking an appointment and watch me handle it end-to-end. I also speak Spanish. 🌎",
 };
 
+type HermesSummary = { primary: string; totalModels: number; online: boolean };
+
 export default function ChatWidget({ tall = false }: { tall?: boolean }) {
   const [messages, setMessages] = useState<Msg[]>([GREETING]);
-  const [engine, setEngine] = useState("HERMES");
+  const [hermes, setHermes] = useState<HermesSummary>({
+    primary: "deterministic core",
+    totalModels: 0,
+    online: false,
+  });
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [voiceOn, setVoiceOn] = useState(false);
@@ -32,9 +38,18 @@ export default function ChatWidget({ tall = false }: { tall?: boolean }) {
   useEffect(() => {
     fetch("/api/health")
       .then((r) => r.json())
-      .then((d) => setEngine(`HERMES · ${d.primaryBrain ?? "agent core"}`))
+      .then((d) => {
+        const h = d?.hermes;
+        if (h) {
+          setHermes({ primary: h.primary, totalModels: h.totalModels, online: h.online });
+        }
+      })
       .catch(() => {});
   }, []);
+
+  const engineLabel = hermes.online
+    ? `HERMES · ${hermes.primary}${hermes.totalModels > 1 ? ` (+${hermes.totalModels - 1} fallback${hermes.totalModels - 1 === 1 ? "" : "s"})` : ""}`
+    : "HERMES · agent core";
 
   function speak(text: string) {
     if (!voiceOn || typeof window === "undefined" || !window.speechSynthesis) return;
@@ -130,7 +145,7 @@ export default function ChatWidget({ tall = false }: { tall?: boolean }) {
           </div>
           <div>
             <div className="text-sm font-semibold">AVA · AI Receptionist</div>
-            <div className="text-xs text-teal-glow">Online — powered by {engine}</div>
+            <div className="text-xs text-teal-glow" title={engineLabel}>Online — powered by {engineLabel}</div>
           </div>
         </div>
         <div className="flex items-center gap-2">

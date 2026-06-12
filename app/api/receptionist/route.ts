@@ -1,9 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { runReceptionist, FRESH_STATE, type SessionState, type ChatMessage } from "@/lib/receptionist";
-import { addBooking, addLead } from "@/lib/store";
+import {
+  addBooking,
+  addLead,
+  listCustomers,
+  getActiveSubscriptionForCustomer,
+  incrementUsage,
+  getUsage,
+} from "@/lib/store";
+import { getPlan } from "@/lib/plans";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
+
+// Default for unauthenticated demo traffic on our own site. Generous, but
+// keeps a single abuser from running up bills.
+const DEMO_CAP = 50;
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,6 +26,33 @@ export async function POST(req: NextRequest) {
     }
     const history: ChatMessage[] = Array.isArray(body.history) ? body.history.slice(-20) : [];
     const state: SessionState = body.state && body.state.stage ? body.state : { ...FRESH_STATE };
+    const customerId = typeof body.customerId === "string" ? body.customerId : null;
+
+    // Enforce the chat cap for paid sites; the homepage demo path uses a
+    // soft demo cap so abuse can't drain LLM credits.
+    if (customerId) {
+      const customers = await listCustomers();
+      const customer = customers.find((c) => c.id === customerId);
+      if (!customer) {
+        return NextResponse.json({ error: "Unknown customer" }, { status: 404 });
+      }
+      const sub = await getActiveSubscriptionForCustomer(customerId);
+      const plan = sub ? getPlan(sub.planId) : getPlan("free");
+      if (!plan) {
+        return NextResponse.json({ error: "Plan unavailable" }, { status: 500 });
+      }
+      const used = await getUsage(customerId);
+      if (used >= plan.monthlyCallCap) {
+        return NextResponse.json(
+          {
+            error: "Monthly chat cap reached on your current plan.",
+            upgrade: { currentPlan: plan.id, used, cap: plan.monthlyCallCap },
+          },
+          { status: 402 }
+        );
+      }
+      await incrementUsage(customerId);
+    }
 
     const result = await runReceptionist(message, history, state);
 
@@ -34,3 +73,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Receptionist unavailable" }, { status: 500 });
   }
 }
+
+// Exported for the demo cap so future embeds can read it.
+export const DEMO_MAX_PER_MONTH = DEMO_CAP;

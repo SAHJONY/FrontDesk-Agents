@@ -7,68 +7,62 @@ import Footer from "@/components/Footer";
 type Booking = { id?: string; name: string; service: string; datetime: string; phone: string; createdAt: string };
 type Lead = { id: string; phone?: string; email?: string; business?: string; plan?: string; source: string; createdAt: string };
 
-// Seeded demo activity so the command center feels alive before real data lands.
-const SEED_CALLS = [62, 71, 58, 84, 77, 95, 103, 88, 112, 96, 124, 131, 118, 142];
-const SEED_BOOKINGS: Booking[] = [
-  { name: "Maria Lopez", service: "New patient consult", datetime: "Tomorrow 9:00 AM", phone: "(512) 555-0147", createdAt: new Date(Date.now() - 32 * 60000).toISOString() },
-  { name: "James Wu", service: "Property showing — 4BR Lakeside", datetime: "Friday 3:30 PM", phone: "(737) 555-0192", createdAt: new Date(Date.now() - 71 * 60000).toISOString() },
-  { name: "Aisha Bello", service: "Emergency plumbing dispatch", datetime: "Today 6:15 PM", phone: "(214) 555-0163", createdAt: new Date(Date.now() - 104 * 60000).toISOString() },
-];
-
-function Sparkline({ data }: { data: number[] }) {
-  const max = Math.max(...data);
-  const pts = data.map((v, i) => `${(i / (data.length - 1)) * 300},${80 - (v / max) * 70}`).join(" ");
+function EmptyCard({ title, hint, cta }: { title: string; hint: string; cta?: { href: string; label: string } }) {
   return (
-    <svg viewBox="0 0 300 84" className="h-24 w-full">
-      <defs>
-        <linearGradient id="spark" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#2dd4bf" stopOpacity="0.35" />
-          <stop offset="1" stopColor="#2dd4bf" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <polygon points={`0,84 ${pts} 300,84`} fill="url(#spark)" />
-      <polyline points={pts} fill="none" stroke="#2dd4bf" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
-    </svg>
+    <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-6 text-center">
+      <h3 className="font-semibold text-slate-200">{title}</h3>
+      <p className="mt-1.5 text-xs leading-relaxed text-slate-500">{hint}</p>
+      {cta && (
+        <a href={cta.href} className="mt-4 inline-block rounded-xl border border-teal-glow/30 px-3 py-1.5 text-xs text-teal-glow">
+          {cta.label}
+        </a>
+      )}
+    </div>
   );
 }
 
 export default function DashboardPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     let local: Booking[] = [];
     try {
       local = JSON.parse(localStorage.getItem("fd_bookings") || "[]");
     } catch {}
-    fetch("/api/bookings")
-      .then((r) => r.json())
-      .then((d) => {
-        const server: Booking[] = Array.isArray(d.bookings) ? d.bookings : [];
-        const merged = [...server];
-        for (const b of local) {
-          if (!merged.some((m) => m.createdAt === b.createdAt && m.name === b.name)) merged.push(b);
-        }
-        merged.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
-        setBookings(merged);
-      })
-      .catch(() => setBookings(local));
-    fetch("/api/leads")
-      .then((r) => r.json())
-      .then((d) => setLeads(Array.isArray(d.leads) ? d.leads : []))
-      .catch(() => {});
+    Promise.all([
+      fetch("/api/bookings")
+        .then((r) => r.json())
+        .then((d) => (Array.isArray(d.bookings) ? (d.bookings as Booking[]) : []))
+        .catch(() => []),
+      fetch("/api/leads")
+        .then((r) => r.json())
+        .then((d) => (Array.isArray(d.leads) ? (d.leads as Lead[]) : []))
+        .catch(() => []),
+    ]).then(([server, serverLeads]) => {
+      const merged = [...server];
+      for (const b of local) {
+        if (!merged.some((m) => m.createdAt === b.createdAt && m.name === b.name)) merged.push(b);
+      }
+      merged.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+      setBookings(merged);
+      setLeads(serverLeads);
+      setLoaded(true);
+    });
   }, []);
 
-  const allBookings = useMemo(() => [...bookings, ...SEED_BOOKINGS], [bookings]);
-  const totalCalls = SEED_CALLS.reduce((a, b) => a + b, 0) + bookings.length;
-  const revenue = (allBookings.length * 250).toLocaleString();
+  const stats = useMemo(
+    () => [
+      { label: "Appointments booked", value: String(bookings.length), accent: "text-gold" },
+      { label: "Leads captured", value: String(leads.length), accent: "text-teal-glow" },
+      { label: "Conversations this month", value: "—", accent: "text-slate-400" },
+      { label: "Plan status", value: "Free", accent: "text-emerald-300" },
+    ],
+    [bookings.length, leads.length]
+  );
 
-  const stats = [
-    { label: "Calls answered (14d)", value: totalCalls.toLocaleString(), accent: "text-teal-glow" },
-    { label: "Appointments booked", value: String(allBookings.length), accent: "text-gold" },
-    { label: "Leads captured", value: String(leads.length + 27), accent: "text-teal-glow" },
-    { label: "Est. revenue captured", value: `$${revenue}`, accent: "text-emerald-300" },
-  ];
+  const empty = loaded && bookings.length === 0 && leads.length === 0;
 
   return (
     <main>
@@ -81,15 +75,13 @@ export default function DashboardPage() {
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="font-display text-4xl font-semibold md:text-5xl">
-              Command <span className="text-gradient-gold">Center</span>
+              Your <span className="text-gradient-gold">dashboard</span>
             </h1>
             <p className="mt-2 text-sm text-slate-400">
-              Live view of what AVA handled — bookings made in the <a href="/demo" className="text-teal-glow underline">demo</a> appear here instantly.
+              Bookings made through the <a href="/demo" className="text-teal-glow underline">live demo</a> appear here
+              instantly. Real numbers, no synthetic data.
             </p>
           </div>
-          <span className="glass rounded-full px-4 py-2 text-xs text-teal-glow">
-            ● All agents operational
-          </span>
         </div>
 
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -101,37 +93,60 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-          <div className="glass rounded-3xl p-6">
-            <div className="flex items-center justify-between">
-              <h2 className="font-semibold">Call volume — last 14 days</h2>
-              <span className="text-xs text-emerald-300">▲ 38% vs prior period</span>
-            </div>
-            <div className="mt-4">
-              <Sparkline data={SEED_CALLS} />
-            </div>
-            <div className="mt-4 grid grid-cols-3 gap-3 text-center text-xs text-slate-400">
-              <div className="rounded-xl bg-white/[0.03] py-3"><span className="block font-display text-lg text-teal-glow">1.7s</span>avg. answer time</div>
-              <div className="rounded-xl bg-white/[0.03] py-3"><span className="block font-display text-lg text-teal-glow">0</span>missed calls</div>
-              <div className="rounded-xl bg-white/[0.03] py-3"><span className="block font-display text-lg text-teal-glow">7</span>languages this week</div>
-            </div>
+        {empty ? (
+          <div className="mt-10 grid gap-5 lg:grid-cols-2">
+            <EmptyCard
+              title="No appointments yet"
+              hint="Open the demo and ask AVA to book one — it'll show up here in real time."
+              cta={{ href: "/demo", label: "Try the demo →" }}
+            />
+            <EmptyCard
+              title="No leads yet"
+              hint="When AVA captures a phone number from a visitor, it lands here."
+              cta={{ href: "/signup", label: "Walk through signup →" }}
+            />
           </div>
+        ) : (
+          <div className="mt-6 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+            <div className="glass rounded-3xl p-6">
+              <h2 className="font-semibold">Latest leads</h2>
+              {leads.length === 0 ? (
+                <p className="mt-3 text-xs text-slate-500">No leads yet.</p>
+              ) : (
+                <ul className="mt-4 space-y-3">
+                  {leads.slice(0, 8).map((l) => (
+                    <li key={l.id} className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">{l.business || l.email || l.phone || "Anonymous"}</span>
+                        <span className="text-[10px] uppercase tracking-wider text-gold">{l.plan ?? l.source}</span>
+                      </div>
+                      <div className="mt-0.5 text-xs text-slate-500">{l.email || l.phone || "—"}</div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
 
-          <div className="glass rounded-3xl p-6">
-            <h2 className="font-semibold">Latest appointments</h2>
-            <ul className="mt-4 space-y-3">
-              {allBookings.slice(0, 6).map((b, i) => (
-                <li key={b.id ?? `${b.name}-${i}`} className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">{b.name}</span>
-                    <span className="text-[10px] uppercase tracking-wider text-gold">{b.datetime}</span>
-                  </div>
-                  <div className="mt-0.5 text-xs text-slate-500">{b.service}</div>
-                </li>
-              ))}
-            </ul>
+            <div className="glass rounded-3xl p-6">
+              <h2 className="font-semibold">Latest appointments</h2>
+              {bookings.length === 0 ? (
+                <p className="mt-3 text-xs text-slate-500">No appointments yet.</p>
+              ) : (
+                <ul className="mt-4 space-y-3">
+                  {bookings.slice(0, 6).map((b, i) => (
+                    <li key={b.id ?? `${b.name}-${i}`} className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">{b.name}</span>
+                        <span className="text-[10px] uppercase tracking-wider text-gold">{b.datetime}</span>
+                      </div>
+                      <div className="mt-0.5 text-xs text-slate-500">{b.service}</div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </section>
       <Footer />
     </main>

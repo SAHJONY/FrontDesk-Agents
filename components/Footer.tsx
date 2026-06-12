@@ -12,8 +12,8 @@ export default function Footer() {
             </span>
           </div>
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-slate-500">
-            The world&apos;s most advanced agentic AI receptionist platform. Every call answered,
-            every lead captured, every language spoken — 24/7.
+            An AI receptionist for service businesses. Answer chats, book appointments, and capture
+            leads in English and Spanish — 24 hours a day.
           </p>
         </div>
         <div>
@@ -31,7 +31,7 @@ export default function Footer() {
             <li><a href="mailto:sahjonyllc@gmail.com" className="hover:text-teal-glow">Contact</a></li>
             <li><Link href="/#features" className="hover:text-teal-glow">Technology</Link></li>
             <li><Link href="/#industries" className="hover:text-teal-glow">Industries</Link></li>
-            <li><Link href="/admin" className="hover:text-gold">Executive Suite</Link></li>
+            <li><Link href="/admin" className="hover:text-gold">Admin</Link></li>
           </ul>
         </div>
       </div>

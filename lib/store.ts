@@ -1,12 +1,39 @@
-// Lightweight persistence that is safe on serverless: writes land in /tmp
-// (ephemeral on Vercel, durable locally). The dashboard merges these records
-// with seeded demo data, so an empty store still renders a rich view.
+// Persistence layer with three tiers:
+//   1. Vercel Blob (BLOB_READ_WRITE_TOKEN set) — durable across deployments.
+//   2. /tmp on serverless without Blob — ephemeral but functional.
+//   3. ./data locally — durable on disk for development.
+// Blob paths are namespaced under a secret prefix derived from the RW token so
+// records (names, phone numbers) are not at a guessable public URL.
 import { promises as fs } from "fs";
 import path from "path";
+import { createHash } from "crypto";
+import { put, head } from "@vercel/blob";
 
 const DATA_DIR = process.env.VERCEL ? "/tmp/frontdesk-data" : path.join(process.cwd(), "data");
 
+function blobEnabled() {
+  return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+}
+
+function blobPath(file: string) {
+  const secret = createHash("sha256")
+    .update(process.env.BLOB_READ_WRITE_TOKEN as string)
+    .digest("hex")
+    .slice(0, 16);
+  return `frontdesk-${secret}/${file}`;
+}
+
 async function readJson<T>(file: string, fallback: T): Promise<T> {
+  if (blobEnabled()) {
+    try {
+      const meta = await head(blobPath(file));
+      const res = await fetch(meta.url, { cache: "no-store" });
+      if (!res.ok) return fallback;
+      return (await res.json()) as T;
+    } catch {
+      return fallback;
+    }
+  }
   try {
     const raw = await fs.readFile(path.join(DATA_DIR, file), "utf8");
     return JSON.parse(raw) as T;
@@ -16,6 +43,15 @@ async function readJson<T>(file: string, fallback: T): Promise<T> {
 }
 
 async function writeJson(file: string, value: unknown) {
+  if (blobEnabled()) {
+    await put(blobPath(file), JSON.stringify(value), {
+      access: "public",
+      addRandomSuffix: false,
+      allowOverwrite: true,
+      contentType: "application/json",
+    });
+    return;
+  }
   await fs.mkdir(DATA_DIR, { recursive: true });
   await fs.writeFile(path.join(DATA_DIR, file), JSON.stringify(value, null, 2));
 }

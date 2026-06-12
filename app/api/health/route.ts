@@ -13,6 +13,7 @@ export async function GET() {
     primaryBrain: brains[0] ?? "deterministic core",
     llmBrain: brains.length > 0,
     bland: blandConfigured(),
+    durableStorage: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
     time: new Date().toISOString(),
   });
 }

@@ -21,6 +21,32 @@ export const CALL_ENGINE = {
   temperature: 0.6,
 } as const;
 
+// Autonomous worldwide language handling for the VOICE channel. Ava detects the
+// caller's language from their words and both understands and SPEAKS it back,
+// re-detecting every few seconds so she switches the moment the caller switches.
+// `language: "babel"` (set on the persona) enables all-language autodetect;
+// this candidate set keeps re-detection from anchoring to the greeting's
+// language and is applied IDENTICALLY to inbound numbers and outbound calls so
+// the two directions behave the same (the CALL_ENGINE contract).
+//
+// `language_detection_period` is how often (seconds) Bland re-checks the spoken
+// language mid-call — short, so a mid-call language switch is near-instant.
+export const LANGUAGE_DETECTION = {
+  language_detection_period: Number(process.env.BLAND_LANG_DETECT_PERIOD || 4),
+  language_detection_options: [
+    // Europe
+    "en", "es", "fr", "de", "it", "pt", "nl", "pl", "sv", "da", "no", "fi",
+    "ru", "uk", "tr", "cs", "ro", "hu", "el", "bg", "hr", "sk", "sl", "sr",
+    "lt", "lv", "et",
+    // Middle East / Africa
+    "ar", "he", "fa", "sw",
+    // South Asia
+    "hi", "bn", "ur", "ta", "te", "mr", "gu", "kn", "ml", "pa",
+    // East / Southeast Asia
+    "ja", "ko", "zh", "vi", "id", "ms", "th", "tl",
+  ],
+} as const;
+
 // Brand pronunciation: the TTS must say "Front Desk Agents dot com" — the
 // dot is part of the brand. Applied to inbound numbers and outbound calls.
 export const PRONUNCIATION_GUIDE = [
@@ -95,6 +121,9 @@ export async function startOutboundCall(opts: OutboundCallOptions | string, lega
     pronunciation_guide: PRONUNCIATION_GUIDE,
     record: true,
     wait_for_greeting: o.waitForGreeting ?? true,
+    // Same autonomous detect-and-speak-any-language behavior as inbound: Ava
+    // hears the callee's language and answers in it, switching mid-call.
+    ...LANGUAGE_DETECTION,
   };
 
   // Bland's `from` parameter requires a number purchased/verified in your
@@ -173,14 +202,11 @@ export async function configureInboundNumber(input: {
     pronunciation_guide: PRONUNCIATION_GUIDE,
     record: true,
     wait_for_greeting: false,
-    // Inbound-specific multilingual plumbing: Bland re-detects the spoken
-    // language every few seconds across this candidate set. Without these,
-    // inbound STT can stay anchored to the greeting's language.
-    language_detection_period: 10,
-    language_detection_options: [
-      "en", "es", "fr", "de", "it", "pt", "nl", "pl", "sv", "da", "no", "fi",
-      "ru", "uk", "tr", "cs", "ro", "hu", "el", "hi", "ja", "ko", "zh", "vi", "id", "ms",
-    ],
+    // Bland re-detects the spoken language every few seconds across this
+    // candidate set and speaks the detected language back. Without these,
+    // inbound STT can stay anchored to the greeting's language. Shared with
+    // outbound so both directions detect-and-speak identically.
+    ...LANGUAGE_DETECTION,
   };
   // Always overwrite first_sentence — a stale one silently overrides the
   // script's opening line on every call.

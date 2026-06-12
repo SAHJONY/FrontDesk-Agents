@@ -164,7 +164,7 @@ export default function ChatWidget({ tall = false }: { tall?: boolean }) {
       </div>
 
       {/* Messages */}
-      <div ref={scrollRef} className="scrollbar-slim flex-1 space-y-4 overflow-y-auto px-5 py-4">
+      <div ref={scrollRef} data-no-translate className="scrollbar-slim flex-1 space-y-4 overflow-y-auto px-5 py-4">
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
             <div className={`max-w-[85%] ${m.role === "user" ? "" : ""}`}>

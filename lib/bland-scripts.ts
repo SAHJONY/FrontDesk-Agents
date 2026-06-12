@@ -35,7 +35,7 @@ export function getPersona(): PersonaConfig {
     fullName: `${name} ${lastName}`,
     businessName: "FrontDeskAgents.com",
     voice: process.env.BLAND_VOICE || "maya",
-    language: process.env.BLAND_DEFAULT_LANGUAGE || "auto",
+    language: process.env.BLAND_DEFAULT_LANGUAGE || "babel",
     inboundNumber: process.env.BLAND_INBOUND_NUMBER,
     outboundNumber: process.env.BLAND_OUTBOUND_NUMBER,
     callerId: process.env.BLAND_CALLER_ID || process.env.BLAND_OUTBOUND_NUMBER,

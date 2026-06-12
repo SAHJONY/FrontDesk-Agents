@@ -78,7 +78,7 @@ const T = {
   en: {
     greet: "Hello! Welcome to FrontDesk Agents — I'm AVA, your AI receptionist. I can answer questions, share pricing, or book an appointment for you right now. How can I help?",
     capabilities:
-      "I handle the heart of a front desk: I answer chats 24/7 in English and Spanish, book appointments, capture leads, and flag urgent matters so a human can follow up. Want to see me book an appointment?",
+      "I handle the heart of a front desk: I answer chats 24/7 in any language worldwide — I detect yours automatically — book appointments, capture leads, and flag urgent matters so a human can follow up. Want to see me book an appointment?",
     hours: BUSINESS.hours,
     pricing: BUSINESS.pricing + " Would you like me to book a live demo so you can see it in action?",
     human: "Of course — I'm flagging a specialist right now. Could you share your phone number so our team can call you back within minutes?",
@@ -92,7 +92,7 @@ const T = {
     thanks: "You're very welcome! I'm here 24/7 whenever you need me.",
     leadThanks: (phone: string) => `Thank you! A specialist will call you at ${phone} shortly. Anything else I can help with meanwhile?`,
     fallback:
-      "Great question! FrontDesk Agents turns missed inquiries into booked revenue: AVA answers chats 24/7, books appointments, and captures leads in English and Spanish. I can share pricing, explain features, or book you a live demo — which would you like?",
+      "Great question! FrontDesk Agents turns missed inquiries into booked revenue: AVA answers chats 24/7 in 100+ languages (she detects the visitor's language automatically), books appointments, and captures leads. I can share pricing, explain features, or book you a live demo — which would you like?",
   },
   es: {
     greet: "¡Hola! Bienvenido a FrontDesk Agents — soy AVA, su recepcionista de IA. Puedo responder preguntas, compartir precios o agendar una cita ahora mismo. ¿Cómo puedo ayudarle?",
@@ -195,7 +195,7 @@ const SYSTEM_PROMPT = `You are AVA, the AI receptionist of FrontDesk Agents. You
 Facts you know:
 - ${BUSINESS.hours}
 - Pricing: ${BUSINESS.pricing}
-- The platform answers chats 24/7 in English and Spanish, books appointments, captures leads, and escalates to a human when needed.
+- The platform autonomously detects the user's language and answers in it — 100+ languages worldwide, 24/7 — books appointments, captures leads, and escalates to a human when needed.
 - It serves any service business: dental, legal, real estate, home services, hospitality, automotive, and more.
 
 Rules:

@@ -154,6 +154,10 @@ export async function configureInboundNumber(input: {
   // Always overwrite first_sentence — a stale one silently overrides the
   // script's opening line on every call.
   if (input.firstSentence) body.first_sentence = input.firstSentence;
+  // Detach any Bland "Memory" from the number. Memories inject summaries of
+  // past calls into new ones — a stale memory from the previous brand kept
+  // resurrecting retired personas and an English/Spanish-only language claim.
+  body.memory_id = null;
   const webhook = webhookUrlWithKey();
   if (webhook) body.webhook = webhook;
 

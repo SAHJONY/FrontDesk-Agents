@@ -457,26 +457,66 @@ function CallLauncher({ blandActive }: { blandActive: boolean }) {
       </div>
       {status && <p className="mt-3 text-xs text-slate-300">{status}</p>}
 
-      {config && (
-        <div className="mt-5 space-y-2 text-xs">
-          {config.persona.inboundNumber && (
-            <div className="flex items-center justify-between rounded-xl border border-white/5 bg-white/[0.02] px-4 py-2.5">
-              <span className="text-slate-400">
-                Inbound number — Ava answers calls here:
-              </span>
-              <span className="font-mono text-gold">{config.persona.inboundNumber}</span>
-            </div>
-          )}
-          <details className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-2.5">
-            <summary className="cursor-pointer text-slate-300">View inbound script (paste into Bland.ai dashboard for {config.persona.inboundNumber ?? "your inbound number"})</summary>
-            <pre className="mt-3 max-h-[360px] overflow-y-auto whitespace-pre-wrap rounded-lg bg-black/40 p-3 text-[11px] leading-relaxed text-slate-300">{config.inboundScript}</pre>
-          </details>
-          <details className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-2.5">
-            <summary className="cursor-pointer text-slate-300">View outbound sales script (used automatically when you press Call now)</summary>
-            <pre className="mt-3 max-h-[360px] overflow-y-auto whitespace-pre-wrap rounded-lg bg-black/40 p-3 text-[11px] leading-relaxed text-slate-300">{config.outboundSalesScript}</pre>
-          </details>
+      {config && <BlandConfigPanel config={config} />}
+    </div>
+  );
+}
+
+function BlandConfigPanel({ config }: { config: BlandConfig }) {
+  const [syncing, setSyncing] = useState(false);
+  const [syncMsg, setSyncMsg] = useState<string | null>(null);
+
+  async function syncInbound() {
+    setSyncing(true);
+    setSyncMsg(null);
+    try {
+      const res = await fetch("/api/admin/bland/sync", { method: "POST" });
+      const data = await res.json();
+      if (res.ok) {
+        setSyncMsg(`✅ Inbound script pushed to Bland.ai (${data.endpoint ?? "ok"}). Try calling ${config.persona.inboundNumber} now.`);
+      } else {
+        setSyncMsg(`⚠️ ${data.error}${data.hint ? ` — ${data.hint}` : ""}`);
+      }
+    } catch (e) {
+      setSyncMsg(`⚠️ ${e instanceof Error ? e.message : "Network error"}`);
+    } finally {
+      setSyncing(false);
+    }
+  }
+
+  return (
+    <div className="mt-5 space-y-2 text-xs">
+      {config.persona.inboundNumber && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-2.5">
+          <div>
+            <div className="text-slate-400">Inbound number — Ava answers calls here:</div>
+            <div className="mt-0.5 font-mono text-gold">{config.persona.inboundNumber}</div>
+          </div>
+          <button
+            onClick={syncInbound}
+            disabled={syncing}
+            className="rounded-lg border border-teal-glow/30 bg-teal-glow/10 px-3 py-1.5 text-[11px] font-medium text-teal-glow hover:bg-teal-glow/15 disabled:opacity-50"
+          >
+            {syncing ? "Syncing…" : "↗ Push inbound script to Bland.ai"}
+          </button>
         </div>
       )}
+      {syncMsg && <p className="px-4 text-slate-300">{syncMsg}</p>}
+
+      <details className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-2.5">
+        <summary className="cursor-pointer text-slate-300">
+          View inbound script {config.persona.inboundNumber ? `for ${config.persona.inboundNumber}` : ""}
+        </summary>
+        <pre className="mt-3 max-h-[360px] overflow-y-auto whitespace-pre-wrap rounded-lg bg-black/40 p-3 text-[11px] leading-relaxed text-slate-300">
+          {config.inboundScript}
+        </pre>
+      </details>
+      <details className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-2.5">
+        <summary className="cursor-pointer text-slate-300">View outbound sales script (used automatically when you press Call now)</summary>
+        <pre className="mt-3 max-h-[360px] overflow-y-auto whitespace-pre-wrap rounded-lg bg-black/40 p-3 text-[11px] leading-relaxed text-slate-300">
+          {config.outboundSalesScript}
+        </pre>
+      </details>
     </div>
   );
 }

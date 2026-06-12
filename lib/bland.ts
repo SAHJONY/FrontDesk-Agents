@@ -102,3 +102,75 @@ export function getActiveScripts() {
     outboundDefault: outboundSalesScript({ persona }),
   };
 }
+
+// Push the inbound script directly to a Bland.ai phone number. Bland's
+// inbound config endpoint accepts a prompt + voice + language and binds the
+// number to that conversational agent. After this runs, any caller dialing
+// the number will be handled by Ava with the live script.
+//
+// Bland.ai has shifted endpoint shapes over the years, so we attempt the
+// modern path first and fall back if the API responds with a 404.
+export async function configureInboundNumber(input: {
+  phoneNumber: string;
+  prompt: string;
+  voice?: string;
+  language?: string;
+}): Promise<
+  | { ok: true; endpoint: string; raw: unknown }
+  | { ok: false; error: string; lastStatus?: number }
+> {
+  const apiKey = process.env.BLAND_API_KEY;
+  if (!apiKey) return { ok: false, error: "BLAND_API_KEY not set" };
+
+  const persona = getPersona();
+  const body = {
+    prompt: input.prompt,
+    voice: input.voice ?? persona.voice,
+    language: input.language ?? persona.language,
+    record: true,
+    wait_for_greeting: false,
+  };
+
+  const candidates = [
+    // Modern endpoint (path-parameterised by phone number)
+    { method: "POST", url: `${BLAND_API}/inbound/${encodeURIComponent(input.phoneNumber)}` },
+    // Older endpoint: phone in body, POST /inbound
+    {
+      method: "POST",
+      url: `${BLAND_API}/inbound`,
+      bodyExtra: { phone_number: input.phoneNumber } as Record<string, unknown>,
+    },
+    // PATCH variant
+    { method: "PATCH", url: `${BLAND_API}/inbound/${encodeURIComponent(input.phoneNumber)}` },
+  ];
+
+  let lastStatus: number | undefined;
+  let lastError = "Bland.ai inbound config failed";
+
+  for (const c of candidates) {
+    const finalBody = { ...body, ...((c as { bodyExtra?: Record<string, unknown> }).bodyExtra ?? {}) };
+    try {
+      const res = await fetch(c.url, {
+        method: c.method,
+        headers: { "Content-Type": "application/json", Authorization: apiKey },
+        body: JSON.stringify(finalBody),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        return { ok: true, endpoint: `${c.method} ${c.url}`, raw: data };
+      }
+      lastStatus = res.status;
+      lastError =
+        (data as { message?: string; error?: string } | null)?.message ||
+        (data as { error?: string } | null)?.error ||
+        `Bland API ${res.status}`;
+      // Only fall through to the next candidate on 404 / "endpoint not found"
+      // shape — other errors (401, 422, 500) are authoritative.
+      if (res.status !== 404) break;
+    } catch (err) {
+      lastError = err instanceof Error ? err.message : String(err);
+    }
+  }
+
+  return { ok: false, error: lastError, lastStatus };
+}

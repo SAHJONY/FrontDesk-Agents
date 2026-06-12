@@ -8,14 +8,14 @@ import { AGENTS, INDUSTRIES } from "@/lib/plans";
 const STATS = [
   { value: "<2s", label: "Avg. response time" },
   { value: "24/7", label: "Always-on coverage" },
-  { value: "EN+ES", label: "English & Spanish" },
+  { value: "100+", label: "Languages worldwide" },
   { value: "0", label: "Calls missed at 3am" },
 ];
 
 const TICKER = [
   "💬 Web chat that answers in seconds — even at 3 AM",
   "🗓 Appointments booked straight into your inbox",
-  "🌎 English and Spanish, switched automatically mid-chat",
+  "🌎 100+ languages worldwide, detected and switched automatically mid-conversation",
   "📥 Every conversation summarized and emailed to your team",
   "📞 Outbound demo calls (Bland.ai voice) on Professional+",
   "🔌 Embed AVA on your site in a single line of code",
@@ -36,7 +36,7 @@ const FAQS = [
   },
   {
     q: "Which languages are supported?",
-    a: "English and Spanish today, with automatic detection mid-conversation. More languages are on the roadmap.",
+    a: "AVA autonomously detects the caller\u2019s language and answers in it — over 100 languages worldwide, on the phone and in chat, with instant mid-conversation switching.",
   },
   {
     q: "Can I resell this to my own clients?",
@@ -68,7 +68,7 @@ export default function Home() {
             </h1>
             <p className="rise-in rise-in-2 mt-6 max-w-xl text-lg leading-relaxed text-slate-300">
               FrontDesk Agents answers every web chat in seconds, books appointments,
-              and captures leads in English and Spanish — 24 hours a day, for any service business.
+              and captures leads in 100+ languages worldwide — 24 hours a day, for any service business.
               Every missed inquiry is a missed customer. <strong className="text-gold">Stop missing them.</strong>
             </p>
             <div className="rise-in rise-in-3 mt-8 flex flex-wrap gap-4">
@@ -182,7 +182,7 @@ export default function Home() {
           <div className="mt-14 grid gap-10 md:grid-cols-3">
             {[
               { n: "1", t: "Tell AVA about your business", d: "Two-minute wizard: your services, hours, and tone of voice. No code, no IT project." },
-              { n: "2", t: "Embed the chat widget", d: "One snippet on your site activates AVA. She answers visitors 24/7 in English and Spanish." },
+              { n: "2", t: "Embed the chat widget", d: "One snippet on your site activates AVA. She answers visitors 24/7 in 100+ languages, detected automatically." },
               { n: "3", t: "Watch bookings land in your inbox", d: "Every appointment AVA captures lands in your dashboard and email — with the full transcript attached." },
             ].map((s) => (
               <div key={s.n} className="relative">

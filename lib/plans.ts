@@ -116,7 +116,7 @@ export const INDUSTRIES = [
   { icon: "⚖️", name: "Legal & Law Firms", blurb: "Capture case details and book consultations when the office is dark." },
   { icon: "🏠", name: "Real Estate", blurb: "Instant property answers and showing requests, no matter the hour." },
   { icon: "🔧", name: "Home Services", blurb: "Job intake, callback scheduling, and lead capture while crews are on jobs." },
-  { icon: "🏨", name: "Hospitality", blurb: "Reservation help and guest questions in English and Spanish." },
+  { icon: "🏨", name: "Hospitality", blurb: "Reservation help and guest questions in the guest\u2019s own language — 100+ worldwide." },
   { icon: "🚗", name: "Automotive", blurb: "Service appointment requests and parts questions, 24/7." },
   { icon: "🏥", name: "Medical Offices", blurb: "Non-PHI intake and appointment booking. (No HIPAA tier yet.)" },
   { icon: "🏢", name: "Professional Services", blurb: "Consultation booking and lead qualification for any service business." },
@@ -133,7 +133,7 @@ export const AGENTS = [
   {
     name: "Information Agent",
     role: "Instant answers",
-    desc: "Answers questions about your business — pricing, hours, services — in English and Spanish.",
+    desc: "Answers questions about your business — pricing, hours, services — in 100+ languages worldwide.",
   },
   {
     name: "Scheduling Agent",

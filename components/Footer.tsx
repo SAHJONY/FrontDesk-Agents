@@ -13,7 +13,7 @@ export default function Footer() {
           </div>
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-slate-500">
             An AI receptionist for service businesses. Answer chats, book appointments, and capture
-            leads in English and Spanish — 24 hours a day.
+            leads in 100+ languages worldwide — 24 hours a day.
           </p>
         </div>
         <div>

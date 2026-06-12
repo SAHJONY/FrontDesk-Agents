@@ -526,24 +526,30 @@ function CallLauncher({ blandActive }: { blandActive: boolean }) {
 }
 
 function BlandConfigPanel({ config }: { config: BlandConfig }) {
-  const [syncing, setSyncing] = useState(false);
+  const [syncing, setSyncing] = useState<"inbound" | "outbound" | "both" | null>(null);
   const [syncMsg, setSyncMsg] = useState<string | null>(null);
 
-  async function syncInbound() {
-    setSyncing(true);
+  async function sync(target: "inbound" | "outbound" | "both") {
+    setSyncing(target);
     setSyncMsg(null);
     try {
-      const res = await fetch("/api/admin/bland/sync", { method: "POST" });
+      const res = await fetch("/api/admin/bland/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ target }),
+      });
       const data = await res.json();
-      if (res.ok) {
-        setSyncMsg(`✅ Inbound script pushed to Bland.ai (${data.endpoint ?? "ok"}). Try calling ${config.persona.inboundNumber} now.`);
-      } else {
-        setSyncMsg(`⚠️ ${data.error}${data.hint ? ` — ${data.hint}` : ""}`);
-      }
+      const lines = (data.results ?? []).map(
+        (r: { target: string; phoneNumber?: string; ok: boolean; error?: string; hint?: string }) =>
+          r.ok
+            ? `✅ ${r.target} → ${r.phoneNumber ?? "?"} (synced)`
+            : `⚠️ ${r.target}: ${r.error}${r.hint ? ` — ${r.hint}` : ""}`
+      );
+      setSyncMsg(lines.join("\n"));
     } catch (e) {
       setSyncMsg(`⚠️ ${e instanceof Error ? e.message : "Network error"}`);
     } finally {
-      setSyncing(false);
+      setSyncing(null);
     }
   }
 
@@ -552,30 +558,65 @@ function BlandConfigPanel({ config }: { config: BlandConfig }) {
       {config.persona.inboundNumber && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-2.5">
           <div>
-            <div className="text-slate-400">Inbound number — Ava answers calls here:</div>
+            <div className="text-slate-400">Inbound number — Ava greets callers here:</div>
             <div className="mt-0.5 font-mono text-gold">{config.persona.inboundNumber}</div>
           </div>
           <button
-            onClick={syncInbound}
-            disabled={syncing}
+            onClick={() => sync("inbound")}
+            disabled={syncing !== null}
             className="rounded-lg border border-teal-glow/30 bg-teal-glow/10 px-3 py-1.5 text-[11px] font-medium text-teal-glow hover:bg-teal-glow/15 disabled:opacity-50"
           >
-            {syncing ? "Syncing…" : "↗ Push inbound script to Bland.ai"}
+            {syncing === "inbound" ? "Syncing…" : "↗ Push inbound script"}
           </button>
         </div>
       )}
-      {syncMsg && <p className="px-4 text-slate-300">{syncMsg}</p>}
+
+      {config.persona.outboundNumber && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-2.5">
+          <div>
+            <div className="text-slate-400">Outbound number — caller ID + answers callbacks:</div>
+            <div className="mt-0.5 font-mono text-gold">{config.persona.outboundNumber}</div>
+          </div>
+          <button
+            onClick={() => sync("outbound")}
+            disabled={syncing !== null}
+            className="rounded-lg border border-gold/30 bg-gold/10 px-3 py-1.5 text-[11px] font-medium text-gold hover:bg-gold/15 disabled:opacity-50"
+          >
+            {syncing === "outbound" ? "Syncing…" : "↗ Push outbound sales script"}
+          </button>
+        </div>
+      )}
+
+      {config.persona.inboundNumber && config.persona.outboundNumber && (
+        <div className="flex justify-end px-1">
+          <button
+            onClick={() => sync("both")}
+            disabled={syncing !== null}
+            className="rounded-lg border border-white/10 px-3 py-1.5 text-[11px] text-slate-300 hover:border-teal-glow/40 disabled:opacity-50"
+          >
+            {syncing === "both" ? "Syncing both…" : "↗ Push both scripts at once"}
+          </button>
+        </div>
+      )}
+
+      {syncMsg && (
+        <pre className="whitespace-pre-wrap rounded-xl border border-white/5 bg-white/[0.02] px-4 py-2.5 text-slate-300">
+          {syncMsg}
+        </pre>
+      )}
 
       <details className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-2.5">
         <summary className="cursor-pointer text-slate-300">
-          View inbound script {config.persona.inboundNumber ? `for ${config.persona.inboundNumber}` : ""}
+          View inbound script {config.persona.inboundNumber ? `→ ${config.persona.inboundNumber}` : ""}
         </summary>
         <pre className="mt-3 max-h-[360px] overflow-y-auto whitespace-pre-wrap rounded-lg bg-black/40 p-3 text-[11px] leading-relaxed text-slate-300">
           {config.inboundScript}
         </pre>
       </details>
       <details className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-2.5">
-        <summary className="cursor-pointer text-slate-300">View outbound sales script (used automatically when you press Call now)</summary>
+        <summary className="cursor-pointer text-slate-300">
+          View outbound sales script {config.persona.outboundNumber ? `→ ${config.persona.outboundNumber}` : ""} (also used per-call when you press Call now)
+        </summary>
         <pre className="mt-3 max-h-[360px] overflow-y-auto whitespace-pre-wrap rounded-lg bg-black/40 p-3 text-[11px] leading-relaxed text-slate-300">
           {config.outboundSalesScript}
         </pre>

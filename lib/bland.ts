@@ -13,6 +13,15 @@ import { getPersona, inboundScript, outboundSalesScript } from "@/lib/bland-scri
 
 const BLAND_API = "https://api.bland.ai/v1";
 
+// Identical engine spec for BOTH inbound numbers and outbound calls — the
+// owner requires the two directions to have exactly the same worldwide
+// language autodetection. Any tuning happens here, once.
+export const CALL_ENGINE = {
+  model: "base",
+  temperature: 0.6,
+} as const;
+
+
 // Webhook URL with an embedded auth key derived from the signing secret.
 // Bland's per-call webhooks don't reliably sign with a header we can verify,
 // so the URL itself carries proof — we set this URL, nobody else knows it.
@@ -73,6 +82,8 @@ export async function startOutboundCall(opts: OutboundCallOptions | string, lega
     task,
     voice: o.voice ?? persona.voice,
     language: o.language ?? persona.language,
+    model: CALL_ENGINE.model,
+    temperature: CALL_ENGINE.temperature,
     record: true,
     wait_for_greeting: o.waitForGreeting ?? true,
   };
@@ -148,6 +159,8 @@ export async function configureInboundNumber(input: {
     prompt: input.prompt,
     voice: input.voice ?? persona.voice,
     language: input.language ?? persona.language,
+    model: CALL_ENGINE.model,
+    temperature: CALL_ENGINE.temperature,
     record: true,
     wait_for_greeting: false,
     // Inbound-specific multilingual plumbing: Bland re-detects the spoken
@@ -158,8 +171,6 @@ export async function configureInboundNumber(input: {
       "en", "es", "fr", "de", "it", "pt", "nl", "pl", "sv", "da", "no", "fi",
       "ru", "uk", "tr", "cs", "ro", "hu", "el", "hi", "ja", "ko", "zh", "vi", "id", "ms",
     ],
-    // Lower temperature → stricter adherence to the ABSOLUTE language rule.
-    temperature: 0.5,
   };
   // Always overwrite first_sentence — a stale one silently overrides the
   // script's opening line on every call.

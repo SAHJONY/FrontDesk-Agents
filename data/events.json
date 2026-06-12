@@ -1,5 +1,24 @@
 [
   {
+    "id": "8c0d8e5e-c12a-471f-8df2-7cf7542c9b05",
+    "kind": "email:failed",
+    "payload": {
+      "to": "sah…@outlook.com",
+      "subject": "🔥 New lead: Test Dental"
+    },
+    "createdAt": "2026-06-12T09:10:08.197Z"
+  },
+  {
+    "id": "29bfab00-8fbe-4670-b988-3037406b8d0b",
+    "kind": "customer:created",
+    "payload": {
+      "id": "018554e5-d679-492a-a090-f1342cc6d5b7",
+      "email": "testcustomer@example.com",
+      "business": "Test Dental"
+    },
+    "createdAt": "2026-06-12T09:10:08.134Z"
+  },
+  {
     "id": "2a2e86aa-6a98-4376-8f5b-730773bf3950",
     "kind": "email:failed",
     "payload": {

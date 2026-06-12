@@ -373,7 +373,9 @@ export type PlatformEventKind =
   | "voice_call:started"
   | "voice_call:completed"
   | "env:updated"
-  | "env:deleted";
+  | "env:deleted"
+  | "email:sent"
+  | "email:failed";
 
 export type PlatformEvent = {
   id: string;

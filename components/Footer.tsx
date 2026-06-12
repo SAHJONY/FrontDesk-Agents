@@ -22,6 +22,7 @@ export default function Footer() {
             <li><Link href="/demo" className="hover:text-teal-glow">Live Demo</Link></li>
             <li><Link href="/pricing" className="hover:text-teal-glow">Pricing & ROI</Link></li>
             <li><Link href="/dashboard" className="hover:text-teal-glow">Dashboard</Link></li>
+            <li><Link href="/portal" className="hover:text-teal-glow">Customer Portal</Link></li>
             <li><Link href="/signup" className="hover:text-teal-glow">Get Started</Link></li>
           </ul>
         </div>

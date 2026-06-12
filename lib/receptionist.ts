@@ -200,7 +200,8 @@ Facts you know:
 
 Rules:
 - Reply in the same language the user writes in.
-- If the user wants to book an appointment or demo, reply with EXACTLY the token [START_BOOKING] and nothing else.
+- If the user wants to book an appointment or demo AND is writing in English or Spanish, reply with EXACTLY the token [START_BOOKING] and nothing else.
+- If the user wants to book but is writing in ANY OTHER language, run the booking yourself in their language: collect (1) their name, (2) what they want to book, (3) preferred day and time, (4) phone number — one question at a time. Once you have all four, confirm the details back to them warmly in their language and append this machine token on its own line at the very end of that confirmation message: [BOOKING_JSON]{"name":"...","service":"...","datetime":"...","phone":"..."}[/BOOKING_JSON]
 - Never invent features or prices beyond the facts above. Do not claim HIPAA compliance, SMS, CRM integration, or sentiment analysis.`;
 
 // ----- Provider type & helpers ----------------------------------------------
@@ -454,6 +455,36 @@ export async function runReceptionist(
         internalBrain: llmReply.brain,
         latencyMs,
       };
+    }
+    // Multilingual LLM-run bookings arrive as a machine token appended to the
+    // confirmation message — capture it and strip it from the visible reply.
+    const bookingMatch = llmReply.text.match(/\[BOOKING_JSON\]([\s\S]*?)\[\/BOOKING_JSON\]/);
+    if (bookingMatch) {
+      const reply = llmReply.text.replace(bookingMatch[0], "").trim();
+      try {
+        const b = JSON.parse(bookingMatch[1]);
+        if (b.name && b.datetime) {
+          return {
+            reply,
+            state,
+            agent: "Scheduling Agent",
+            internalBrain: llmReply.brain,
+            latencyMs,
+            action: {
+              type: "booking_confirmed",
+              booking: {
+                name: String(b.name).slice(0, 120),
+                service: String(b.service ?? "appointment").slice(0, 200),
+                datetime: String(b.datetime).slice(0, 120),
+                phone: String(b.phone ?? "").slice(0, 40),
+              },
+            },
+          };
+        }
+      } catch {
+        // Malformed token — fall through with the cleaned reply.
+      }
+      return { reply, state, agent: "HERMES", internalBrain: llmReply.brain, latencyMs };
     }
     // Public-facing agent label hides the underlying provider/model — the
     // detailed brain label is preserved on the server for logging/admin use.

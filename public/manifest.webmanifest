@@ -1,0 +1,12 @@
+{
+  "name": "FrontDesk Agents — AI Receptionist",
+  "short_name": "FrontDesk",
+  "description": "The world's most advanced agentic AI receptionist platform. 24/7 answering, booking, and lead capture in 50+ languages.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#04080f",
+  "theme_color": "#04080f",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

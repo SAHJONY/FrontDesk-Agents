@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "frontdesk",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--", "--port", "3456"],
+      "port": 3456,
+      "cwd": "/Users/juangonzalez/CLAUDE FABLE 5/frontdesk-agents"
+    }
+  ]
+}

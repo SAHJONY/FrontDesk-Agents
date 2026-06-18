@@ -1,0 +1,23 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "buildCommand": "next build",
+  "functions": {
+    "app/api/fund/run/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/**/route.ts": {
+      "maxDuration": 15
+    }
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "no-store" }]
+    }
+  ],
+  "crons": [
+    { "path": "/api/finder/run", "schedule": "0 9 * * *" },
+    { "path": "/api/fund/run", "schedule": "30 21 * * 1-5" }
+  ]
+}

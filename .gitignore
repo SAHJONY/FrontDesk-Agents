@@ -1,0 +1,9 @@
+node_modules/
+.env
+.next
+.vercel
+.env*.local
+*.tsbuildinfo
+next-env.d.ts
+backups/
+ops/.uptime.env.local

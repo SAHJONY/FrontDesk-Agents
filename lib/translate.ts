@@ -84,7 +84,7 @@ async function writeCache(lang: string, cache: Record<string, string>) {
 
 async function llmTranslate(lang: string, texts: string[]): Promise<string[] | null> {
   const language = SUPPORTED_LANGS[lang] ?? lang;
-  const system = `You are a professional UI translator. Translate each string in the JSON array from English into ${language} (${lang}). Return ONLY a JSON array of the translated strings — same order, same length, no commentary, no code fences. Keep brand names (FrontDesk Agents, FrontDeskAgents.com, AVA, Ava Sterling, HERMES, BUFFY, Bland.ai, NVIDIA, Stripe), numbers, prices, emoji, and the word "dot" in domains unchanged. Translations must be natural and concise — these are website labels and marketing copy.`;
+  const system = `You are a professional UI translator. Translate each string in the JSON array from English into ${language} (${lang}). Return ONLY a JSON array of the translated strings — same order, same length, no commentary, no code fences. Keep brand names (FrontDesk Agents, FrontDeskAgents.com, AVA, Ava Sterling, HERMES, BUFFY, FrontDesk Agents, NVIDIA, Stripe), numbers, prices, emoji, and the word "dot" in domains unchanged. Translations must be natural and concise — these are website labels and marketing copy.`;
   const user = JSON.stringify(texts);
 
   const tryParse = (raw: string | null): string[] | null => {

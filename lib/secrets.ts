@@ -25,7 +25,7 @@ export type KnownSecret = {
     | "Owner"
     | "Storage"
     | "LLM (HERMES)"
-    | "Voice (Bland.ai)"
+    | "Voice (FrontDesk Agents)"
     | "Payments"
     | "Deploy"
     | "Secrets";
@@ -111,44 +111,44 @@ export const KNOWN_SECRETS: KnownSecret[] = [
   // Voice
   {
     name: "BLAND_API_KEY",
-    category: "Voice (Bland.ai)",
-    description: "Bland.ai API key. Activates inbound + outbound phone calls.",
+    category: "Voice (FrontDesk Agents)",
+    description: "FrontDesk Agents API key. Activates inbound + outbound phone calls.",
     link: "https://www.bland.ai",
   },
   {
     name: "BLAND_INBOUND_NUMBER",
-    category: "Voice (Bland.ai)",
-    description: "The number callers dial to reach Ava (e.g. +12164804413). Configure the matching number in your Bland.ai dashboard with the inbound script from the admin Voice panel.",
+    category: "Voice (FrontDesk Agents)",
+    description: "The number callers dial to reach Ava (e.g. +12164804413). Configure the matching number in your FrontDesk Agents dashboard with the inbound script from the admin Voice panel.",
   },
   {
     name: "BLAND_OUTBOUND_NUMBER",
-    category: "Voice (Bland.ai)",
+    category: "Voice (FrontDesk Agents)",
     description: "Caller-ID number used for outbound calls (e.g. +13465214387). Must be a Bland-purchased or verified number.",
   },
   {
     name: "BLAND_AGENT_NAME",
-    category: "Voice (Bland.ai)",
+    category: "Voice (FrontDesk Agents)",
     description: "The first name Ava uses when introducing herself. Default: Ava.",
   },
   {
     name: "BLAND_VOICE",
-    category: "Voice (Bland.ai)",
-    description: "Bland.ai voice ID. Defaults to maya. See Bland's voice library for alternatives.",
+    category: "Voice (FrontDesk Agents)",
+    description: "FrontDesk Agents voice ID. Defaults to maya. See Bland's voice library for alternatives.",
   },
   {
     name: "BLAND_DEFAULT_LANGUAGE",
-    category: "Voice (Bland.ai)",
+    category: "Voice (FrontDesk Agents)",
     description: "Default language code (en, es, fr, …). Default: en. Ava still auto-switches per call when the caller speaks another supported language.",
   },
   {
     name: "BLAND_WEBHOOK_URL",
-    category: "Voice (Bland.ai)",
+    category: "Voice (FrontDesk Agents)",
     description: "Per-call webhook URL. Overrides the org-level webhook for calls we initiate. Leave empty to fall back to Bland's org-level webhook.",
   },
   {
     name: "BLAND_WEBHOOK_SECRET",
-    category: "Voice (Bland.ai)",
-    description: "Bland.ai webhook signing secret. When set, /api/bland/webhook verifies the HMAC signature on incoming Bland call events. Get this from Bland → Settings → Webhook Signing Secret.",
+    category: "Voice (FrontDesk Agents)",
+    description: "FrontDesk Agents webhook signing secret. When set, /api/bland/webhook verifies the HMAC signature on incoming Bland call events. Get this from Bland → Settings → Webhook Signing Secret.",
   },
 
   // Stripe

@@ -19,7 +19,7 @@ const TICKER = [
   "🗓 Appointments booked straight into your inbox",
   "🌎 100+ languages worldwide, detected and switched automatically mid-conversation",
   "📥 Every conversation summarized and emailed to your team",
-  "📞 Outbound demo calls (Bland.ai voice) on Professional+",
+  "📞 Outbound demo calls (FrontDesk Agents voice) on Professional+",
   "🔌 Embed AVA on your site in a single line of code",
 ];
 

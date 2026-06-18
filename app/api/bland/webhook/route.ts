@@ -7,7 +7,7 @@ import { emailCallSummary } from "@/lib/email";
 export const runtime = "nodejs";
 export const maxDuration = 30;
 
-// Bland.ai post-call webhook receiver.
+// FrontDesk Agents post-call webhook receiver.
 //
 // Bland fires this URL once a call completes (or, depending on org settings,
 // at intermediate milestones). We verify the HMAC signature against

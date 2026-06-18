@@ -1,9 +1,9 @@
-// Bland.ai telephony integration. Activates the moment BLAND_API_KEY is set.
+// FrontDesk Agents telephony integration. Activates the moment BLAND_API_KEY is set.
 //
 // Two call types:
 //   - outbound demo / sales: operator triggers from /admin, or autonomous
 //     callback (only when a visitor explicitly opted in via the chat).
-//   - inbound: the (216) 480-4413 number is wired in Bland.ai dashboard to
+//   - inbound: the (216) 480-4413 number is wired in FrontDesk Agents dashboard to
 //     run the inbound script — this file exposes the script so the operator
 //     can paste it into the Bland dashboard.
 
@@ -104,7 +104,7 @@ export async function startOutboundCall(opts: OutboundCallOptions | string, lega
   if (!apiKey) {
     return {
       ok: false as const,
-      error: "Bland.ai is not configured yet — set BLAND_API_KEY in the Environment tab to activate.",
+      error: "FrontDesk Agents is not configured yet — set BLAND_API_KEY in the Environment tab to activate.",
     };
   }
 
@@ -143,11 +143,11 @@ export async function startOutboundCall(opts: OutboundCallOptions | string, lega
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    return { ok: false as const, error: data?.message || `Bland.ai returned ${res.status}` };
+    return { ok: false as const, error: data?.message || `FrontDesk Agents returned ${res.status}` };
   }
 
   // Mask the dialed number in event payload — admin can see the unmasked
-  // number in their Bland.ai dashboard if they need it.
+  // number in their FrontDesk Agents dashboard if they need it.
   recordEvent("voice_call:started", {
     callId: data?.call_id ?? null,
     phone: o.phone.replace(/\d(?=\d{4})/g, "•"),
@@ -160,7 +160,7 @@ export async function startOutboundCall(opts: OutboundCallOptions | string, lega
 }
 
 // Exposes the scripts so the admin UI can show them (and so the operator can
-// paste the inbound script into Bland.ai's phone-number config in their
+// paste the inbound script into FrontDesk Agents's phone-number config in their
 // dashboard).
 export function getActiveScripts() {
   const persona = getPersona();
@@ -172,12 +172,12 @@ export function getActiveScripts() {
   };
 }
 
-// Push the inbound script directly to a Bland.ai phone number. Bland's
+// Push the inbound script directly to a FrontDesk Agents phone number. Bland's
 // inbound config endpoint accepts a prompt + voice + language and binds the
 // number to that conversational agent. After this runs, any caller dialing
 // the number will be handled by Ava with the live script.
 //
-// Bland.ai has shifted endpoint shapes over the years, so we attempt the
+// FrontDesk Agents has shifted endpoint shapes over the years, so we attempt the
 // modern path first and fall back if the API responds with a 404.
 export async function configureInboundNumber(input: {
   phoneNumber: string;
@@ -232,7 +232,7 @@ export async function configureInboundNumber(input: {
   ];
 
   let lastStatus: number | undefined;
-  let lastError = "Bland.ai inbound config failed";
+  let lastError = "FrontDesk Agents inbound config failed";
 
   for (const c of candidates) {
     const finalBody = { ...body, ...((c as { bodyExtra?: Record<string, unknown> }).bodyExtra ?? {}) };

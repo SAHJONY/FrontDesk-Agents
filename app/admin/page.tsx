@@ -415,7 +415,7 @@ function LiveEventRow({ event }: { event: PlatformEvent }) {
 }
 
 // ============================================================================
-// Outbound Bland.ai call launcher
+// Outbound FrontDesk Agents call launcher
 // ============================================================================
 
 type BlandConfig = {
@@ -732,7 +732,7 @@ function EnvironmentTab() {
     return g;
   }, [secrets]);
 
-  const order = ["Owner", "Storage", "Secrets", "LLM (HERMES)", "Voice (Bland.ai)", "Payments", "Deploy", "Custom"];
+  const order = ["Owner", "Storage", "Secrets", "LLM (HERMES)", "Voice (FrontDesk Agents)", "Payments", "Deploy", "Custom"];
 
   return (
     <div className="mt-8 space-y-6">
@@ -990,7 +990,7 @@ export default function AdminPage() {
       { name: "Stripe checkout", active: data.integrations.stripe, hint: data.integrations.stripe ? "Card payments live" : "Add STRIPE_SECRET_KEY" },
       { name: "Square checkout", active: data.integrations.square, hint: data.integrations.square ? "Square subscriptions live" : "Optional — add SQUARE_ACCESS_TOKEN" },
       { name: "PayPal checkout", active: data.integrations.paypal, hint: data.integrations.paypal ? "PayPal subscriptions live" : "Optional — add PAYPAL_CLIENT_ID" },
-      { name: "Bland.ai voice", active: data.integrations.bland, hint: data.integrations.bland ? "Outbound calls armed" : "Optional — add BLAND_API_KEY" },
+      { name: "FrontDesk Agents voice", active: data.integrations.bland, hint: data.integrations.bland ? "Outbound calls armed" : "Optional — add BLAND_API_KEY" },
     ];
   }, [data]);
 

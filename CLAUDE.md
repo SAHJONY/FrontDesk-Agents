@@ -17,7 +17,7 @@ pushing to the `platform` branch. Follow these rules to avoid collisions:
 4. **Production = www.frontdeskagents.com** (project-y8vxc, Vercel account
    sahjonyllc-1808). The account-1 deployment (frontdesk-agents-kappa) is a
    non-canonical mirror.
-5. **Bland.ai gotchas** (hard-won): number prompts can be silently overridden
+5. **FrontDesk Agents gotchas** (hard-won): number prompts can be silently overridden
    by attached Personas (check `persona_id` on call records) and Memories
    (`memory_id` on number config) — the sync route strips memories. Language
    `auto` = EN/ES only; we use `babel`. `first_sentence` overrides script

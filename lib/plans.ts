@@ -68,7 +68,7 @@ export const PLANS: Plan[] = [
     features: [
       "1,000 AI chats / month",
       "Everything in Starter",
-      "Outbound demo calls (powered by Bland.ai)",
+      "Outbound demo calls (powered by FrontDesk Agents)",
       "Lead-qualification scoring",
       "Webhook export to your tools",
       "Priority email + chat support",

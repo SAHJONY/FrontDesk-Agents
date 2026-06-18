@@ -1,7 +1,7 @@
 name: Uptime watchdog
 
 # Checks production from outside every 15 minutes. On sustained failure it
-# alerts the owner directly through Bland.ai (a real phone call) — this works
+# alerts the owner directly through FrontDesk Agents (a real phone call) — this works
 # even when the entire platform is down, because the call is placed from the
 # GitHub runner, not from the platform.
 

@@ -10,7 +10,7 @@ export const maxDuration = 30;
 
 type Target = "inbound" | "outbound" | "both";
 
-// Owner-only. Pushes Ava's prompts to Bland.ai.
+// Owner-only. Pushes Ava's prompts to FrontDesk Agents.
 //
 //   target=inbound  → inbound script → BLAND_INBOUND_NUMBER  (default)
 //   target=outbound → outbound sales script → BLAND_OUTBOUND_NUMBER
@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
         phoneNumber: job.phone,
         ok: false,
         error: r.error,
-        hint: `If this keeps failing, paste the ${job.label} script into Bland.ai dashboard → Phone Numbers → ${job.phone} → Inbound config.`,
+        hint: `If this keeps failing, paste the ${job.label} script into FrontDesk Agents dashboard → Phone Numbers → ${job.phone} → Inbound config.`,
       });
     }
   }

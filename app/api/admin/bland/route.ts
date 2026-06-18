@@ -7,7 +7,7 @@ export const runtime = "nodejs";
 
 // Owner-only. Returns the inbound + outbound Ava scripts plus persona config
 // (name, voice, language, both numbers). The operator can copy the inbound
-// script into the Bland.ai phone-number configuration in their dashboard.
+// script into the FrontDesk Agents phone-number configuration in their dashboard.
 export async function GET() {
   await loadSecretOverrides();
   if (!(await isOwner())) {

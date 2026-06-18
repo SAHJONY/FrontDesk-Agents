@@ -1,4 +1,4 @@
-// Bland.ai task prompts for Ava — the receptionist persona.
+// FrontDesk Agents task prompts for Ava — the receptionist persona.
 //
 // Two scripts live here: an inbound greeting/triage flow, and an outbound
 // sales/callback flow. Both share the same facts about the business so we

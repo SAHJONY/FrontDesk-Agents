@@ -4,6 +4,7 @@ import ChatWidget from "@/components/ChatWidget";
 import PricingCards from "@/components/PricingCards";
 import ROICalculator from "@/components/ROICalculator";
 import Footer from "@/components/Footer";
+import LanguageSelector from "@/components/LanguageSelector";
 import { AGENTS, INDUSTRIES } from "@/lib/plans";
 import TestimonialCarousel from "@/components/TestimonialCarousel";
 
@@ -275,6 +276,7 @@ export default function Home() {
         </div>
       </section>
 
+      <LanguageSelector />
       <Footer />
     </main>
   );

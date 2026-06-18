@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import PricingCards from "@/components/PricingCards";
-import RoiCalculator from "@/components/RoiCalculator";
+import ROICalculator from "@/components/ROICalculator";
 
 export const metadata: Metadata = {
   title: "Pricing & ROI Calculator | FrontDesk Agents",
@@ -31,7 +31,7 @@ export default function PricingPage() {
             What are missed calls <span className="text-gradient-gold">costing you?</span>
           </h2>
           <div className="mt-10">
-            <RoiCalculator />
+            <ROICalculator />
           </div>
         </div>
       </section>

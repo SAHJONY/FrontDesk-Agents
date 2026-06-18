@@ -38,7 +38,6 @@ export default function TestimonialCarousel() {
       <blockquote className="relative rounded-2xl bg-ink-2/40 p-8 text-lg italic text-slate-300">
         <p>{"\""}{quote}{"\""}</p>
         <footer className="mt-6 flex items-center justify-center gap-3">
-          <img src={avatar} alt={name} className="h-10 w-10 rounded-full" />
           <span className="font-medium text-slate-200">{name}</span>
         </footer>
       </blockquote>

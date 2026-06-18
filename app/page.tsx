@@ -2,8 +2,10 @@ import Link from "next/link";
 import Nav from "@/components/Nav";
 import ChatWidget from "@/components/ChatWidget";
 import PricingCards from "@/components/PricingCards";
+import ROICalculator from "@/components/ROICalculator";
 import Footer from "@/components/Footer";
 import { AGENTS, INDUSTRIES } from "@/lib/plans";
+import TestimonialCarousel from "@/components/TestimonialCarousel";
 
 const STATS = [
   { value: "<2s", label: "Avg. response time" },
@@ -93,6 +95,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* TESTIMONIALS */}
+      <TestimonialCarousel />
 
       {/* LIVE TICKER */}
       <section className="border-y border-white/5 bg-ink-2/60 py-3.5">
@@ -222,6 +227,7 @@ export default function Home() {
           </p>
           <div className="mt-12">
             <PricingCards />
+          <ROICalculator />
           </div>
           <p className="mt-8 text-center text-sm text-slate-500">
             Want the math for your business? <Link href="/pricing" className="text-teal-glow underline">Try the ROI calculator →</Link>

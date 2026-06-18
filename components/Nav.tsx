@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import ShareButton from "./ShareButton";
+import LanguageSelector from "./LanguageSelector";
 
 const links = [
   { href: "/#features", label: "Features" },
@@ -22,6 +23,7 @@ export default function Nav() {
           <span className="font-display text-lg font-semibold tracking-tight">
             FrontDesk <span className="text-gradient-gold">Agents</span>
           </span>
+          <LanguageSelector />
         </Link>
         <div className="hidden items-center gap-7 text-sm text-slate-300 md:flex">
           {links.map((l) => (

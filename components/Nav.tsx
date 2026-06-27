@@ -6,7 +6,7 @@ import ShareButton from "./ShareButton";
 
 const links = [
   { href: "/#features", label: "Features" },
-  { href: "/#industries", label: "Industries" },
+  { href: "/websites", label: "Websites" },
   { href: "/pricing", label: "Pricing" },
   { href: "/demo", label: "Live Demo" },
   { href: "/dashboard", label: "Dashboard" },

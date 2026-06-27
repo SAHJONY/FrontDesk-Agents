@@ -28,6 +28,46 @@ export default function BuilderPage() {
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const [sites, setSites] = useState<SiteEntry[]>([]);
+  const [lookupName, setLookupName] = useState("");
+  const [lookupAddr, setLookupAddr] = useState("");
+  const [photos, setPhotos] = useState<string[]>([]);
+
+  async function research() {
+    setBusy(true);
+    setStatus(null);
+    try {
+      const res = await fetch("/api/admin/leads-find", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lookup: true, name: lookupName, address: lookupAddr }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Lookup failed");
+      const b = data.business;
+      setName(b.name || lookupName);
+      setPhotos(Array.isArray(b.photos) ? b.photos : []);
+      const social = b.social && Object.keys(b.social).length ? `\nSocial: ${Object.entries(b.social).map(([k, v]) => `${k}: ${v}`).join(", ")}` : "";
+      const reviews = (b.reviews || []).slice(0, 3).map((r: { text: string }) => `“${r.text}”`).join(" ");
+      setBrief(
+        [
+          `${b.name} — ${b.type}${b.city ? ` in ${b.city}` : ""}.`,
+          b.address && `Address: ${b.address}.`,
+          b.phone && `Phone: ${b.phone}.`,
+          b.hours?.length && `Hours: ${b.hours.join("; ")}.`,
+          b.about && `About: ${b.about}`,
+          b.rating && `Rating: ${b.rating}★ (${b.reviewsCount} reviews).`,
+          reviews && `Reviews: ${reviews}`,
+          photos.length && `Use these real photos: ${(b.photos || []).join(", ")}`,
+          social,
+        ].filter(Boolean).join("\n")
+      );
+      setStatus(`✅ Found "${b.name}" — ${(b.photos || []).length} photo(s) imported. Review the brief, then generate.`);
+    } catch (e) {
+      setStatus(`⚠️ ${e instanceof Error ? e.message : "Lookup failed"}`);
+    } finally {
+      setBusy(false);
+    }
+  }
 
   const loadSites = useCallback(async () => {
     const res = await fetch("/api/sites");
@@ -110,6 +150,22 @@ export default function BuilderPage() {
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_1fr]">
           <div className="glass rounded-3xl p-6">
+            <div className="mb-5 rounded-2xl border border-gold/20 bg-gold/5 p-4">
+              <label className="text-xs uppercase tracking-widest text-gold">🔎 Autonomous research (Google Maps)</label>
+              <p className="mt-1 text-[11px] text-slate-400">Enter a business name + address — we pull its real data, hours, reviews & official photos to auto-fill the brief.</p>
+              <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
+                <input value={lookupName} onChange={(e) => setLookupName(e.target.value)} placeholder="Business name" className="rounded-xl border border-white/10 bg-ink-2/80 px-3 py-2.5 text-sm outline-none focus:border-gold/50" />
+                <input value={lookupAddr} onChange={(e) => setLookupAddr(e.target.value)} placeholder="City / address" className="rounded-xl border border-white/10 bg-ink-2/80 px-3 py-2.5 text-sm outline-none focus:border-gold/50" />
+                <button onClick={research} disabled={busy || !lookupName.trim()} className="btn-gold rounded-xl px-4 py-2.5 text-sm disabled:opacity-50">{busy ? "…" : "Research"}</button>
+              </div>
+              {photos.length > 0 && (
+                <div className="mt-3 flex gap-2 overflow-x-auto">
+                  {photos.map((u) => (
+                    <img key={u} src={u} alt="" className="h-16 w-24 shrink-0 rounded-lg object-cover" />
+                  ))}
+                </div>
+              )}
+            </div>
             <label className="text-xs uppercase tracking-widest text-slate-500">Business name</label>
             <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Bright Smile Dental" className="mt-2 w-full rounded-xl border border-white/10 bg-ink-2/80 px-4 py-3 text-sm outline-none focus:border-gold/50" />
             <label className="mt-4 block text-xs uppercase tracking-widest text-slate-500">Business brief</label>

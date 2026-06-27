@@ -4,6 +4,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import { PLANS } from "@/lib/plans";
+import { scoreLead, tierFor, TIER_META, type LeadTier } from "@/lib/lead-scoring";
+
+const TIER_BADGE: Record<LeadTier, string> = {
+  hot: "bg-red-400/15 text-red-300",
+  qualified: "bg-gold/20 text-gold",
+  marketing: "bg-teal-glow/15 text-teal-glow",
+  cold: "bg-slate-400/15 text-slate-400",
+};
 
 // ============================================================================
 // Real-time event types + hook
@@ -153,7 +161,7 @@ type SecretListing = {
   updatedAt?: string;
 };
 
-const TABS = ["Overview", "Financials", "HERMES", "Bookings", "Leads", "Subscriptions", "Customers", "Environment", "Settings"] as const;
+const TABS = ["Overview", "Intelligence", "Financials", "HERMES", "Bookings", "Leads", "Subscriptions", "Customers", "Environment", "Settings"] as const;
 type Tab = (typeof TABS)[number];
 
 // ============================================================================
@@ -1168,6 +1176,8 @@ export default function AdminPage() {
               </div>
             )}
 
+            {tab === "Intelligence" && <IntelligenceTab />}
+
             {tab === "Financials" && (
               <div className="mt-8 space-y-6">
                 <div className="grid gap-4 sm:grid-cols-3">
@@ -1283,22 +1293,33 @@ export default function AdminPage() {
 
             {tab === "Leads" && (
               <div className="glass mt-8 overflow-x-auto rounded-3xl p-6">
-                <h3 className="font-semibold">All leads ({data.leads.length})</h3>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="font-semibold">All leads ({data.leads.length})</h3>
+                  <p className="text-[11px] text-slate-500">Scored 0–100 · sorted by priority · ⚙ = inferred from industry</p>
+                </div>
                 {data.leads.length === 0 ? (
                   <p className="mt-4 text-sm text-slate-500">No leads yet.</p>
                 ) : (
                   <table className="mt-4 w-full text-left text-sm">
                     <thead className="text-xs uppercase tracking-wider text-slate-500">
-                      <tr><th className="py-2 pr-4">Business</th><th className="py-2 pr-4">Contact</th><th className="py-2 pr-4">Industry</th><th className="py-2 pr-4">Plan</th><th className="py-2 pr-4">Source</th><th className="py-2"></th></tr>
+                      <tr><th className="py-2 pr-4">Score</th><th className="py-2 pr-4">Business</th><th className="py-2 pr-4">Contact</th><th className="py-2 pr-4">Industry</th><th className="py-2 pr-4">Recommended offer</th><th className="py-2 pr-4">Plan</th><th className="py-2"></th></tr>
                     </thead>
                     <tbody className="text-slate-300">
-                      {data.leads.map((l) => (
+                      {[...data.leads]
+                        .map((l) => ({ l, sc: scoreLead({ industry: l.industry, business: l.business, plan: l.plan }) }))
+                        .sort((a, b) => b.sc.score - a.sc.score)
+                        .map(({ l, sc }) => (
                         <tr key={l.id} className="border-t border-white/5">
+                          <td className="py-2.5 pr-4">
+                            <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${TIER_BADGE[sc.tier]}`} title={sc.reasons.join(" · ")}>
+                              {sc.score} {TIER_META[sc.tier].label}{sc.inferred ? " ⚙" : ""}
+                            </span>
+                          </td>
                           <td className="py-2.5 pr-4 font-medium">{l.business || "—"}</td>
                           <td className="py-2.5 pr-4">{l.email || l.phone || "—"}</td>
                           <td className="py-2.5 pr-4">{l.industry || "—"}</td>
+                          <td className="py-2.5 pr-4 text-xs text-slate-400">{sc.recommendedOffer}</td>
                           <td className="py-2.5 pr-4 capitalize text-gold">{l.plan || "—"}</td>
-                          <td className="py-2.5 pr-4 text-xs text-slate-500">{l.source}</td>
                           <td className="py-2.5 text-right">
                             <button
                               onClick={async () => {
@@ -1446,6 +1467,216 @@ function CustomersTab({ onChange }: { onChange: () => void }) {
           </tbody>
         </table>
       )}
+    </div>
+  );
+}
+
+// ============================================================================
+// Intelligence tab — Autonomous Decision Engine (derived business report)
+// ============================================================================
+
+type Severity = "opportunity" | "risk" | "healthy";
+type Priority = "high" | "medium" | "low";
+
+type Insight = {
+  id: string;
+  severity: Severity;
+  title: string;
+  problem: string;
+  impact: string;
+  action: string;
+  actionHref?: string;
+  priority: Priority;
+  estValue?: number;
+};
+
+type IntelligenceReport = {
+  generatedAt: string;
+  health: {
+    mrr: number;
+    arr: number;
+    activeSubscribers: number;
+    customers: number;
+    leads: number;
+    bookings: number;
+    newLeads7d: number;
+    newLeads7dPrev: number;
+    newCustomers7d: number;
+    bookings7d: number;
+    activityWoWPct: number | null;
+  };
+  funnel: {
+    leads: number;
+    customers: number;
+    paidSubscribers: number;
+    leadToCustomerPct: number | null;
+    customerToPaidPct: number | null;
+  };
+  insights: Insight[];
+  summary: string;
+};
+
+const SEVERITY_STYLE: Record<Severity, { chip: string; ring: string; label: string }> = {
+  risk: { chip: "bg-red-400/15 text-red-300", ring: "border-red-400/20", label: "Risk" },
+  opportunity: { chip: "bg-gold/20 text-gold", ring: "border-gold/20", label: "Opportunity" },
+  healthy: { chip: "bg-emerald-400/15 text-emerald-300", ring: "border-emerald-400/20", label: "Healthy" },
+};
+
+const PRIORITY_STYLE: Record<Priority, string> = {
+  high: "bg-red-400/15 text-red-300",
+  medium: "bg-amber-400/15 text-amber-300",
+  low: "bg-slate-400/15 text-slate-300",
+};
+
+function FunnelBar({ label, value, max, accent }: { label: string; value: number; max: number; accent: string }) {
+  return (
+    <div>
+      <div className="flex justify-between text-xs text-slate-400">
+        <span>{label}</span>
+        <span className="text-slate-200">{value.toLocaleString()}</span>
+      </div>
+      <div className="mt-1 h-2.5 rounded-full bg-white/5">
+        <div className={`h-2.5 rounded-full ${accent}`} style={{ width: `${max > 0 ? (value / max) * 100 : 0}%` }} />
+      </div>
+    </div>
+  );
+}
+
+function InsightCard({ insight }: { insight: Insight }) {
+  const sev = SEVERITY_STYLE[insight.severity];
+  return (
+    <div className={`rounded-2xl border ${sev.ring} bg-white/[0.02] p-5`}>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wider ${sev.chip}`}>{sev.label}</span>
+        <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wider ${PRIORITY_STYLE[insight.priority]}`}>
+          {insight.priority} priority
+        </span>
+        {typeof insight.estValue === "number" && insight.estValue > 0 && (
+          <span className="rounded-full bg-emerald-400/15 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-emerald-300">
+            {fmtMoney(insight.estValue)}/mo at stake
+          </span>
+        )}
+      </div>
+      <h4 className="mt-3 font-semibold text-slate-100">{insight.title}</h4>
+      {insight.problem !== "—" && (
+        <p className="mt-2 text-xs leading-relaxed text-slate-400">
+          <span className="font-medium text-slate-300">Problem:</span> {insight.problem}
+        </p>
+      )}
+      <p className="mt-1.5 text-xs leading-relaxed text-slate-400">
+        <span className="font-medium text-slate-300">Impact:</span> {insight.impact}
+      </p>
+      <p className="mt-1.5 text-xs leading-relaxed text-slate-400">
+        <span className="font-medium text-slate-300">Recommended action:</span> {insight.action}
+      </p>
+    </div>
+  );
+}
+
+function IntelligenceTab() {
+  const [report, setReport] = useState<IntelligenceReport | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/admin/intelligence", { cache: "no-store" });
+      if (!res.ok) throw new Error("Failed to load report");
+      setReport((await res.json()) as IntelligenceReport);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  if (loading && !report) return <p className="mt-10 text-sm text-slate-500">Analyzing business data…</p>;
+  if (error) return <p className="mt-10 text-sm text-red-300">{error}</p>;
+  if (!report) return null;
+
+  const h = report.health;
+  const f = report.funnel;
+  const funnelMax = Math.max(1, f.leads, f.customers, f.paidSubscribers);
+  const wow = h.activityWoWPct;
+
+  return (
+    <div className="mt-8 space-y-6">
+      <div className="glass-gold rounded-3xl p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h3 className="font-semibold">Daily owner report</h3>
+          <div className="flex items-center gap-3">
+            <span className="text-[11px] text-slate-500">Generated {fmtAgo(report.generatedAt)}</span>
+            <button onClick={load} className="rounded-xl border border-white/10 px-3 py-1.5 text-xs text-slate-300 hover:border-teal-glow/40">
+              ↻ Regenerate
+            </button>
+          </div>
+        </div>
+        <p className="mt-3 text-sm leading-relaxed text-slate-300">{report.summary}</p>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard label="MRR" value={fmtMoney(h.mrr)} accent="text-emerald-300" hint={`${fmtMoney(h.arr)} ARR run-rate`} />
+        <StatCard
+          label="Activity (WoW)"
+          value={wow === null ? "—" : `${wow >= 0 ? "+" : ""}${wow}%`}
+          accent={wow === null ? "text-slate-400" : wow >= 0 ? "text-emerald-300" : "text-red-300"}
+          hint="Bookings + leads + subs vs last week"
+        />
+        <StatCard label="New leads · 7d" value={String(h.newLeads7d)} accent="text-gold" hint={`${h.newLeads7dPrev} the prior week`} />
+        <StatCard label="Bookings · 7d" value={String(h.bookings7d)} accent="text-teal-glow" hint={`${h.newCustomers7d} new customers`} />
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="glass rounded-3xl p-6">
+          <h3 className="font-semibold">Conversion funnel</h3>
+          <div className="mt-4 space-y-4">
+            <FunnelBar label="Leads captured" value={f.leads} max={funnelMax} accent="bg-gold/70" />
+            <FunnelBar label="Customers registered" value={f.customers} max={funnelMax} accent="bg-teal-glow/70" />
+            <FunnelBar label="Paid subscribers" value={f.paidSubscribers} max={funnelMax} accent="bg-emerald-400/70" />
+          </div>
+          <div className="mt-5 grid grid-cols-2 gap-3">
+            <div className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
+              <div className="text-[10px] uppercase tracking-wider text-slate-500">Lead → customer</div>
+              <div className="mt-1 font-display text-xl font-semibold text-teal-glow">
+                {f.leadToCustomerPct === null ? "—" : `${f.leadToCustomerPct}%`}
+              </div>
+            </div>
+            <div className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3">
+              <div className="text-[10px] uppercase tracking-wider text-slate-500">Customer → paid</div>
+              <div className="mt-1 font-display text-xl font-semibold text-emerald-300">
+                {f.customerToPaidPct === null ? "—" : `${f.customerToPaidPct}%`}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="glass rounded-3xl p-6">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold">Decision engine</h3>
+            <span className="text-[10px] uppercase tracking-wider text-slate-500">
+              {report.insights.length} insight{report.insights.length === 1 ? "" : "s"}
+            </span>
+          </div>
+          {report.insights.length === 0 ? (
+            <p className="mt-4 text-sm text-slate-500">
+              No action items detected. The funnel is clean — keep feeding it leads and the engine will surface
+              opportunities and risks the moment they appear.
+            </p>
+          ) : (
+            <div className="mt-4 space-y-3">
+              {report.insights.map((i) => (
+                <InsightCard key={i.id} insight={i} />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

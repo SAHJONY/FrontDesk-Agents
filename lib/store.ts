@@ -388,6 +388,33 @@ export async function upsertReceptionistConfig(
   return config;
 }
 
+// ---------- Outreach opt-out suppression (anti-spam compliance) -------------
+
+const OPTOUT_FILE = "outreach-optout.json";
+
+function normContact(c: string): string {
+  return String(c || "").trim().toLowerCase();
+}
+
+export async function listOptOuts(): Promise<string[]> {
+  return readJson<string[]>(OPTOUT_FILE, []);
+}
+
+export async function isOptedOut(contact: string): Promise<boolean> {
+  const list = await listOptOuts();
+  return list.includes(normContact(contact));
+}
+
+export async function addOptOut(contact: string): Promise<void> {
+  const c = normContact(contact);
+  if (!c) return;
+  const list = await listOptOuts();
+  if (!list.includes(c)) {
+    list.unshift(c);
+    await writeJson(OPTOUT_FILE, list.slice(0, 50000));
+  }
+}
+
 // ---------- Usage tracking (chat caps) --------------------------------------
 
 export type UsageRecord = { customerId: string; periodKey: string; count: number };

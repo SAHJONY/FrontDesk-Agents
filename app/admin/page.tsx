@@ -145,7 +145,7 @@ type Overview = {
     models: string[];
     byProvider: { nim: string[]; anthropic: string[]; openai: string[] };
   };
-  integrations: { bland: boolean; stripe: boolean; square: boolean; paypal: boolean };
+  integrations: { bland: boolean; stripe: boolean; square: boolean; paypal: boolean; websiteHosting?: boolean; prospecting?: boolean; imageGen?: boolean };
 };
 
 type SecretListing = {
@@ -1003,6 +1003,9 @@ export default function AdminPage() {
       { name: "Square checkout", active: data.integrations.square, hint: data.integrations.square ? "Square subscriptions live" : "Optional — add SQUARE_ACCESS_TOKEN" },
       { name: "PayPal checkout", active: data.integrations.paypal, hint: data.integrations.paypal ? "PayPal subscriptions live" : "Optional — add PAYPAL_CLIENT_ID" },
       { name: "FrontDesk Agents voice", active: data.integrations.bland, hint: data.integrations.bland ? "Outbound calls armed" : "Optional — add BLAND_API_KEY" },
+      { name: "Website hosting", active: Boolean(data.integrations.websiteHosting), hint: data.integrations.websiteHosting ? "Built sites serve at /s/<slug>" : "Add UPSTASH_REDIS_REST_URL + _TOKEN" },
+      { name: "Lead prospecting", active: Boolean(data.integrations.prospecting), hint: data.integrations.prospecting ? "Google Maps discovery live" : "Add GOOGLE_PLACES_API_KEY" },
+      { name: "AI image generation", active: Boolean(data.integrations.imageGen), hint: data.integrations.imageGen ? "Builder can generate images" : "Add FAL_API_KEY / OPENAI_API_KEY" },
     ];
   }, [data]);
 
@@ -1108,6 +1111,15 @@ export default function AdminPage() {
                         <StatusPill active={c.active} labelOn="Online" labelOff="Pending" />
                       </div>
                     ))}
+                  </div>
+                </div>
+
+                <div className="glass rounded-3xl p-6">
+                  <h3 className="font-semibold">Operator tools</h3>
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    <a href="/builder" className="rounded-xl border border-gold/30 bg-gold/5 px-4 py-2.5 text-sm text-gold hover:bg-gold/10">🏗 Website Builder + Prospecting</a>
+                    <a href="/websites" className="rounded-xl border border-white/10 px-4 py-2.5 text-sm text-slate-300 hover:border-teal-glow/40">🌐 Websites product page</a>
+                    <a href="/onboarding" className="rounded-xl border border-white/10 px-4 py-2.5 text-sm text-slate-300 hover:border-teal-glow/40">🎙 Receptionist onboarding</a>
                   </div>
                 </div>
 

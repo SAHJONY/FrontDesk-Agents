@@ -6,6 +6,9 @@ import { blandConfigured } from "@/lib/bland";
 import { stripeConfigured } from "@/lib/billing/stripe";
 import { squareConfigured } from "@/lib/billing/square";
 import { paypalConfigured } from "@/lib/billing/paypal";
+import { siteStoreConfigured } from "@/lib/site-store";
+import { placesConfigured } from "@/lib/leads-find";
+import { imageConfigured } from "@/lib/site-image";
 import { PLANS, getPlan } from "@/lib/plans";
 import { loadSecretOverrides } from "@/lib/secrets";
 
@@ -135,6 +138,9 @@ export async function GET() {
       stripe: stripeConfigured(),
       square: squareConfigured(),
       paypal: paypalConfigured(),
+      websiteHosting: siteStoreConfigured(),
+      prospecting: await placesConfigured(),
+      imageGen: await imageConfigured(),
     },
   });
 }

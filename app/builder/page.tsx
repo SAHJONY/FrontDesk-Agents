@@ -120,6 +120,27 @@ export default function BuilderPage() {
     }
   }
 
+  async function heroImage() {
+    setBusy(true);
+    setStatus("Generating image…");
+    try {
+      const res = await fetch("/api/site-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: `Premium, photoreal hero image for: ${brief || name || "a local service business website"}`, size: "1792x1024" }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Image failed");
+      setPhotos((p) => [data.url, ...p]);
+      setBrief((b) => `${b}\nHero image: ${data.url}`);
+      setStatus(`✅ Image generated via ${data.provider} (added to brief & photos).`);
+    } catch (e) {
+      setStatus(`⚠️ ${e instanceof Error ? e.message : "Image failed"}`);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function publish() {
     setBusy(true);
     setStatus(null);
@@ -193,6 +214,9 @@ export default function BuilderPage() {
             <div className="mt-4 flex flex-wrap gap-3">
               <button onClick={generate} disabled={busy || !brief.trim()} className="btn-gold rounded-xl px-5 py-2.5 text-sm disabled:opacity-50">
                 {busy ? "Working…" : "✨ Generate site"}
+              </button>
+              <button onClick={heroImage} disabled={busy} className="btn-ghost rounded-xl px-5 py-2.5 text-sm disabled:opacity-50">
+                🖼 Generate image
               </button>
               <button onClick={publish} disabled={busy || !html} className="btn-ghost rounded-xl px-5 py-2.5 text-sm disabled:opacity-50">
                 Publish →

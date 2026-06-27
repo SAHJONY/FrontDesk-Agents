@@ -57,7 +57,7 @@ async function chatCompletions(url: string, key: string, model: string, prompt: 
 async function tryClaude(prompt: string, maxTokens: number, getKey: GetKey): Promise<EngineResult | null> {
   const key = getKey("ANTHROPIC_API_KEY");
   if (!key) return null;
-  const model = process.env.CLAUDE_MODEL || process.env.ANTHROPIC_MODEL || "claude-3-5-sonnet-20241022";
+  const model = process.env.CLAUDE_MODEL || process.env.ANTHROPIC_MODEL || "claude-opus-4-8";
   const r = await fetchT("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
@@ -138,7 +138,10 @@ export async function generateWebsite(prompt: string, maxTokens = 2000): Promise
   const secrets = await loadFactorySecrets();
   const getKey: GetKey = (name) => process.env[name] || secrets[name] || "";
 
-  const engines = [tryClaude, tryOpenAI, tryGemini, tryGrok, tryGLM, tryNvidia];
+  // CLAUDE primary; secondary chain per brain policy: OpenAI → x.AI (Grok) →
+  // Gemini → NVIDIA NIM free models (the "HERMES" tier). GLM kept as a final
+  // bonus fallback.
+  const engines = [tryClaude, tryOpenAI, tryGrok, tryGemini, tryNvidia, tryGLM];
   const errors: string[] = [];
   let configured = 0;
 

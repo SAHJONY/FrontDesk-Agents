@@ -229,8 +229,9 @@ const DEFAULT_NIM_MODELS = [
   "microsoft/phi-3-medium-128k-instruct",
 ];
 
-// Fallback Anthropic models — Opus 4.7 → Sonnet 4.6 → Haiku 4.5.
+// Primary brain models — newest first: Opus 4.8 → Opus 4.7 → Sonnet 4.6 → Haiku 4.5.
 const DEFAULT_ANTHROPIC_MODELS = [
+  "claude-opus-4-8",
   "claude-opus-4-7",
   "claude-sonnet-4-6",
   "claude-haiku-4-5-20251001",
@@ -271,31 +272,25 @@ function openaiModels(): string[] {
 
 // configuredCascade returns the full ordered list of (provider, model) pairs
 // HERMES will walk through for each user turn.
+//
+// Brain policy: CLAUDE is the primary brain/engine; the rest (NVIDIA NIM free
+// models = "HERMES" tier, then OpenAI) are secondary fallbacks. Set
+// HERMES_PRIMARY=nim to put the free NIM models first instead (cost-saving for
+// very high chat volume).
 export function configuredCascade(): HermesModel[] {
-  const cascade: HermesModel[] = [];
+  const claude: HermesModel[] = process.env.ANTHROPIC_API_KEY
+    ? anthropicModels().map((model) => ({ provider: "anthropic" as const, model, label: `Claude · ${model}` }))
+    : [];
+  const nim: HermesModel[] = process.env.NIM_API_KEY
+    ? nimModels().map((model) => ({ provider: "nim" as const, model, label: `NVIDIA NIM · ${model}` }))
+    : [];
+  const openai: HermesModel[] = process.env.OPENAI_API_KEY
+    ? openaiModels().map((model) => ({ provider: "openai" as const, model, label: `OpenAI · ${model}` }))
+    : [];
 
-  // 1. NVIDIA NIM — primary HERMES brain.
-  if (process.env.NIM_API_KEY) {
-    for (const model of nimModels()) {
-      cascade.push({ provider: "nim", model, label: `NVIDIA NIM · ${model}` });
-    }
-  }
-
-  // 2. Anthropic Claude — fallback provider.
-  if (process.env.ANTHROPIC_API_KEY) {
-    for (const model of anthropicModels()) {
-      cascade.push({ provider: "anthropic", model, label: `Claude · ${model}` });
-    }
-  }
-
-  // 3. OpenAI — last-resort fallback.
-  if (process.env.OPENAI_API_KEY) {
-    for (const model of openaiModels()) {
-      cascade.push({ provider: "openai", model, label: `OpenAI · ${model}` });
-    }
-  }
-
-  return cascade;
+  // Default: Claude primary → NIM (HERMES free tier) → OpenAI.
+  const claudePrimary = (process.env.HERMES_PRIMARY || "claude").toLowerCase() !== "nim";
+  return claudePrimary ? [...claude, ...nim, ...openai] : [...nim, ...claude, ...openai];
 }
 
 // Back-compat: return the list of unique provider names (used by the health

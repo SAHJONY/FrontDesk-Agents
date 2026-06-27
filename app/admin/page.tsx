@@ -314,6 +314,8 @@ function eventBadge(kind: PlatformEventKind): { label: string; color: string } {
       return { label: "env updated", color: "bg-slate-400/15 text-slate-300" };
     case "env:deleted":
       return { label: "env deleted", color: "bg-red-400/15 text-red-300" };
+    default:
+      return { label: String(kind).replace(/[:_]/g, " "), color: "bg-slate-400/15 text-slate-300" };
   }
 }
 
@@ -351,6 +353,8 @@ function eventTitle(e: PlatformEvent): string {
       return `Env updated · ${p.name}`;
     case "env:deleted":
       return `Env removed · ${p.name}`;
+    default:
+      return `${String(e.kind).replace(/[:_]/g, " ")}${p.businessName ? ` · ${p.businessName}` : ""}`;
   }
 }
 

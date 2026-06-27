@@ -324,6 +324,70 @@ export async function upsertSubscription(input: {
   return sub;
 }
 
+// ---------- Receptionist configs (v24 self-onboarding) ----------------------
+
+// Stored shape mirrors lib/receptionist-config.ts ReceptionistConfig but is
+// declared structurally here to keep store.ts free of UI/lib imports.
+export type StoredReceptionistConfig = {
+  id: string;
+  customerId: string;
+  businessName: string;
+  industry: string;
+  agentName: string;
+  phone?: string;
+  hours?: string;
+  services: string[];
+  serviceArea?: string;
+  faqs: { q: string; a: string }[];
+  pricingInfo?: string;
+  bookingRules?: string;
+  escalationRules?: string;
+  voiceStyle: string;
+  status: "draft" | "active";
+  createdAt: string;
+  updatedAt: string;
+};
+
+const RECEPTIONIST_FILE = "receptionists.json";
+
+export async function listReceptionistConfigs(): Promise<StoredReceptionistConfig[]> {
+  return readJson<StoredReceptionistConfig[]>(RECEPTIONIST_FILE, []);
+}
+
+export async function getReceptionistByCustomer(customerId: string): Promise<StoredReceptionistConfig | null> {
+  const all = await listReceptionistConfigs();
+  return all.find((r) => r.customerId === customerId) ?? null;
+}
+
+// One config per customer — upsert keyed on customerId.
+export async function upsertReceptionistConfig(
+  customerId: string,
+  input: Omit<StoredReceptionistConfig, "id" | "customerId" | "status" | "createdAt" | "updatedAt">,
+  status: "draft" | "active" = "draft"
+): Promise<StoredReceptionistConfig> {
+  const all = await listReceptionistConfigs();
+  const now = new Date().toISOString();
+  const existing = all.find((r) => r.customerId === customerId);
+  if (existing) {
+    Object.assign(existing, input, { status, updatedAt: now });
+    await writeJson(RECEPTIONIST_FILE, all);
+    recordEvent("receptionist:updated", { id: existing.id, businessName: existing.businessName, status });
+    return existing;
+  }
+  const config: StoredReceptionistConfig = {
+    ...input,
+    id: crypto.randomUUID(),
+    customerId,
+    status,
+    createdAt: now,
+    updatedAt: now,
+  };
+  all.unshift(config);
+  await writeJson(RECEPTIONIST_FILE, all.slice(0, 5000));
+  recordEvent("receptionist:created", { id: config.id, businessName: config.businessName, status });
+  return config;
+}
+
 // ---------- Usage tracking (chat caps) --------------------------------------
 
 export type UsageRecord = { customerId: string; periodKey: string; count: number };
@@ -375,7 +439,9 @@ export type PlatformEventKind =
   | "env:updated"
   | "env:deleted"
   | "email:sent"
-  | "email:failed";
+  | "email:failed"
+  | "receptionist:created"
+  | "receptionist:updated";
 
 export type PlatformEvent = {
   id: string;

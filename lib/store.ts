@@ -441,7 +441,8 @@ export type PlatformEventKind =
   | "email:sent"
   | "email:failed"
   | "receptionist:created"
-  | "receptionist:updated";
+  | "receptionist:updated"
+  | "site:published";
 
 export type PlatformEvent = {
   id: string;

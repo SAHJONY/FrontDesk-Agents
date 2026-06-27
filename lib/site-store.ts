@@ -56,8 +56,104 @@ async function kvGet<T = unknown>(key: string): Promise<T | null> {
   return null;
 }
 
+async function kvSetRaw(key: string, value: string): Promise<void> {
+  const u = upstash();
+  if (!u) throw new Error("Storage not configured");
+  const r = await fetch(`${u.base}/set/${encodeURIComponent(key)}`, {
+    method: "POST",
+    headers: { ...u.auth, "content-type": "text/plain" },
+    body: value,
+  });
+  if (!r.ok) throw new Error("Upstash write failed");
+}
+
+async function kvDel(key: string): Promise<void> {
+  const u = upstash();
+  if (!u) return;
+  await fetch(`${u.base}/del/${encodeURIComponent(key)}`, { method: "POST", headers: u.auth });
+}
+
+// AI provider keys the factory stores in Upstash under fda:secrets (managed via
+// its dashboard). Env always wins; this is the fallback source.
+export async function loadFactorySecrets(): Promise<Record<string, string>> {
+  return (await kvGet<Record<string, string>>("fda:secrets")) ?? {};
+}
+
 export function cleanSlug(s: string): string {
   return String(s || "").toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 60);
+}
+
+function slugify(s: string): string {
+  return String(s || "site").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40) || "site";
+}
+function rand4() { return Math.random().toString(36).slice(2, 6); }
+
+export type SiteIndexEntry = { name: string; slug: string; at: string; status?: string; views?: number };
+const INDEX_KEY = "fda:sites:index";
+
+export async function listSitesIndex(): Promise<SiteIndexEntry[]> {
+  const idx = await kvGet<SiteIndexEntry[]>(INDEX_KEY);
+  return Array.isArray(idx) ? idx : [];
+}
+
+// Save (or update) a generated site. Provisions a Business Console access code
+// the first time, and binds the __SITE_SLUG__ placeholder. Ported from sites.js.
+export async function saveSite(input: { name: string; html: string; slug?: string; status?: SiteStatus; bizType?: string; bizCity?: string }): Promise<{ slug: string; url: string; bizCode: string }> {
+  const name = String(input.name || "Website").slice(0, 120);
+  const slug = input.slug ? slugify(input.slug) : `${slugify(name)}-${rand4()}`;
+  const html = String(input.html).split("__SITE_SLUG__").join(slug);
+
+  let bizCode = "";
+  try {
+    const existingAuth = await kvGet<{ code?: string }>(`fda:biz:${slug}:auth`);
+    if (existingAuth?.code) bizCode = existingAuth.code;
+    else {
+      bizCode = Math.random().toString(36).slice(2, 8).toUpperCase().replace(/[O0I1]/g, "X");
+      await kvSetRaw(`fda:biz:${slug}:auth`, JSON.stringify({ code: bizCode, at: new Date().toISOString() }));
+    }
+    const prof = (await kvGet<Record<string, unknown>>(`fda:biz:${slug}:profile`)) ?? {};
+    prof.name = name; prof.slug = slug;
+    if (input.bizType) prof.type = String(input.bizType).slice(0, 80);
+    if (input.bizCity) prof.city = String(input.bizCity).slice(0, 80);
+    await kvSetRaw(`fda:biz:${slug}:profile`, JSON.stringify(prof));
+  } catch {
+    /* provisioning best-effort */
+  }
+
+  const now = new Date().toISOString();
+  let status: SiteStatus = input.status === "pending" || input.status === "suspended" || input.status === "active" ? input.status : "";
+  if (!status) {
+    const prev = await getSite(slug);
+    status = (prev?.status as SiteStatus) || "active";
+  }
+  await kvSetRaw(`fda:site:${slug}`, JSON.stringify({ name, slug, html, at: now, status }));
+
+  const index = await listSitesIndex();
+  const existing = index.find((s) => s.slug === slug);
+  if (existing) { existing.name = name; existing.at = now; existing.status = status; }
+  else index.unshift({ name, slug, at: now, status });
+  await kvSetRaw(INDEX_KEY, JSON.stringify(index));
+
+  return { slug, url: `/s/${slug}`, bizCode };
+}
+
+export async function deleteSite(slug: string): Promise<string> {
+  const clean = slugify(slug);
+  await kvDel(`fda:site:${clean}`);
+  const index = (await listSitesIndex()).filter((s) => s.slug !== clean);
+  await kvSetRaw(INDEX_KEY, JSON.stringify(index));
+  return clean;
+}
+
+export async function setSiteStatus(slug: string, status: "active" | "suspended"): Promise<void> {
+  const clean = slugify(slug);
+  const rec = await getSite(clean);
+  if (!rec) throw new Error("Site not found");
+  rec.status = status;
+  await kvSetRaw(`fda:site:${clean}`, JSON.stringify(rec));
+  const index = await listSitesIndex();
+  const e = index.find((s) => s.slug === clean);
+  if (e) { e.status = status; await kvSetRaw(INDEX_KEY, JSON.stringify(index)); }
 }
 
 export async function getSite(slug: string): Promise<SiteRecord | null> {

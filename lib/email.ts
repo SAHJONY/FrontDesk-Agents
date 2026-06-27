@@ -4,6 +4,7 @@
 // configuration degrades to a silent no-op so the calling flow never breaks.
 import nodemailer from "nodemailer";
 import { recordEvent } from "@/lib/store";
+import type { IntelligenceReport } from "@/lib/intelligence";
 
 export function emailConfigured(): boolean {
   return Boolean((process.env.SMTP_USER && process.env.SMTP_PASS) || process.env.RESEND_API_KEY);
@@ -117,6 +118,58 @@ export async function emailLeadAlert(l: { business?: string; email?: string; pho
       ${row("Business", l.business || "—")}${row("Contact", l.email || l.phone || "—")}${row("Plan interest", l.plan || "—")}${row("Source", l.source)}
     </table>`;
   await sendEmail(notifyAddress(), `🔥 New lead: ${l.business || l.email || l.phone || "unknown"}`, wrap("New lead captured", body));
+}
+
+// Daily Owner Report — the Autonomous Decision Engine, pushed to the owner's
+// inbox on a schedule (via /api/cron/daily-report). Renders the same health,
+// funnel, and prioritized insights shown in the admin Intelligence tab.
+export async function emailDailyOwnerReport(report: IntelligenceReport): Promise<boolean> {
+  const h = report.health;
+  const money = (n: number) => `$${Math.round(n).toLocaleString()}`;
+  const wow = h.activityWoWPct;
+  const wowStr = wow === null ? "—" : `${wow >= 0 ? "+" : ""}${wow}%`;
+
+  const sevColor: Record<string, string> = {
+    risk: "#f87171",
+    opportunity: "#e8c476",
+    healthy: "#34d399",
+  };
+
+  const stats = `
+    <table style="width:100%;background:#0d1a2d;border-radius:8px;border-collapse:collapse;margin-bottom:16px">
+      ${row("MRR", money(h.mrr))}${row("ARR run-rate", money(h.arr))}
+      ${row("Active subscribers", String(h.activeSubscribers))}${row("Customers", String(h.customers))}
+      ${row("New leads · 7d", `${h.newLeads7d} (prior wk ${h.newLeads7dPrev})`)}${row("Bookings · 7d", String(h.bookings7d))}
+      ${row("Activity WoW", wowStr)}
+    </table>`;
+
+  const insightHtml = report.insights.length
+    ? report.insights
+        .map((i) => {
+          const c = sevColor[i.severity] ?? "#94a3b8";
+          const val = i.estValue ? ` · <span style="color:#34d399">${money(i.estValue)}/mo</span>` : "";
+          return `
+      <div style="border-left:3px solid ${c};background:#0d1a2d;border-radius:6px;padding:10px 14px;margin-bottom:10px">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:${c}">${i.severity} · ${i.priority} priority${val}</div>
+        <div style="font-size:14px;font-weight:bold;color:#e8eef7;margin:4px 0">${i.title}</div>
+        ${i.problem !== "—" ? `<div style="font-size:12px;color:#94a3b8"><strong>Problem:</strong> ${i.problem}</div>` : ""}
+        <div style="font-size:12px;color:#94a3b8"><strong>Impact:</strong> ${i.impact}</div>
+        <div style="font-size:12px;color:#cbd5e1"><strong>Action:</strong> ${i.action}</div>
+      </div>`;
+        })
+        .join("")
+    : `<p style="font-size:13px;color:#94a3b8">No action items detected — the funnel is clean.</p>`;
+
+  const body = `
+    <p style="font-size:14px;color:#cbd5e1;line-height:1.5">${report.summary}</p>
+    <h3 style="color:#f6dba2;font-size:14px;margin:18px 0 8px">Business health</h3>
+    ${stats}
+    <h3 style="color:#f6dba2;font-size:14px;margin:18px 0 8px">Decision engine — ${report.insights.length} item(s)</h3>
+    ${insightHtml}
+    <p style="font-size:12px;color:#64748b;margin-top:16px">Full detail in the <a href="https://project-y8vxc.vercel.app/admin" style="color:#2dd4bf">Intelligence tab</a>.</p>`;
+
+  const date = report.generatedAt.slice(0, 10);
+  return sendEmail(notifyAddress(), `📊 Daily owner report — ${date} · MRR ${money(h.mrr)}`, wrap("Daily owner report", body));
 }
 
 export async function emailCallSummary(c: {

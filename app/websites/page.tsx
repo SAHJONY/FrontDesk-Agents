@@ -149,6 +149,7 @@ export default function WebsitesPage() {
           <p className="mt-1.5 text-sm text-slate-400">
             Tell us your business — we&apos;ll send a tailored proposal within one business day. No obligation.
           </p>
+          <p className="mt-1.5 text-xs text-gold">💵 Flexible payment: Cash App, Zelle, or card — pay in full or in installments.</p>
           <form onSubmit={submit} className="mt-6 space-y-3">
             <input
               value={business}

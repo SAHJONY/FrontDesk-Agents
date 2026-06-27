@@ -79,6 +79,22 @@ export async function loadFactorySecrets(): Promise<Record<string, string>> {
   return (await kvGet<Record<string, string>>("fda:secrets")) ?? {};
 }
 
+// Generic KV accessors for the Business Console (fda:biz:* / fda:biztoken:*).
+export async function kvGetJson<T = unknown>(key: string): Promise<T | null> {
+  return kvGet<T>(key);
+}
+export async function kvSetJson(key: string, value: unknown, ttlSeconds?: number): Promise<void> {
+  const u = upstash();
+  if (!u) throw new Error("Storage not configured");
+  const path = `/set/${encodeURIComponent(key)}${ttlSeconds ? `?EX=${ttlSeconds}` : ""}`;
+  const r = await fetch(`${u.base}${path}`, {
+    method: "POST",
+    headers: { ...u.auth, "content-type": "text/plain" },
+    body: JSON.stringify(value == null ? {} : value),
+  });
+  if (!r.ok) throw new Error("Upstash write failed");
+}
+
 export function cleanSlug(s: string): string {
   return String(s || "").toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 60);
 }

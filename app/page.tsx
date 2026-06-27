@@ -61,21 +61,21 @@ export default function Home() {
           <div>
             <p className="rise-in mb-5 inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-4 py-1.5 text-xs font-medium tracking-wide text-gold">
               <span className="h-1.5 w-1.5 rounded-full bg-teal-glow animate-pulse-glow" />
-              The AI receptionist that pays for itself in a week
+              Your complete online presence — built, hosted, and answered for you
             </p>
             <h1 className="rise-in rise-in-1 font-display text-5xl font-semibold leading-[1.05] tracking-tight md:text-7xl">
-              Never miss a call.
+              We build your website first.
               <br />
-              <span className="text-gradient-gold">Never lose a client.</span>
+              <span className="text-gradient-gold">Then AVA answers every call.</span>
             </h1>
             <p className="rise-in rise-in-2 mt-6 max-w-xl text-lg leading-relaxed text-slate-300">
-              FrontDesk Agents answers every web chat in seconds, books appointments,
-              and captures leads in 100+ languages worldwide — 24 hours a day, for any service business.
-              Every missed inquiry is a missed customer. <strong className="text-gold">Stop missing them.</strong>
+              FrontDesk Agents designs and launches your done-for-you website — then adds an AI
+              receptionist that answers chats and calls 24/7, books appointments, and captures leads
+              in 100+ languages worldwide. <strong className="text-gold">One company for your entire digital front desk.</strong>
             </p>
             <div className="rise-in rise-in-3 mt-8 flex flex-wrap gap-4">
-              <Link href="/signup" className="btn-gold rounded-2xl px-7 py-3.5 text-base">
-                Start Free — Live in 10 Minutes
+              <Link href="/websites" className="btn-gold rounded-2xl px-7 py-3.5 text-base">
+                Build My Website →
               </Link>
               <Link href="/demo" className="btn-ghost rounded-2xl px-7 py-3.5 text-base">
                 ▶ Talk to AVA Now

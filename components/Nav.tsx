@@ -5,8 +5,8 @@ import { useState } from "react";
 import ShareButton from "./ShareButton";
 
 const links = [
-  { href: "/#features", label: "Features" },
   { href: "/websites", label: "Websites" },
+  { href: "/#features", label: "AI Receptionist" },
   { href: "/pricing", label: "Pricing" },
   { href: "/demo", label: "Live Demo" },
   { href: "/dashboard", label: "Dashboard" },
@@ -32,8 +32,8 @@ export default function Nav() {
         </div>
         <div className="hidden items-center gap-3 md:flex">
           <ShareButton />
-          <Link href="/signup" className="btn-gold rounded-xl px-4 py-2 text-sm">
-            Start Free
+          <Link href="/websites" className="btn-gold rounded-xl px-4 py-2 text-sm">
+            Build My Website
           </Link>
         </div>
         <button
@@ -58,8 +58,8 @@ export default function Nav() {
               {l.label}
             </Link>
           ))}
-          <Link href="/signup" onClick={() => setOpen(false)} className="btn-gold mt-2 block rounded-xl px-4 py-2.5 text-center text-sm">
-            Start Free
+          <Link href="/websites" onClick={() => setOpen(false)} className="btn-gold mt-2 block rounded-xl px-4 py-2.5 text-center text-sm">
+            Build My Website
           </Link>
         </div>
       )}

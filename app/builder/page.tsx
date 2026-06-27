@@ -100,6 +100,26 @@ export default function BuilderPage() {
     }
   }
 
+  async function paymentLink(slug: string, siteName: string) {
+    const build = Number(prompt("One-time build price (USD)?", "999") || 0);
+    const monthly = Number(prompt("Monthly care plan (USD)? 0 for none", "89") || 0);
+    if (!build && !monthly) return;
+    setStatus("Creating payment link…");
+    try {
+      const res = await fetch("/api/sites/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug, name: siteName, build, monthly }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Checkout failed");
+      if (data.message) { try { await navigator.clipboard?.writeText(data.message); } catch {} }
+      setStatus(`✅ Payment link ready (copied). ${data.url || "(manual options sent)"}`);
+    } catch (e) {
+      setStatus(`⚠️ ${e instanceof Error ? e.message : "Checkout failed"}`);
+    }
+  }
+
   async function publish() {
     setBusy(true);
     setStatus(null);
@@ -208,9 +228,12 @@ export default function BuilderPage() {
                     <div className="font-medium">{s.name}</div>
                     <a href={`/s/${s.slug}`} target="_blank" rel="noreferrer" className="text-xs text-teal-glow underline">/s/{s.slug}</a>
                   </div>
-                  <span className={`rounded-full px-2.5 py-0.5 text-[10px] uppercase tracking-wider ${s.status === "active" || !s.status ? "bg-emerald-400/15 text-emerald-300" : "bg-amber-400/15 text-amber-300"}`}>
-                    {s.status || "active"}
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <button onClick={() => paymentLink(s.slug, s.name)} className="rounded-lg border border-gold/30 px-2.5 py-1 text-[11px] text-gold hover:bg-gold/10">💳 Payment link</button>
+                    <span className={`rounded-full px-2.5 py-0.5 text-[10px] uppercase tracking-wider ${s.status === "active" || !s.status ? "bg-emerald-400/15 text-emerald-300" : "bg-amber-400/15 text-amber-300"}`}>
+                      {s.status || "active"}
+                    </span>
+                  </div>
                 </li>
               ))}
             </ul>

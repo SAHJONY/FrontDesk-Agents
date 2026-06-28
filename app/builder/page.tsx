@@ -169,18 +169,36 @@ export default function BuilderPage() {
 
   async function heroVideo() {
     setBusy(true);
-    setStatus("🎬 Generating cinematic video via Higgsfield (this can take a minute)…");
+    setStatus("🎬 Generating cinematic video (this can take a minute)…");
     try {
       const res = await fetch("/api/site-video", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // Animate the latest hero still into a looping background film when available.
-        body: JSON.stringify({ prompt: brief || name || "a premium local service business", aspect: "16:9", durationSec: 5, inputImage: photos[0] }),
+        // Backend picks the engine: OpenMontage (full production, async) when a
+        // worker is configured, else a Higgsfield clip. inputImage animates the
+        // hero still into a looping background film.
+        body: JSON.stringify({ prompt: brief || name || "a premium local service business", aspect: "16:9", durationSec: 20, inputImage: photos[0], photos, business: name }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Video failed");
-      setVideos((v) => [data.url, ...v]);
-      setStatus(`✅ Video generated via ${data.provider} (added to project media).`);
+
+      // Higgsfield returns the URL directly; OpenMontage returns a jobId to poll.
+      if (data.url) {
+        setVideos((v) => [data.url, ...v]);
+        setStatus(`✅ Video generated via ${data.provider} (added to project media).`);
+      } else if (res.status === 202 && data.jobId) {
+        setStatus("🎬 OpenMontage is producing your film… (polling)");
+        const deadline = Date.now() + 6 * 60 * 1000;
+        // eslint-disable-next-line no-constant-condition
+        while (Date.now() < deadline) {
+          await new Promise((s) => setTimeout(s, 5000));
+          const p = await fetch(`/api/site-video?job=${encodeURIComponent(data.jobId)}`).then((r) => r.json()).catch(() => null);
+          if (!p) continue;
+          if (p.progress) setStatus(`🎬 OpenMontage: ${typeof p.progress === "string" ? p.progress : JSON.stringify(p.progress)}`);
+          if (p.state === "done" && p.url) { setVideos((v) => [p.url, ...v]); setStatus("✅ OpenMontage film ready (added to project media)."); break; }
+          if (p.state === "error") throw new Error(p.error || "OpenMontage render failed");
+        }
+      }
     } catch (e) {
       setStatus(`⚠️ ${e instanceof Error ? e.message : "Video failed"}`);
     } finally {

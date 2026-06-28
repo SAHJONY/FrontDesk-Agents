@@ -259,3 +259,4 @@ export async function lookupBusiness(
 
   return { status: 200, data: { ...top, hours, summary } };
 }
+

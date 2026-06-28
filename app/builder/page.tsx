@@ -3,12 +3,37 @@
 import { useCallback, useEffect, useState } from "react";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
+import { TESLA_DESIGN_SYSTEM } from "@/lib/visual-style";
 
 type SiteEntry = { name: string; slug: string; at: string; status?: string };
 
-// The prompt that turns a business brief into a complete, single-file website.
-function buildPrompt(brief: string) {
-  return `You are an elite web designer. Output a COMPLETE, single self-contained HTML document (inline CSS, no external build) for the business described below. Modern, premium, mobile-first, fast. Include: hero, services, about, testimonials, contact section, and a footer. Use semantic HTML and tasteful animation. Return ONLY the HTML, starting with <!doctype html>. Business brief:\n\n${brief}`;
+// The prompt that turns a business brief + real media into a complete,
+// single-file, ultra-premium (Tesla-grade) website. Every real asset the
+// operator added to the project (photos AND videos) MUST appear in the design —
+// placeholder/stock/sample imagery is strictly forbidden.
+function buildPrompt(brief: string, photos: string[], videos: string[]) {
+  const imgs = photos.filter(Boolean);
+  const vids = videos.filter(Boolean);
+  const mediaBlock =
+    (imgs.length ? `\nREAL IMAGES (use ALL of these — hero, gallery, sections):\n${imgs.map((u, i) => `  ${i + 1}. ${u}`).join("\n")}` : "") +
+    (vids.length ? `\nREAL VIDEOS (embed ALL — hero background loop and/or gallery, use <video autoplay muted loop playsinline> for background, controls for gallery):\n${vids.map((u, i) => `  ${i + 1}. ${u}`).join("\n")}` : "");
+
+  const mediaRules = (imgs.length || vids.length)
+    ? `\n\nMEDIA RULES (CRITICAL):
+- Use ONLY the real asset URLs listed above. Embed EVERY one of them somewhere in the page (first image = full-bleed hero; remaining images = gallery/section visuals; videos as specified).
+- ABSOLUTELY NO placeholder, stock, sample, lorem-ipsum, picsum, via.placeholder, unsplash-random, dummyimage, or invented image/video URLs. Do not reference any URL not listed above.
+- Never leave an empty/gray image box. If you run out of listed assets for a slot, reuse a listed asset rather than inventing one.`
+    : `\n\nMEDIA RULES (CRITICAL): No media assets were provided. Do NOT invent, hotlink, or use placeholder/stock image URLs. Build a striking design using CSS gradients, color, and typography only — never a broken or placeholder <img>.`;
+
+  return `You are an elite, award-winning web designer building a flagship, ultra-premium website.
+
+${TESLA_DESIGN_SYSTEM}
+
+OUTPUT: a COMPLETE, single self-contained HTML document — inline <style>, Google Fonts via <link>, vanilla JS for motion/tabs, no build step, no external CSS framework. Include a sticky tabbed nav, full-bleed cinematic hero, services, about, gallery, testimonials, an accessible contact form, and a refined footer. Return ONLY the HTML, starting with <!doctype html>.
+${mediaBlock}${mediaRules}
+
+BUSINESS BRIEF:
+${brief}`;
 }
 
 function extractHtml(text: string): string {
@@ -31,6 +56,7 @@ export default function BuilderPage() {
   const [lookupName, setLookupName] = useState("");
   const [lookupAddr, setLookupAddr] = useState("");
   const [photos, setPhotos] = useState<string[]>([]);
+  const [videos, setVideos] = useState<string[]>([]);
 
   async function research() {
     setBusy(true);
@@ -46,6 +72,7 @@ export default function BuilderPage() {
       const b = data.business;
       setName(b.name || lookupName);
       setPhotos(Array.isArray(b.photos) ? b.photos : []);
+      setVideos(Array.isArray(b.videos) ? b.videos : []);
       const social = b.social && Object.keys(b.social).length ? `\nSocial: ${Object.entries(b.social).map(([k, v]) => `${k}: ${v}`).join(", ")}` : "";
       const reviews = (b.reviews || []).slice(0, 3).map((r: { text: string }) => `“${r.text}”`).join(" ");
       setBrief(
@@ -86,7 +113,7 @@ export default function BuilderPage() {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: buildPrompt(brief), maxTokens: 4000 }),
+        body: JSON.stringify({ prompt: buildPrompt(brief, photos, videos), maxTokens: 4000 }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Generation failed");
@@ -132,10 +159,30 @@ export default function BuilderPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Image failed");
       setPhotos((p) => [data.url, ...p]);
-      setBrief((b) => `${b}\nHero image: ${data.url}`);
-      setStatus(`✅ Image generated via ${data.provider} (added to brief & photos).`);
+      setStatus(`✅ Image generated via ${data.provider} (added to project media).`);
     } catch (e) {
       setStatus(`⚠️ ${e instanceof Error ? e.message : "Image failed"}`);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function heroVideo() {
+    setBusy(true);
+    setStatus("🎬 Generating cinematic video via Higgsfield (this can take a minute)…");
+    try {
+      const res = await fetch("/api/site-video", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        // Animate the latest hero still into a looping background film when available.
+        body: JSON.stringify({ prompt: brief || name || "a premium local service business", aspect: "16:9", durationSec: 5, inputImage: photos[0] }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Video failed");
+      setVideos((v) => [data.url, ...v]);
+      setStatus(`✅ Video generated via ${data.provider} (added to project media).`);
+    } catch (e) {
+      setStatus(`⚠️ ${e instanceof Error ? e.message : "Video failed"}`);
     } finally {
       setBusy(false);
     }
@@ -199,12 +246,18 @@ export default function BuilderPage() {
                 <input value={lookupAddr} onChange={(e) => setLookupAddr(e.target.value)} placeholder="City / address" className="rounded-xl border border-white/10 bg-ink-2/80 px-3 py-2.5 text-sm outline-none focus:border-gold/50" />
                 <button onClick={research} disabled={busy || !lookupName.trim()} className="btn-gold rounded-xl px-4 py-2.5 text-sm disabled:opacity-50">{busy ? "…" : "Research"}</button>
               </div>
-              {photos.length > 0 && (
-                <div className="mt-3 flex gap-2 overflow-x-auto">
-                  {photos.map((u) => (
-                    <img key={u} src={u} alt="" className="h-16 w-24 shrink-0 rounded-lg object-cover" />
-                  ))}
-                </div>
+              {(photos.length > 0 || videos.length > 0) && (
+                <>
+                  <p className="mt-3 text-[10px] uppercase tracking-widest text-slate-500">Project media — all embedded in the site ({photos.length} image{photos.length === 1 ? "" : "s"}, {videos.length} video{videos.length === 1 ? "" : "s"})</p>
+                  <div className="mt-2 flex gap-2 overflow-x-auto">
+                    {photos.map((u) => (
+                      <img key={u} src={u} alt="" className="h-16 w-24 shrink-0 rounded-lg object-cover" />
+                    ))}
+                    {videos.map((u) => (
+                      <video key={u} src={u} muted loop playsInline className="h-16 w-24 shrink-0 rounded-lg object-cover" />
+                    ))}
+                  </div>
+                </>
               )}
             </div>
             <label className="text-xs uppercase tracking-widest text-slate-500">Business name</label>
@@ -217,6 +270,9 @@ export default function BuilderPage() {
               </button>
               <button onClick={heroImage} disabled={busy} className="btn-ghost rounded-xl px-5 py-2.5 text-sm disabled:opacity-50">
                 🖼 Generate image
+              </button>
+              <button onClick={heroVideo} disabled={busy} className="btn-ghost rounded-xl px-5 py-2.5 text-sm disabled:opacity-50">
+                🎬 Generate video
               </button>
               <button onClick={publish} disabled={busy || !html} className="btn-ghost rounded-xl px-5 py-2.5 text-sm disabled:opacity-50">
                 Publish →

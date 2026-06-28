@@ -56,6 +56,15 @@ async function writeJson(file: string, value: unknown) {
   await fs.writeFile(path.join(DATA_DIR, file), JSON.stringify(value, null, 2));
 }
 
+// Generic durable state for small engine docs (e.g. the lead-sweep cursor),
+// reusing the same Blob/disk tiering and namespacing as everything else.
+export async function getState<T>(file: string, fallback: T): Promise<T> {
+  return readJson<T>(file, fallback);
+}
+export async function setState(file: string, value: unknown): Promise<void> {
+  return writeJson(file, value);
+}
+
 // ---------- Bookings & leads (existing) -------------------------------------
 
 export type Booking = {
@@ -76,6 +85,16 @@ export type Lead = {
   plan?: string;
   source: string;
   createdAt: string;
+  // Optional enrichment (populated by the autonomous lead engine / sweep).
+  website?: string;
+  address?: string;
+  location?: string; // city/region/country the prospect was discovered in
+  placeId?: string; // Google Places id — used for cross-run dedup
+  score?: number; // 0-100 lead score
+  tier?: string; // hot | qualified | marketing | cold
+  needsSite?: boolean; // no website at all
+  outdated?: boolean; // has a website, but it's outdated/poor
+  note?: string; // short human-readable reason ("No website", "Outdated: no mobile, ©2014")
 };
 
 export async function listBookings(): Promise<Booking[]> {
@@ -114,6 +133,35 @@ export async function listLeads(): Promise<Lead[]> {
 
 export async function addLead(l: Omit<Lead, "id" | "createdAt">): Promise<Lead> {
   const leads = await listLeads();
+  const lead: Lead = { ...l, id: crypto.randomUUID(), createdAt: new Date().toISOString() };
+  leads.unshift(lead);
+  await writeJson("leads.json", leads.slice(0, 1000));
+  recordEvent("lead:captured", { id: lead.id, business: lead.business, source: lead.source, plan: lead.plan });
+  return lead;
+}
+
+// Dedup-aware insert for bulk discovery (the autonomous sweep). Skips a lead
+// that already exists by Google placeId, or by normalized phone/email. Returns
+// the created lead, or null when it was a duplicate. Single read+write of the
+// store so a batch can pre-load existing leads and pass them in to avoid N reads.
+function normPhone(p?: string): string {
+  return String(p || "").replace(/[^0-9]/g, "").replace(/^1(?=\d{10}$)/, "");
+}
+export function isDuplicateLead(l: Pick<Lead, "placeId" | "phone" | "email">, existing: Lead[]): boolean {
+  const place = l.placeId || "";
+  const phone = normPhone(l.phone);
+  const email = (l.email || "").toLowerCase().trim();
+  return existing.some(
+    (e) =>
+      (place && e.placeId === place) ||
+      (phone && normPhone(e.phone) === phone) ||
+      (email && (e.email || "").toLowerCase().trim() === email),
+  );
+}
+
+export async function addLeadDedup(l: Omit<Lead, "id" | "createdAt">): Promise<Lead | null> {
+  const leads = await listLeads();
+  if (isDuplicateLead(l, leads)) return null;
   const lead: Lead = { ...l, id: crypto.randomUUID(), createdAt: new Date().toISOString() };
   leads.unshift(lead);
   await writeJson("leads.json", leads.slice(0, 1000));

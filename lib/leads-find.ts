@@ -9,6 +9,8 @@
 // out of third-party social platforms into a customer site is intentionally NOT
 // done here — owners add their own media (with consent) via their console.
 import { loadFactorySecrets } from "@/lib/site-store";
+import { auditSite } from "@/lib/site-audit";
+import { scoreLead } from "@/lib/lead-scoring";
 
 const PLACES = "https://places.googleapis.com/v1";
 
@@ -326,4 +328,131 @@ export async function lookupBusiness(name: string, address: string): Promise<Fin
   };
 
   return { status: 200, data: { business } };
+}
+
+// ---- Autonomous discovery (worldwide sweep) ---------------------------------
+// A discovered prospect: fully enriched + audited + scored, ready to persist.
+export type Prospect = {
+  name: string;
+  address: string;
+  phone: string;
+  email: string;
+  website: string;
+  mapsUrl: string;
+  status: string;
+  rating: number | null;
+  reviews: number;
+  placeId: string;
+  needsSite: boolean; // no website at all
+  outdated: boolean; // has a site, but it's old/poor
+  staleness: number; // 0-100 (how bad the existing site is)
+  auditReasons: string[]; // why we flagged it ("No mobile viewport", "©2013")
+  score: number;
+  tier: string;
+  recommendedOffer: string;
+};
+
+// One paginated Google Places text search. Pulls up to `maxPages` pages
+// (Places returns ~20/page + a nextPageToken) so a sweep cell can surface
+// dozens of businesses per (location, keyword) instead of just 12.
+async function searchTextPaged(
+  key: string,
+  textQuery: string,
+  bias: Record<string, unknown> | null,
+  maxPages: number,
+): Promise<any[]> {
+  const out: any[] = [];
+  let pageToken: string | undefined;
+  for (let page = 0; page < Math.max(1, maxPages); page++) {
+    const body: Record<string, unknown> = { textQuery, maxResultCount: 20 };
+    if (bias) body.locationBias = bias;
+    if (pageToken) body.pageToken = pageToken;
+    let j: any;
+    try {
+      const r = await fetch(`${PLACES}/places:searchText`, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "X-Goog-Api-Key": key,
+          "X-Goog-FieldMask":
+            "nextPageToken,places.id,places.displayName,places.formattedAddress,places.nationalPhoneNumber,places.internationalPhoneNumber,places.websiteUri,places.googleMapsUri,places.businessStatus,places.rating,places.userRatingCount",
+        },
+        body: JSON.stringify(body),
+      });
+      j = await r.json();
+      if (!r.ok) break;
+    } catch {
+      break;
+    }
+    for (const p of j.places || []) out.push(p);
+    pageToken = j.nextPageToken;
+    if (!pageToken) break;
+  }
+  return out;
+}
+
+/**
+ * Discover prospects for ONE (location, keyword) cell and return only the ones
+ * worth pitching: no website, OR a website that fails the staleness audit.
+ * Each prospect is enriched (email scrape on outdated sites) and scored.
+ */
+export async function discoverProspects(input: {
+  keyword: string;
+  locationText: string;
+  maxPages?: number;
+  now?: number;
+}): Promise<{ status: number; prospects: Prospect[]; scanned: number; error?: string }> {
+  const key = await placesKey();
+  if (!key) return { status: 500, prospects: [], scanned: 0, error: "GOOGLE_PLACES_API_KEY not set" };
+
+  const keyword = String(input.keyword || "").slice(0, 60).trim() || "local business";
+  const locationText = String(input.locationText || "").slice(0, 120).trim();
+  if (!locationText) return { status: 400, prospects: [], scanned: 0, error: "locationText required" };
+
+  const places = await searchTextPaged(key, `${keyword} in ${locationText}`, null, input.maxPages ?? 2);
+
+  const prospects = await Promise.all(
+    places.map(async (p: any): Promise<Prospect | null> => {
+      const website = p.websiteUri || "";
+      const needsSite = !website;
+      // Audit only when there IS a site to judge; skip the fetch otherwise.
+      const audit = website ? await auditSite(website, { now: input.now }).catch(() => null) : null;
+      const outdated = needsSite ? false : Boolean(audit?.outdated);
+
+      // Only no-site or outdated-site businesses are prospects for us.
+      if (!needsSite && !outdated) return null;
+
+      const email = outdated ? await scrapeEmail(website).catch(() => "") : "";
+      const sc = scoreLead({
+        industry: keyword,
+        business: p.displayName?.text,
+        signals: needsSite ? { hasWebsite: false } : audit?.signals,
+      });
+
+      return {
+        name: p.displayName?.text || "(unnamed)",
+        address: p.formattedAddress || "",
+        phone: p.nationalPhoneNumber || p.internationalPhoneNumber || "",
+        email,
+        website,
+        mapsUrl: p.googleMapsUri || "",
+        status: p.businessStatus || "",
+        rating: p.rating ?? null,
+        reviews: p.userRatingCount || 0,
+        placeId: p.id || "",
+        needsSite,
+        outdated,
+        staleness: needsSite ? 100 : audit?.staleness ?? 0,
+        auditReasons: needsSite ? ["No website on Google"] : audit?.reasons ?? [],
+        score: sc.score,
+        tier: sc.tier,
+        recommendedOffer: sc.recommendedOffer,
+      };
+    }),
+  );
+
+  const filtered = prospects.filter((x): x is Prospect => x !== null);
+  // Highest-need first: no-site, then most-outdated, then best score.
+  filtered.sort((a, b) => (b.needsSite ? 1 : 0) - (a.needsSite ? 1 : 0) || b.staleness - a.staleness || b.score - a.score);
+  return { status: 200, prospects: filtered, scanned: places.length };
 }

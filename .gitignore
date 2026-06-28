@@ -7,3 +7,7 @@ node_modules/
 next-env.d.ts
 backups/
 ops/.uptime.env.local
+
+# Python
+__pycache__/
+*.pyc
